@@ -1,20 +1,28 @@
-scaleFactorAccel = 8192; % 2g --> 16384 , 4g --> 8192 , 8g --> 4096, 16g --> 2048
-scaleFactorGyro = 65.5; % 250 deg/s --> 131, 500 deg/s --> 65.5, 1000 deg/s --> 32.8, 2000 deg/s --> 16.4
+clear all
+close all
+clc
 
-a = arduino; %a = arduino('COM4','Uno','Libraries','I2C');
+% Connect to arduino
+a = arduino;
 dev = i2cdev(a,'0x68');
 
+% Set up and configure MPU 6050 for +/- 4g and 500 deg/s --> See README for more
+scaleFactorAccel = 8192;
+scaleFactorGyro = 65.5;
 
-% Activate the MPU 6050
-writeRegister(dev, hex2dec('6B'), hex2dec('00'), 'int16');
+writeRegister(dev, hex2dec('6B'), hex2dec('00'), 'int16'); % Activate MPU 6050
+writeRegister(dev, hex2dec('1C'), hex2dec('08'), 'int16'); % Accelerometer
+writeRegister(dev, hex2dec('1B'), hex2dec('08'), 'int16'); % Gyroscope
 
-% Configure the accelerometer - 2g --> 0x00, 4g --> 0x08, 8g --> 0x10, 16g --> 0x18
-writeRegister(dev, hex2dec('1C'), hex2dec('08'), 'int16');
+% Start a timer
+tic
+loopTimer = toc;
 
-% Configure the gyroscope --> 250 deg/s --> 0x00, 500 deg/s --> 0x08, 1000 deg/s --> 0x10, 2000 deg/s --> 0x18
-writeRegister(dev, hex2dec('1B'), hex2dec('08'), 'int16');
+% Run a continous loop, get data, and eventually plot
+while 1
+  [a g] = readMPU6050(dev,scaleFactorAccel,scaleFactorGyro);
 
-
-for i = 1:500
-  [a g] = readMPU6050(dev);
+  % Wait for the timer to reach 250 Hz
+  while ((toc - loopTimer) < 0.004); end
+  loopTimer = toc;
 end
