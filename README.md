@@ -17,3 +17,15 @@ Configure the gyroscope on 0x1B and the accelerometer on 0x1C as per data sheets
 
 
 It should also be noted that the pin "AD0" selects between I2C address 0x68 and 0x69 which allows for multiple sensors. Primary communication will take place over the 0x68 register. Further resources can be found [here](https://playground.arduino.cc/Main/MPU-6050).
+
+
+## Connections
+VCC --> 5V or 3.3V based on specific breakout Board
+GND --> GND
+
+| Board         | SDA Pin       | SCL Pin       |
+| ------------- | ------------- | ------------- |
+| Uno	          | A4            | A5            |
+| Mega2560	    | 20	          | 21            |
+| Leonardo      | 2	            | 3             |
+| Due           | 20	          | 21            |
