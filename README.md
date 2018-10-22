@@ -20,8 +20,10 @@ It should also be noted that the pin "AD0" selects between I2C address 0x68 and 
 
 
 ## Connections
-VCC --> 5V or 3.3V based on specific breakout Board
-GND --> GND
+
+* VCC --> 5V or 3.3V based on specific breakout Board
+* GND --> GND
+* SDA and SCL pins located in table below:
 
 | Board         | SDA Pin       | SCL Pin       |
 | ------------- | ------------- | ------------- |
@@ -29,3 +31,15 @@ GND --> GND
 | Mega2560	    | 20	          | 21            |
 | Leonardo      | 2	            | 3             |
 | Due           | 20	          | 21            |
+
+## Usage
+
+Run in the following order:
+
+```
+arduinoConnection.m
+
+main(ard,dev,totalTime)
+```
+
+Where ard and dev are saved from arduinoConnection.m and totalTime is defined by the user in seconds.
