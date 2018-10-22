@@ -53,4 +53,10 @@ function [] = main(ard,dev,totalTime)
     loopTimer(i) = toc;
   end
 
+  % Calculate sampling frequency
+  for i = 2:length(loopTimer)-1
+    freq(i) = loopTimer(i+1) - loopTimer(i);
+  end
+  fprintf('Average sample at %0.2f Hz\n',1/mean(freq))
+
 end
