@@ -1,4 +1,4 @@
-function [a g] = readMPU6050(dev,scaleFactorAccel,scaleFactorGyro)
+function [a g] = readMPU6050(dev,scaleFactorAccel,scaleFactorGyro,gyroCal)
 
   % Read Accelerometer
   ACCEL_XOUT_H = readRegister(dev,hex2dec('3B'),'int8');
@@ -24,8 +24,8 @@ function [a g] = readMPU6050(dev,scaleFactorAccel,scaleFactorGyro)
   GYRO_ZOUT_H = readRegister(dev,hex2dec('47'),'int8');
   GYRO_ZOUT_L = readRegister(dev,hex2dec('48'),'int8');
 
-  g.x = double(typecast(int8([GYRO_XOUT_L GYRO_XOUT_H]),'int16')) / scaleFactorGyro;
-  g.y = double(typecast(int8([GYRO_YOUT_L GYRO_YOUT_H]),'int16')) / scaleFactorGyro;
-  g.z = double(typecast(int8([GYRO_ZOUT_L GYRO_ZOUT_H]),'int16')) / scaleFactorGyro;
+  g.x = (double(typecast(int8([GYRO_XOUT_L GYRO_XOUT_H]),'int16')) / scaleFactorGyro) - gyroCal.x;
+  g.y = (double(typecast(int8([GYRO_YOUT_L GYRO_YOUT_H]),'int16')) / scaleFactorGyro) - gyroCal.y;
+  g.z = (double(typecast(int8([GYRO_ZOUT_L GYRO_ZOUT_H]),'int16')) / scaleFactorGyro) - gyroCal.z;
 
 end

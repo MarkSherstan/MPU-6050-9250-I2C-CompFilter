@@ -9,6 +9,9 @@ function [] = main(ard,dev,totalTime)
   writeRegister(dev, hex2dec('1C'), hex2dec('08'), 'int8'); % Accelerometer
   writeRegister(dev, hex2dec('1B'), hex2dec('08'), 'int8'); % Gyroscope
 
+  % Find average offset for gyro
+  gyroCal = calibrateGyro(dev,scaleFactorGyro);
+
   % Set up figure, get properties, and label
   figure
   h1 = animatedline('Color',[1 0 0]);
@@ -17,8 +20,9 @@ function [] = main(ard,dev,totalTime)
   ax = gca;
   ax.YLim = [-4 4];
   xlabel('Time (s)')
-  ylabel('Acceleration [g]')
+  ylabel('Acceleration [g] | Angular Velocity [deg/s]')
   legend('a_x','a_y','a_z')
+  legend('w_x','w_y','w_z')
 
   % Start counters and timers
   i = 1;
@@ -29,13 +33,20 @@ function [] = main(ard,dev,totalTime)
   % Loop for some amount of time
   while toc < totalTime
     % Read from MPU 6050
-    [a g] = readMPU6050(dev,scaleFactorAccel,scaleFactorGyro);
+    [a g] = readMPU6050(dev,scaleFactorAccel,scaleFactorGyro,gyroCal);
     %fprintf('Accel x: %10.3f     Accel y: %10.3f     Accel z: %10.3f\n',a.x,a.y,a.z)
 
     t = toc - startTime;
-    addpoints(h1,t,a.x)
-    addpoints(h2,t,a.y)
-    addpoints(h3,t,a.z)
+    % If acceleration
+    % addpoints(h1,t,a.x)
+    % addpoints(h2,t,a.y)
+    % addpoints(h3,t,a.z)
+
+    % If gyro
+    addpoints(h1,t,g.x)
+    addpoints(h2,t,g.y)
+    addpoints(h3,t,g.z)
+
 
     % Update axes
     if toc < 5

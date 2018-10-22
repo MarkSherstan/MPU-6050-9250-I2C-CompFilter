@@ -31,7 +31,7 @@ function [gyroCal] = calibrateGyro(dev,scaleFactorGyro)
   gyroCal.y = sum(gyroCalY) / length(gyroCalY);
   gyroCal.z = sum(gyroCalZ) / length(gyroCalZ);
 
-  fprintf('%0.0f values taken',length(gyroCalX))
+  fprintf('%0.0f values taken\n',length(gyroCalX))
 
 end
 
