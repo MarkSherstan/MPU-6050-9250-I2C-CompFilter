@@ -1,4 +1,4 @@
-function [] = main(ard,dev,totalTime)
+function [] = main(ard,dev,totalTime,tau)
   close all
 
   % Set up and configure MPU 6050 for +/- 4g and 500 deg/s --> See README for more
@@ -20,9 +20,8 @@ function [] = main(ard,dev,totalTime)
   ax = gca;
   ax.YLim = [-4 4];
   xlabel('Time (s)')
-  ylabel('Acceleration [g] | Angular Velocity [deg/s]')
-  legend('a_x','a_y','a_z')
-  legend('w_x','w_y','w_z')
+  ylabel('Angle [deg]')
+  legend('theta_x','theta_y','theta_z')
 
   % Start counters and timers
   i = 1;
@@ -36,6 +35,18 @@ function [] = main(ard,dev,totalTime)
     [a g] = readMPU6050(dev,scaleFactorAccel,scaleFactorGyro,gyroCal);
     %fprintf('Accel x: %10.3f     Accel y: %10.3f     Accel z: %10.3f\n',a.x,a.y,a.z)
 
+    accelPitch = atan2(accelX, sqrt(accelY*accelY + accelZ*accelZ));
+    accelRoll = atan2(accelY, sqrt(accelX*accelX + accelZ*accelZ));
+
+    dt = toc - previous;
+
+    pitch = (tau)*(pitch + g.x * dt) + (1 - tau)*(accelPitch);
+    roll = (tau)*(roll + g.y * dt) + (1 - tau)*(accelRoll);
+    yaw = (yaw + g.z * dt); % Would this work?? --> 0.9*(yaw + g.z * dt) + 0.1*yaw
+
+    previous = toc;
+
+
     t = toc - startTime;
     % If acceleration
     % addpoints(h1,t,a.x)
@@ -46,6 +57,9 @@ function [] = main(ard,dev,totalTime)
     addpoints(h1,t,g.x)
     addpoints(h2,t,g.y)
     addpoints(h3,t,g.z)
+
+
+
 
 
     % Update axes
