@@ -1,4 +1,4 @@
-function [] = main(ard,dev,totalTime,tau)
+function [] = linePlotter(ard,dev,totalTime,tau)
   close all
 
   FUSE = imufilter('SampleRate',6.5);
