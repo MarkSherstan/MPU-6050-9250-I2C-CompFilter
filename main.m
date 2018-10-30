@@ -1,6 +1,8 @@
 function [] = main(ard,dev,totalTime)
   close all
 
+  FUSE = imufilter('SampleRate',6.5);
+
   % Set up and configure MPU 6050 for +/- 4g and 500 deg/s --> See README for more
   scaleFactorAccel = 8192;
   scaleFactorGyro = 65.5;
@@ -10,7 +12,10 @@ function [] = main(ard,dev,totalTime)
   writeRegister(dev, hex2dec('1B'), hex2dec('08'), 'int8'); % Gyroscope
 
   % Find average offset for gyro
-  gyroCal = calibrateGyro(dev,scaleFactorGyro);
+  %gyroCal = calibrateGyro(dev,scaleFactorGyro)
+  gyroCal.x = -10.2382;
+  gyroCal.y = 3.0588;
+  gyroCal.z = 0.7153;
 
   % Set up figure, get properties, and label
   figure
@@ -35,17 +40,22 @@ function [] = main(ard,dev,totalTime)
     % Read from MPU 6050
     [a g] = readMPU6050(dev,scaleFactorAccel,scaleFactorGyro,gyroCal);
     %fprintf('Accel x: %10.3f     Accel y: %10.3f     Accel z: %10.3f\n',a.x,a.y,a.z)
+    accelReadings = [a.x a.y a.z];
+    gyroReadings = [g.x g.y g.z];
+
+    q = FUSE(accelReadings,gyroReadings);
+    theta = rotvecd(q);
 
     t = toc - startTime;
     % If acceleration
-    % addpoints(h1,t,a.x)
-    % addpoints(h2,t,a.y)
-    % addpoints(h3,t,a.z)
+    addpoints(h1,t,a.x)
+    addpoints(h2,t,a.y)
+    addpoints(h3,t,a.z)
 
     % If gyro
-    addpoints(h1,t,g.x)
-    addpoints(h2,t,g.y)
-    addpoints(h3,t,g.z)
+    % addpoints(h1,t,g.x)
+    % addpoints(h2,t,g.y)
+    % addpoints(h3,t,g.z)
 
 
     % Update axes
@@ -69,5 +79,6 @@ function [] = main(ard,dev,totalTime)
     freq(i) = loopTimer(i+1) - loopTimer(i);
   end
   fprintf('Average sample at %0.2f Hz\n',1/mean(freq))
-
+  release(FUSE)
+  clear FUSE
 end
