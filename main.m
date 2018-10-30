@@ -1,4 +1,4 @@
-function [] = main(ard,dev,totalTime)
+function [] = main(ard,dev,totalTime,tau)
   close all
 
   FUSE = imufilter('SampleRate',6.5);
@@ -12,10 +12,11 @@ function [] = main(ard,dev,totalTime)
   writeRegister(dev, hex2dec('1B'), hex2dec('08'), 'int8'); % Gyroscope
 
   % Find average offset for gyro
-  %gyroCal = calibrateGyro(dev,scaleFactorGyro)
-  gyroCal.x = -10.2382;
-  gyroCal.y = 3.0588;
-  gyroCal.z = 0.7153;
+  %gyroCal = calibrateGyro(dev,scaleFactorGyro);
+  gyroCal.x = -10.2107;
+  gyroCal.y = 3.0496;
+  gyroCal.z = 0.7554;
+
 
   % Set up figure, get properties, and label
   figure
@@ -23,11 +24,16 @@ function [] = main(ard,dev,totalTime)
   h2 = animatedline('Color',[0 1 0]);
   h3 = animatedline('Color',[0 0 1]);
   ax = gca;
-  ax.YLim = [-4 4];
+  ax.YLim = [-90 90];
   xlabel('Time (s)')
-  ylabel('Acceleration [g] | Angular Velocity [deg/s]')
-  legend('a_x','a_y','a_z')
-  legend('w_x','w_y','w_z')
+  ylabel('Angle [deg]')
+  legend('roll','pitch','yaw')
+
+  % Initialize zero points
+  pitch = 0;
+  roll = 0;
+  yaw = 0;
+  previous = 0;
 
   % Start counters and timers
   i = 1;
@@ -39,24 +45,25 @@ function [] = main(ard,dev,totalTime)
   while toc < totalTime
     % Read from MPU 6050
     [a g] = readMPU6050(dev,scaleFactorAccel,scaleFactorGyro,gyroCal);
-    %fprintf('Accel x: %10.3f     Accel y: %10.3f     Accel z: %10.3f\n',a.x,a.y,a.z)
-    accelReadings = [a.x a.y a.z];
-    gyroReadings = [g.x g.y g.z];
 
-    q = FUSE(accelReadings,gyroReadings);
-    theta = rotvecd(q);
+    % Find angles using complementary filter
+    accelPitch = atan2(a.x, sqrt(a.y*a.y + a.z*a.z));
+    accelRoll = atan2(a.y, sqrt(a.x*a.x + a.z*a.z));
 
+    dt = toc - previous;
+
+    pitch = (tau)*(pitch + g.x * dt) + (1 - tau)*(accelPitch);
+    roll = (tau)*(roll + g.y * dt) + (1 - tau)*(accelRoll);
+    yaw = (yaw + g.z * dt);
+
+    % Update timers
+    previous = toc;
     t = toc - startTime;
-    % If acceleration
-    addpoints(h1,t,a.x)
-    addpoints(h2,t,a.y)
-    addpoints(h3,t,a.z)
 
-    % If gyro
-    % addpoints(h1,t,g.x)
-    % addpoints(h2,t,g.y)
-    % addpoints(h3,t,g.z)
-
+    % Plot the new points
+    addpoints(h1,t,roll)
+    addpoints(h2,t,pitch)
+    addpoints(h3,t,yaw)
 
     % Update axes
     if toc < 5

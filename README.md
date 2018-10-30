@@ -1,5 +1,5 @@
 # MPU6050_Visualizer
-Test project using MATLAB's Arduino package to interface with an I2C sensor device.
+Test project using MATLAB's Arduino package to interface with an I2C sensor device and the use of a complementary filter.
 
 
 ## Registry Maps and Sensitivity Values for MPU-6050
@@ -39,7 +39,7 @@ Run in the following order:
 ```
 arduinoConnection.m
 
-main(ard,dev,totalTime)
+main(ard,dev,20,0.99)
 ```
 
 Where ard and dev are saved from arduinoConnection.m and totalTime is defined by the user in seconds.
