@@ -10,7 +10,10 @@ function [] = main(ard,dev,totalTime,tau)
   writeRegister(dev, hex2dec('1B'), hex2dec('08'), 'int8'); % Gyroscope
 
   % Find average offset for gyro
-  gyroCal = calibrateGyro(dev,scaleFactorGyro);
+  %gyroCal = calibrateGyro(dev,scaleFactorGyro);
+  gyroCal.x = -10.2107;
+  gyroCal.y = 3.0496;
+  gyroCal.z = 0.7554;
 
   % Set up figure, get properties, and label
   figure
@@ -18,10 +21,16 @@ function [] = main(ard,dev,totalTime,tau)
   h2 = animatedline('Color',[0 1 0]);
   h3 = animatedline('Color',[0 0 1]);
   ax = gca;
-  ax.YLim = [-4 4];
+  ax.YLim = [-90 90];
   xlabel('Time (s)')
   ylabel('Angle [deg]')
-  legend('theta_x','theta_y','theta_z')
+  legend('roll','pitch','yaw')
+
+  % Initialize zero points
+  pitch = 0;
+  roll = 0;
+  yaw = 0;
+  previous = 0;
 
   % Start counters and timers
   i = 1;
@@ -33,34 +42,25 @@ function [] = main(ard,dev,totalTime,tau)
   while toc < totalTime
     % Read from MPU 6050
     [a g] = readMPU6050(dev,scaleFactorAccel,scaleFactorGyro,gyroCal);
-    %fprintf('Accel x: %10.3f     Accel y: %10.3f     Accel z: %10.3f\n',a.x,a.y,a.z)
 
-    accelPitch = atan2(accelX, sqrt(accelY*accelY + accelZ*accelZ));
-    accelRoll = atan2(accelY, sqrt(accelX*accelX + accelZ*accelZ));
+    % Find angles using complementary filter
+    accelPitch = atan2(a.x, sqrt(a.y*a.y + a.z*a.z));
+    accelRoll = atan2(a.y, sqrt(a.x*a.x + a.z*a.z));
 
     dt = toc - previous;
 
     pitch = (tau)*(pitch + g.x * dt) + (1 - tau)*(accelPitch);
     roll = (tau)*(roll + g.y * dt) + (1 - tau)*(accelRoll);
-    yaw = (yaw + g.z * dt); % Would this work?? --> 0.9*(yaw + g.z * dt) + 0.1*yaw
+    yaw = (yaw + g.z * dt);
 
+    % Update timers
     previous = toc;
-
-
     t = toc - startTime;
-    % If acceleration
-    % addpoints(h1,t,a.x)
-    % addpoints(h2,t,a.y)
-    % addpoints(h3,t,a.z)
 
-    % If gyro
-    addpoints(h1,t,g.x)
-    addpoints(h2,t,g.y)
-    addpoints(h3,t,g.z)
-
-
-
-
+    % Plot the new points
+    addpoints(h1,t,roll)
+    addpoints(h2,t,pitch)
+    addpoints(h3,t,yaw)
 
     % Update axes
     if toc < 5
