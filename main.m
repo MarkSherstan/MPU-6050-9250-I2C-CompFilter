@@ -1,7 +1,5 @@
 function [] = main(ard,dev,gyroCal,tau)
 
-  close all
-
   % Set up and configure MPU 6050 for +/- 4g and 500 deg/s --> See README for more
   scaleFactorAccel = 8192;
   scaleFactorGyro = 65.5;
@@ -15,7 +13,7 @@ function [] = main(ard,dev,gyroCal,tau)
 
   % Set up visualizer and GUI
   figureHandle = figure(1);
-  StopButton = uicontrol('Style','pushbutton','String','Stop & Close Serial Port','pos',[0, 0, 200, 25],'Callback','delete(gcbo)');
+  StopButton = uicontrol('Style','pushbutton','String','Stop & Close','pos',[0, 0, 200, 25],'Callback','delete(gcbo)');
   degreeLabelX = uicontrol('Style','text','String','X:  0 Degrees','pos',[450, 50, 100, 20],'parent',figureHandle);
   degreeLabelY = uicontrol('Style','text','String','Y:  0 Degrees','pos',[450, 30, 100, 20],'parent',figureHandle);
   degreeLabelZ = uicontrol('Style','text','String','Z:  0 Degrees','pos',[450, 10, 100, 20],'parent',figureHandle);
@@ -38,6 +36,11 @@ function [] = main(ard,dev,gyroCal,tau)
     roll = (tau)*(roll + g.y * dt) + (1 - tau)*(accelRoll);
     yaw = (yaw + g.z * dt);
 
+    % Update angles to fall in [-360 360]
+    roll = updateAngle(roll);
+    pitch = updateAngle(pitch);
+    yaw = updateAngle(yaw);
+
     % Create the cube and update
   	[vert, face] = NewCoords(roll, pitch, yaw);
   	view([1, 0, 0]);
@@ -50,10 +53,6 @@ function [] = main(ard,dev,gyroCal,tau)
 
   	axis off;
   	axis([-1.1,1.1,-1.1,1.1,-1.1,1.1]);
-
-  	roll = updateAngle(roll);
-  	pitch = updateAngle(pitch);
-  	yaw = updateAngle(yaw);
 
   	pause(0.0001);
 
