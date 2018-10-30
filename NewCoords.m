@@ -10,13 +10,10 @@ yaw_matrix   = [1  0           0;
 pitch_matrix = [cosd(pitch)   0  sind(pitch);
                 0             1  0;
                 -sind(pitch)  0  cosd(pitch)];
- 
+
 roll_matrix  = [cosd(yaw)  -sind(yaw) 0;
                 sind(yaw)  cosd(yaw)  0;
                 0          0          1];
 
-rot_matrix = yaw_matrix*pitch_matrix*roll_matrix; 
+rot_matrix = yaw_matrix*pitch_matrix*roll_matrix;
 A = Initial * rot_matrix;
-    
-
-
