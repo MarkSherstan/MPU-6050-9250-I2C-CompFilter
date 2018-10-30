@@ -1,5 +1,4 @@
-function [] = linePlotter(ard,dev,totalTime,tau)
-  close all
+function [] = linePlotter(ard,dev,gyroCal,tau)
 
   % Set up and configure MPU 6050 for +/- 4g and 500 deg/s --> See README for more
   scaleFactorAccel = 8192;
@@ -11,12 +10,13 @@ function [] = linePlotter(ard,dev,totalTime,tau)
 
   % Find average offset for gyro
   %gyroCal = calibrateGyro(dev,scaleFactorGyro);
-  gyroCal.x = -10.2107;
-  gyroCal.y = 3.0496;
-  gyroCal.z = 0.7554;
+  % gyroCal.x = -10.2107;
+  % gyroCal.y = 3.0496;
+  % gyroCal.z = 0.7554;
 
   % Set up figure, get properties, and label
-  figure
+  figureHandle = figure(1);
+  StopButton = uicontrol('Style','pushbutton','String','Stop & Close','pos',[0, 0, 200, 25],'Callback','delete(gcbo)');
   h1 = animatedline('Color',[1 0 0]);
   h2 = animatedline('Color',[0 1 0]);
   h3 = animatedline('Color',[0 0 1]);
@@ -39,7 +39,7 @@ function [] = linePlotter(ard,dev,totalTime,tau)
   startTime = toc;
 
   % Loop for some amount of time
-  while toc < totalTime
+  while ishandle(StopButton)
     % Read from MPU 6050
     [a g] = readMPU6050(dev,scaleFactorAccel,scaleFactorGyro,gyroCal);
 
@@ -83,5 +83,5 @@ function [] = linePlotter(ard,dev,totalTime,tau)
     freq(i) = loopTimer(i+1) - loopTimer(i);
   end
   fprintf('Average sample at %0.2f Hz\n',1/mean(freq))
-
+  close all
 end
