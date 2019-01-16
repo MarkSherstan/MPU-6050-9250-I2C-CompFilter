@@ -3,19 +3,19 @@
 
 int gyro_x, gyro_y, gyro_z;
 long loop_timer;
-long scaleFactor = 65.5; // 250 deg/s --> 131, 500 deg/s --> 65.5, 1000 deg/s --> 32.8, 2000 deg/s --> 16.4
+long scaleFactorGyro = 65.5; // 250 deg/s --> 131, 500 deg/s --> 65.5, 1000 deg/s --> 32.8, 2000 deg/s --> 16.4
 double rotation_x, rotation_y, rotation_z;
 
 long acc_x, acc_y, acc_z;
-long loop_timer;
-long scaleFactor = 8192; // 2g --> 16384 , 4g --> 8192 , 8g --> 4096, 16g --> 2048
+int temperature;
+long scaleFactorAccel = 8192; // 2g --> 16384 , 4g --> 8192 , 8g --> 4096, 16g --> 2048
 double accel_x, accel_y, accel_z;
 
 
 // Set offsets from initial calibration
-long gyro_x_cal = 0;
-long gyro_y_cal = 0;
-long gyro_z_cal = 0;
+long gyro_x_cal = -213;
+long gyro_y_cal = 240;
+long gyro_z_cal = -297;
 
 
 // Run once
@@ -42,21 +42,20 @@ void loop() {
   gyro_z -= gyro_z_cal;
 
   // Convert to instantaneous degrees per second
-  rotation_x = (double)gyro_x / (double)scaleFactor;
-  rotation_y = (double)gyro_y / (double)scaleFactor;
-  rotation_z = (double)gyro_z / (double)scaleFactor;
+  rotation_x = (double)gyro_x / (double)scaleFactorGyro;
+  rotation_y = (double)gyro_y / (double)scaleFactorGyro;
+  rotation_z = (double)gyro_z / (double)scaleFactorGyro;
 
   // Convert to g force
-  accel_x = (double)acc_x / (double)scaleFactor;
-  accel_y = (double)acc_y / (double)scaleFactor;
-  accel_z = (double)acc_z / (double)scaleFactor;
+  accel_x = (double)acc_x / (double)scaleFactorAccel;
+  accel_y = (double)acc_y / (double)scaleFactorAccel;
+  accel_z = (double)acc_z / (double)scaleFactorAccel;
 
   // Print / write data
   Serial.print(loop_timer); Serial.print(",");
   Serial.print(accel_x, 7); Serial.print(",");
   Serial.print(accel_y, 7); Serial.print(",");
   Serial.print(accel_z, 7); Serial.print(",");
-
   Serial.print(rotation_x, 7); Serial.print(",");
   Serial.print(rotation_y, 7); Serial.print(",");
   Serial.println(rotation_z, 7);
