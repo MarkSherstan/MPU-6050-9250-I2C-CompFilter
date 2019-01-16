@@ -4,7 +4,7 @@ Testing different methods to use a MPU6050 via I2C and implementing a complement
 
 ## Registry Maps and Sensitivity Values for MPU-6050
 
-Values retrieved from the MPU-6050 Register Map and Descriptions Revision 4.2 located [here](https://www.invensense.com/wp-content/uploads/2015/02/MPU-6000-Register-Map1.pdf) and the Product Specification Revision 3.4 located [here](https://www.invensense.com/wp-content/uploads/2015/02/MPU-6000-Datasheet1.pdf).
+Values retrieved from the MPU-6050 Register Map and Descriptions Revision 4.2 located [here](https://www.invensense.com/wp-content/uploads/2015/02/MPU-6000-Register-Map1.pdf) and the Product Specification Revision 3.4 located [here](https://www.invensense.com/wp-content/uploads/2015/02/MPU-6000-Datasheet1.pdf). Documentation can also be found in the /Resources folder.
 
 Configure the gyroscope on 0x1B and the accelerometer on 0x1C as per data sheets with the following values:
 
