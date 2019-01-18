@@ -27,7 +27,7 @@ while ishandle(StopButton)
 	axis off;
 	axis([-1.1,1.1,-1.1,1.1,-1.1,1.1]);
 
-i = i + 0.5;		
+i = i + 0.5;
 
 	x = i;
 	x = updateAngle(x);

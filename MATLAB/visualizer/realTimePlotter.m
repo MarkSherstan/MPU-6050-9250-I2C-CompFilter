@@ -4,25 +4,30 @@ function [] = realTimePlotter()
   figure
   h = animatedline;
   ax = gca;
-  ax.YLim = [-5 5];
+  ax.YLim = [0 10];
   xlabel('Time (s)')
   ylabel('Acceleration [g]')
 
   % Start a timer
   tic
-  startTime = toc
+  startTime = toc;
 
-  % Loop for 30 secounds
-  while toc < 30
-    % Some data...
+  % Loop for 20 secounds
+  while toc < 20
+    % Random data
+    v = randi(4);
 
     % Get current time and add to animation
     t = toc - startTime;
     addpoints(h,t,v)
 
     % Update axes
-    ax.XLim = [t t+15];
-    drawnow
-  end
+    if t < 5
+        ax.XLim = [0 10];
+        drawnow
+    else
+        ax.XLim = [t-5 t+5];
+        drawnow
+    end
 
-end
+  end

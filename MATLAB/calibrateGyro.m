@@ -10,7 +10,7 @@ function [gyroCal] = calibrateGyro(dev,scaleFactorGyro)
   timer = toc;
 
   % Loop through gyro values for 15 seconds
-  while toc < 12
+  while toc < 15
     i = i + 1;
 
     g = readGyro(dev, scaleFactorGyro);
