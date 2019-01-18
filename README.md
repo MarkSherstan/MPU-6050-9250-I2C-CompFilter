@@ -1,6 +1,10 @@
 # MPU6050_Visualizer
 Testing different methods to use a MPU6050 via I2C and implementing a complementary filter.
 
+## Summary
+* Arduino/C++ | Passing
+* MATLAB | Very slow, requires fixes
+* RPi/Python | To be completed
 
 ## Registry Maps and Sensitivity Values for MPU-6050
 
