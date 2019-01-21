@@ -1,6 +1,9 @@
 # MPU6050_Visualizer
 Testing different methods to use a MPU6050 via I2C and implementing a complementary filter.
 
+## To do 
+* Compare to MPU 9250 and transition?
+
 ## Summary
 * Arduino/C++ | Passing
 * MATLAB | Very slow, requires fixes
