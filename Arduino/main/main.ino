@@ -122,7 +122,7 @@ void loop() {
 
 
 void read_mpu_6050_data() {
-  //Subroutine for reading the raw accelerometer data
+  //Subroutine for reading the raw data
   Wire.beginTransmission(0x68);
   Wire.write(0x3B);
   Wire.endTransmission();
