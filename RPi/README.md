@@ -34,4 +34,5 @@ Should yield:
 70: -- -- -- -- -- -- -- --  
 ```
 
-sudo i2cget -y 1 0x68 0x75
+Wiring follows this:
+https://pinout.xyz
