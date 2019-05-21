@@ -41,7 +41,7 @@ void setup() {
   gyro_z_cal /= 5000;
 
   // Display results
-  Serial.println(" Complete");
+  Serial.println("Complete");
 
   Serial.println();
   Serial.println("Place these values in the main program");

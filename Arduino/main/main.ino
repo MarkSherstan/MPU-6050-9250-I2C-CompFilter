@@ -16,7 +16,7 @@ double tau = 0.98;
 double roll = 0;
 double pitch = 0;
 
-// 250 deg/s --> 131, 500 deg/s --> 65.5, 1000 deg/s --> 32.8, 2000 deg/s --> 16.4
+// 250 deg/s --> 131.0, 500 deg/s --> 65.5, 1000 deg/s --> 32.8, 2000 deg/s --> 16.4
 long scaleFactorGyro = 65.5;
 
 // 2g --> 16384 , 4g --> 8192 , 8g --> 4096, 16g --> 2048
@@ -34,7 +34,7 @@ void setup() {
   // Calibration
   Serial.println("Calibrating gyro, place on level surface and do not move.");
 
-  // // Take 3000 readings for each coordinate and then find average offset
+  // Take 3000 readings for each coordinate and then find average offset
   for (int cal_int = 0; cal_int < 3000; cal_int ++){
     if(cal_int % 200 == 0)Serial.print(".");
     read_mpu_6050_data();
@@ -59,7 +59,7 @@ void setup() {
   Serial.print("Yaw (deg)\t\t\n");
   delay(2000);
 
-  //Reset the loop timer
+  // Reset the loop timer
   loopTimer = micros();
   loopTimer2 = micros();
 }
@@ -122,7 +122,7 @@ void loop() {
 
 
 void read_mpu_6050_data() {
-  //Subroutine for reading the raw accelerometer data
+  // Subroutine for reading the raw data
   Wire.beginTransmission(0x68);
   Wire.write(0x3B);
   Wire.endTransmission();

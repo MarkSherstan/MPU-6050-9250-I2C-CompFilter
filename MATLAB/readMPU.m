@@ -1,4 +1,4 @@
-function [a g] = readMPU6050(dev,scaleFactorAccel,scaleFactorGyro,gyroCal)
+function [a g] = readMPU(dev, scaleFactorAccel, scaleFactorGyro, gyroCal)
 
   % Read Accelerometer
   ACCEL_XOUT_H = readRegister(dev,hex2dec('3B'),'int8');
