@@ -1,7 +1,7 @@
-function [gyroCal] = calibrateGyro(dev,scaleFactorGyro)
+function [gyroCal] = calibrateGyro(dev, scaleFactorGyro)
 
   % Talk to user and pause
-  fprintf('Hold IMU still, calibrating ')
+  fprintf('Hold IMU still, calibrating...')
   pause(2)
 
   % Start counter and timer
@@ -31,12 +31,14 @@ function [gyroCal] = calibrateGyro(dev,scaleFactorGyro)
   gyroCal.y = sum(gyroCalY) / length(gyroCalY);
   gyroCal.z = sum(gyroCalZ) / length(gyroCalZ);
 
-  fprintf('%0.0f values taken\n',length(gyroCalX))
+  % Display info to user
+  fprintf('%0.0f values sampled\n',length(gyroCalX))
 
 end
 
 
 function [g] = readGyro(dev, scaleFactorGyro)
+  % Get raw int8 values from the registry(s)
   GYRO_XOUT_H = readRegister(dev,hex2dec('43'),'int8');
   GYRO_XOUT_L = readRegister(dev,hex2dec('44'),'int8');
 
@@ -46,6 +48,7 @@ function [g] = readGyro(dev, scaleFactorGyro)
   GYRO_ZOUT_H = readRegister(dev,hex2dec('47'),'int8');
   GYRO_ZOUT_L = readRegister(dev,hex2dec('48'),'int8');
 
+  % Cast the low and high int8 values to usable int16 values
   g.x = double(typecast(int8([GYRO_XOUT_L GYRO_XOUT_H]),'int16')) / scaleFactorGyro;
   g.y = double(typecast(int8([GYRO_YOUT_L GYRO_YOUT_H]),'int16')) / scaleFactorGyro;
   g.z = double(typecast(int8([GYRO_ZOUT_L GYRO_ZOUT_H]),'int16')) / scaleFactorGyro;
