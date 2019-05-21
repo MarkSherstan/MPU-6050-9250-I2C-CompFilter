@@ -1,8 +1,8 @@
 # MPU-6050 and MPU-9250 I2C Complementary Filter
-Testing different methods to interface with a MPU-6050 or MPU-9250 via I2C. All methods feature the extraction of the raw values as well as the implementation of a complementary filter for the fusion of the gyroscope and accelerometer to yield an angle(s) in 3 dimensional space.
+Testing different methods to interface with a MPU-6050 or MPU-9250 via I2C. All methods feature the extraction of the raw sensor values as well as the implementation of a complementary filter for the fusion of the gyroscope and accelerometer to yield an angle(s) in 3 dimensional space.
 
-## Registry Maps and Sensitivity Values for MPU-6050
-Values retrieved below come from the MPU-6050 and MPU-9250 registry maps and product specifications documents located in the `\Resources` folder. Configure the gyroscope on 0x1B and the accelerometer on 0x1C as per data sheets with the following values (the MPU-6050 and MPU-9250 are interchangeable and all registries are the same):
+## Registry Maps and Sensitivity Values
+Values retrieved below come from the MPU-6050 and MPU-9250 registry maps and product specifications documents located in the `\Resources` folder. Configure the gyroscope on `0x1B` and the accelerometer on `0x1C` as per data sheets with the following values (the MPU-6050 and MPU-9250 are interchangeable and all registries are the same):
 
 | Accelerometer | Sensitivity   | Gyroscope     | Sensitivity   | Hexadecimal   |  Binary       |
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
@@ -11,9 +11,9 @@ Values retrieved below come from the MPU-6050 and MPU-9250 registry maps and pro
 | +/- 8g        | 4096	        | +/- 1000 deg/s| 32.8          | 0x10	        | 00010000      |
 | +/- 16g	      | 2048	        | +/- 2000 deg/s| 16.4          | 0x18	        | 00011000      |
 
-The slave address is b110100X which is 7 bits long. The LSB bit of the 7 bit address is determined by the logic level on pin AD0. This allows two sensors to be connected to the same I2C bus. When used in this configuration, the address of the one of the devices should be b1101000 (pin AD0 is logic low) and the address of the other should be b1101001 (pin AD0 is logic high). Communication will typically take place over the 0x68 register.
+The slave address is b110100X which is 7 bits long. The LSB bit of the 7 bit address is determined by the logic level on pin AD0. This allows two sensors to be connected to the same I2C bus. When used in this configuration, the address of one of the devices should be b1101000 (pin AD0 is logic low) and the address of the other should be b1101001 (pin AD0 is logic high). Communication will typically take place over the `0x68` register.
 
-**Ensure that the proper logic (3.3V vs 5V) is being used so you do not fry it**
+**Ensure that the proper logic (3.3V vs 5V) is being used so you do not fry your sensor**
 
 ## Use
 ### Arduino
@@ -30,7 +30,7 @@ Connect the sensor to the microcontroller as outlined below.
 | Leonardo      | 2	            | 3             |
 | Due           | 20	          | 21            |
 
-Upload the `main.ino` sketch and observe the values in the serial port or serial plotter. The `calibrateGyro.ino` sketch can be used to retrieve the offset values which can be directly placed into the `main.ino` sketch to eliminate the need for calibration every time the microcontroller is started up. Note that this is at at the cost of performance as the sensors drift over time.
+Upload the `main.ino` sketch and observe the values in the serial port or serial plotter. The `calibrateGyro.ino` sketch can be used to retrieve the offset values which can be directly placed into the `main.ino` sketch to eliminate the need for calibration every time the microcontroller is started up. Note that this is at at the cost of performance as the sensors drift over time and between uses.
 
 ### MATLAB
 Connect an Arduino using the same wiring as outlined above. Run `main.m` and observe the values in the command line. MATLAB is extremely slow with I2C devices through an Arduino and it will be faster to run a serial connection with the data acquisition occurring on a microcontroller.
@@ -42,7 +42,7 @@ Setup as described [here](https://tutorials-raspberrypi.com/measuring-rotation-a
 
 Edit the modules file using `sudo nano /etc/modules` and ensure `i2c-bcm2708` and `i2c-dev` are both in the file. Reboot again.
 
-With the sensor correctly wired enter.
+With the sensor correctly wired enter the following in the command line.
 ```
 sudo apt-get install i2c-tools python-smbus
 sudo i2cdetect -y 1
@@ -63,5 +63,5 @@ Which should yield the table below (possible to have the value 0x69) verifying a
 Once verified run `python3 main.py` to observe the values. 
 
 ## Under Development
-Create a GUI visualizer of the data.
-RPi C++ version
+* Create a GUI visualizer of the data.
+* RPi C++ version
