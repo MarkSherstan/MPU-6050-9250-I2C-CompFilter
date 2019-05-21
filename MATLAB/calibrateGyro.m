@@ -1,5 +1,10 @@
 function [gyroCal] = calibrateGyro(dev, scaleFactorGyro)
 
+  % Set up and configure MPU
+  writeRegister(dev, hex2dec('6B'), hex2dec('00'), 'int8'); % Activate MPU
+  writeRegister(dev, hex2dec('1C'), hex2dec('08'), 'int8'); % Accelerometer
+  writeRegister(dev, hex2dec('1B'), hex2dec('08'), 'int8'); % Gyroscope
+
   % Talk to user and pause
   fprintf('Hold IMU still, calibrating...')
   pause(2)
