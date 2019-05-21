@@ -1,6 +1,6 @@
-function [] = main(ard, dev, gyroCal, tau)
+function [] = compFilter(ard, dev, gyroCal, tau)
 
-  % Set up and configure MPU 6050 for +/- 4g and 500 deg/s
+  % Set up and configure MPU for +/- 4g and 500 deg/s
   scaleFactorAccel = 8192;
   scaleFactorGyro = 65.5;
 
@@ -13,7 +13,7 @@ function [] = main(ard, dev, gyroCal, tau)
 
   % Run for 30 seconds
   while toc < 30
-    % Read from MPU 6050
+    % Read from 6050
     [a g] = readMPU(dev, scaleFactorAccel, scaleFactorGyro, gyroCal);
 
     % Find angles from accelerometer
