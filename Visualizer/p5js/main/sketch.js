@@ -1,15 +1,31 @@
-let sensor; // Declare object
+// Declare objects
+let sensor;
+var serial;
 
 function setup() {
-  createCanvas(400, 400, WEBGL);
+  // Create a canvas to work on
+  createCanvas(900, 700, WEBGL);
+
+  // Set up the signal processing and serial port.
   sensor = new MPU();
+  serial = new p5.SerialPort();
+
+  // Connect to an arduino serial port
+  serial.open("/dev/cu.usbmodem14101");
 }
 
 function draw() {
-  background(100);
+  // Draw a fresh bacground
+  background(75);
 
   //sensor.displayCube();
-  sensor.displayTorus()
+  sensor.displayTorus();
+
+  // Read data from serial port if available
+  if (serial.available() > 0) {
+    var data = serial.read();
+    print(data);
+  }
 
 }
 
@@ -20,7 +36,7 @@ class MPU {
     this.pitch = 0;
     this.yaw = 0;
     this.count = 1;
-    this.solidFill = fill('#8000ff');
+    this.solidFill = fill('#8000ff'); // normalMaterial();
   }
 
   upDate() {
@@ -52,7 +68,7 @@ class MPU {
     rotateZ(this.roll);
     rotateX(this.pitch);
     rotateY(this.yaw);
-    torus(50, 20);
+    torus(100, 40);
     pop();
   }
 }

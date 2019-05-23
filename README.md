@@ -60,8 +60,18 @@ Which should yield the table below (possible to have the value 0x69) verifying a
 60: -- -- -- -- -- -- -- -- 68 -- -- -- -- -- -- --
 70: -- -- -- -- -- -- -- --  
 ```
-Once verified run `python3 main.py` to observe the values. 
+Once verified run `python3 main.py` to observe the values.
 
 ## Under Development
 * Create a GUI visualizer of the data.
 * RPi C++ version
+
+
+Clone this:
+https://github.com/vanevery/p5.serialport
+
+cd to directory
+npm install
+node startserver.js
+
+open index.html
