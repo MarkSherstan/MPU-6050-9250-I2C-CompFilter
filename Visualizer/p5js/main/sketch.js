@@ -1,40 +1,89 @@
 // Declare objects
-let sensor;
+let angleGen;
+let visualizer;
 var serial;
+
 
 function setup() {
   // Create a canvas to work on
   createCanvas(900, 700, WEBGL);
 
-  // Set up the signal processing and serial port.
-  sensor = new MPU();
+  // Set up the clases
+  angleGen = new AngleGen();
+  visualizer = new Visualizer();
   serial = new p5.SerialPort();
 
-  // Connect to an arduino serial port
-  serial.open("/dev/cu.usbmodem14101");
+  // Set some initial values for the IMU processing
+  angleGen.tau = 0.98;
+  angleGen.gyroScaleFactor = 65.5;
+  angleGen.accScaleFactor = 8192.0;
+
+  // Set up some initial values for the DAQ
+  angleGen.serialPort = '/dev/cu.usbmodem14101';
+  angleGen.dataNumBytes = 2;
+  angleGen.dataNumBytes = 6;
 }
+
 
 function draw() {
   // Draw a fresh bacground
   background(75);
 
-  //sensor.displayCube();
-  sensor.displayTorus();
+  // Display object to the user
+  visualizer.displayTorus(); //visualizer.displayCube();
+}
 
-  // Read data from serial port if available
-  if (serial.available() > 0) {
-    var data = serial.read();
-    print(data);
+
+class AngleGen {
+  constructor() {
+    // IMU Processing
+    this.gx = null; this.gy = null; this.gz = null;
+    this.ax = null; this.ay = null; this.az = null;
+
+    this.gyroXcal = 0;
+    this.gyroYcal = 0;
+    this.gyroZcal = 0;
+
+    this.gyroRoll = 0;
+    this.gyroPitch = 0;
+    this.gyroYaw = 0;
+
+    this.roll = 0;
+    this.pitch = 0;
+    this.yaw = 0;
+
+    self.dtTimer = null;
+    self.tau = null;
+
+    this.gyroScaleFactor = null;
+    this.accScaleFactor = null;
+
+    // Data acquisition
+    this.serialPort = '';
+    this.dataNumBytes = null;
+    this.numSignals = null;
+    this.byteArray = [];
+    this.dataOut = [];
+  }
+
+  readSerialStart() {
+    serial.open(this.serialPort);
+    serial.clear()
+  }
+
+  getSerialData() {
+    // Read data from serial port if available
+    if (serial.available() > 0) {
+      var data = serial.read();
+      print(data);
+    }
   }
 
 }
 
-// Class
-class MPU {
+
+class Visualizer {
   constructor() {
-    this.roll = 0;
-    this.pitch = 0;
-    this.yaw = 0;
     this.count = 1;
     this.solidFill = fill('#8000ff'); // normalMaterial();
   }
@@ -45,6 +94,8 @@ class MPU {
     this.yaw = this.count * 0.001;
     this.count += 1;
   }
+
+  // displayUAV() { }
 
   displayCube() {
     this.upDate();
