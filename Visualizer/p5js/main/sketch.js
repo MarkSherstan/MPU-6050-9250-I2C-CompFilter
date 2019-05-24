@@ -29,6 +29,8 @@ function draw() {
   // Draw a fresh bacground
   background(150);
 
+  angleGen.getRawData();
+
   // Display object to the user
   visualizer.displayTorus(); //visualizer.displayCube();
 }
@@ -37,8 +39,9 @@ function draw() {
 class AngleGen {
   constructor() {
     // IMU Processing
-    this.gx = null; this.gy = null; this.gz = null;
     this.ax = null; this.ay = null; this.az = null;
+    this.gx = null; this.gy = null; this.gz = null;
+
 
     this.gyroXcal = 0;
     this.gyroYcal = 0;
@@ -62,7 +65,6 @@ class AngleGen {
     this.serialPort = '';
     this.dataNumBytes = null;
     this.numSignals = null;
-    this.byteArray = [];
     this.dataOut = [];
   }
 
@@ -71,16 +73,26 @@ class AngleGen {
     serial.clear()
   }
 
-  getSerialData() {
-    // Read data from serial port if available
-    if (serial.available() > 0) {
-      var data = serial.read();
-      print(data);
-    }
-  }
-
   getRawData(){
+    // Reset byteArray
+    byteArray = []
 
+    // Read data from serial port if available and do a header check
+    if (serial.available() > 0) {
+      if ((serial.read() == 0x9F) && (serial.read() == 0x6E)){
+        for (ii = 0; ii < (this.numSignals * this.dataNumBytes); ii++) {
+          byteArray.push(serial.read())
+        }
+      }
+    }
+
+    // Cast bytes to ints
+    this.ax = byteArray[0] | byteArray[1] << 8;
+    this.ay = byteArray[2] | byteArray[3] << 8;
+    this.az = byteArray[4] | byteArray[5] << 8;
+    this.gx = byteArray[6] | byteArray[7] << 8;
+    this.gy = byteArray[8] | byteArray[9] << 8;
+    this.gz = byteArray[10] | byteArray[11] << 8;
   }
 
   calibrateGyro(N) {
@@ -93,6 +105,7 @@ class AngleGen {
         this.gyroXcal += this.gx
         this.gyroYcal += this.gy
         this.gyroZcal += this.gz
+    }
 
     // Find average offset value
     this.gyroXcal /= N
@@ -107,9 +120,7 @@ class AngleGen {
 
     this.dtTimer = millis();
   }
-
 }
-
 
 class Visualizer {
   constructor() {
