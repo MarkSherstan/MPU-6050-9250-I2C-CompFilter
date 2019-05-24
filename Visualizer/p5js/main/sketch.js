@@ -22,6 +22,9 @@ function setup() {
   angleGen.serialPort = '/dev/cu.usbmodem14101';
   angleGen.dataNumBytes = 2;
   angleGen.dataNumBytes = 6;
+
+  // Set up serial port
+  angleGen.readSerialStart()
 }
 
 
@@ -29,7 +32,9 @@ function draw() {
   // Draw a fresh bacground
   background(150);
 
+  // Get some raw data and print
   angleGen.getRawData();
+  print(angleGen.az)
 
   // Display object to the user
   visualizer.displayTorus(); //visualizer.displayCube();
@@ -41,7 +46,6 @@ class AngleGen {
     // IMU Processing
     this.ax = null; this.ay = null; this.az = null;
     this.gx = null; this.gy = null; this.gz = null;
-
 
     this.gyroXcal = 0;
     this.gyroYcal = 0;
@@ -65,34 +69,41 @@ class AngleGen {
     this.serialPort = '';
     this.dataNumBytes = null;
     this.numSignals = null;
-    this.dataOut = [];
+    this.byteArray = []
   }
 
   readSerialStart() {
-    serial.open(this.serialPort);
-    serial.clear()
+    // Attempt a connection on the given serial port
+    try {
+      serial.open(this.serialPort);
+      serial.clear()
+      print("Serial port opened on " + this.serialPort)
+    } catch {
+      print("Serial port " + this.serialport + " failed to open")
+    }
+
   }
 
   getRawData(){
     // Reset byteArray
-    byteArray = []
+    this.byteArray = [];
 
     // Read data from serial port if available and do a header check
     if (serial.available() > 0) {
       if ((serial.read() == 0x9F) && (serial.read() == 0x6E)){
         for (ii = 0; ii < (this.numSignals * this.dataNumBytes); ii++) {
-          byteArray.push(serial.read())
+          this.byteArray.push(serial.read())
         }
       }
     }
 
     // Cast bytes to ints
-    this.ax = byteArray[0] | byteArray[1] << 8;
-    this.ay = byteArray[2] | byteArray[3] << 8;
-    this.az = byteArray[4] | byteArray[5] << 8;
-    this.gx = byteArray[6] | byteArray[7] << 8;
-    this.gy = byteArray[8] | byteArray[9] << 8;
-    this.gz = byteArray[10] | byteArray[11] << 8;
+    this.ax = this.byteArray[0] | this.byteArray[1] << 8;
+    this.ay = this.byteArray[2] | this.byteArray[3] << 8;
+    this.az = this.byteArray[4] | this.byteArray[5] << 8;
+    this.gx = this.byteArray[6] | this.byteArray[7] << 8;
+    this.gy = this.byteArray[8] | this.byteArray[9] << 8;
+    this.gz = this.byteArray[10] | this.byteArray[11] << 8;
   }
 
   calibrateGyro(N) {
