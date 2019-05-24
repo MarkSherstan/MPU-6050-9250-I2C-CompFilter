@@ -27,7 +27,7 @@ function setup() {
 
 function draw() {
   // Draw a fresh bacground
-  background(75);
+  background(150);
 
   // Display object to the user
   visualizer.displayTorus(); //visualizer.displayCube();
@@ -77,6 +77,35 @@ class AngleGen {
       var data = serial.read();
       print(data);
     }
+  }
+
+  getRawData(){
+
+  }
+
+  calibrateGyro(N) {
+    // Display message
+    print("Calibrating gyro with " + String(N) + " points. Do not move!")
+
+    // Take N readings for each coordinate and add to itself
+    for (ii = 0; ii < N; ii++) {
+        this.getRawData()
+        this.gyroXcal += this.gx
+        this.gyroYcal += this.gy
+        this.gyroZcal += this.gz
+
+    // Find average offset value
+    this.gyroXcal /= N
+    this.gyroYcal /= N
+    this.gyroZcal /= N
+
+    // Display message and restart timer for comp filter
+    print("Calibration complete")
+    print("\tX axis offset: " + String(round(this.gyroXcal,1)))
+    print("\tY axis offset: " + String(round(this.gyroYcal,1)))
+    print("\tZ axis offset: " + String(round(this.gyroZcal,1)) + "\n")
+
+    this.dtTimer = millis();
   }
 
 }
