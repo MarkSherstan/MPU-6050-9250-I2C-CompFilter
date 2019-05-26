@@ -2,6 +2,7 @@
 let angleGen;
 let visualizer;
 var serial;
+var ii;
 
 
 function setup() {
@@ -20,8 +21,8 @@ function setup() {
 
   // Set up some initial values for the DAQ
   angleGen.serialPort = '/dev/cu.usbmodem14101';
+  angleGen.numSignals = 6;
   angleGen.dataNumBytes = 2;
-  angleGen.dataNumBytes = 6;
 
   // Set up serial port
   angleGen.readSerialStart()
@@ -32,9 +33,8 @@ function draw() {
   // Draw a fresh bacground
   background(150);
 
-  // Get some raw data and print
+  // Get some raw data
   angleGen.getRawData();
-  print(angleGen.az)
 
   // Display object to the user
   visualizer.displayTorus(); //visualizer.displayCube();
@@ -81,7 +81,19 @@ class AngleGen {
     } catch {
       print("Serial port " + this.serialport + " failed to open")
     }
+  }
 
+  bytes2num(byteA, byteB){
+    // Remove byteA sign and & it and then bit shift. Finally combine with byteB
+    var temp = ((byteA & 0x7F) << 8) | byteB;
+
+    // Sign the value
+    if (byteA & 0x80){
+      temp = temp - 32767;
+    }
+
+    // Return the number value
+    return temp;
   }
 
   getRawData(){
@@ -91,19 +103,22 @@ class AngleGen {
     // Read data from serial port if available and do a header check
     if (serial.available() > 0) {
       if ((serial.read() == 0x9F) && (serial.read() == 0x6E)){
+        // Read the useful bytes
         for (ii = 0; ii < (this.numSignals * this.dataNumBytes); ii++) {
-          this.byteArray.push(serial.read())
+          this.byteArray.push(serial.read());
         }
+        // Clear the buffer
+        serial.clear();
+
+        // Cast the bytes into a usable values
+        this.ax = this.bytes2num(this.byteArray[1], this.byteArray[0]);
+        this.ay = this.bytes2num(this.byteArray[3], this.byteArray[2]);
+        this.az = this.bytes2num(this.byteArray[5], this.byteArray[4]);
+        this.gx = this.bytes2num(this.byteArray[7], this.byteArray[6]);
+        this.gy = this.bytes2num(this.byteArray[9], this.byteArray[8]);
+        this.gz = this.bytes2num(this.byteArray[11], this.byteArray[10]);
       }
     }
-
-    // Cast bytes to ints
-    this.ax = this.byteArray[0] | this.byteArray[1] << 8;
-    this.ay = this.byteArray[2] | this.byteArray[3] << 8;
-    this.az = this.byteArray[4] | this.byteArray[5] << 8;
-    this.gx = this.byteArray[6] | this.byteArray[7] << 8;
-    this.gy = this.byteArray[8] | this.byteArray[9] << 8;
-    this.gz = this.byteArray[10] | this.byteArray[11] << 8;
   }
 
   calibrateGyro(N) {
@@ -132,6 +147,7 @@ class AngleGen {
     this.dtTimer = millis();
   }
 }
+
 
 class Visualizer {
   constructor() {
