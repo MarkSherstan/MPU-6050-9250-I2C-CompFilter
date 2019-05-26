@@ -42,9 +42,11 @@ function draw() {
     angleGen.dataState = 1;
   }
 
-  // // If the gyro has been calibrated process the values
-  // if (angleGen.dataState == 1){
-  // }
+  // Display data to user
+  print(angleGen.roll)
+  print(angleGen.pitch)
+  print(angleGen.yaw)
+  print("")
 
   // Display object to the user
   visualizer.displayTorus();
@@ -61,13 +63,13 @@ class AngleGen {
     this.gyroYcal = 0;
     this.gyroZcal = 0;
 
-    this.gyroRoll = 0;
-    this.gyroPitch = 0;
-    this.gyroYaw = 0;
+    this.gyroRoll = null;
+    this.gyroPitch = null;
+    this.gyroYaw = null;
 
-    this.roll = 0;
-    this.pitch = 0;
-    this.yaw = 0;
+    this.roll = null;
+    this.pitch = null;
+    this.yaw = null;
 
     self.dtTimer = null;
     self.tau = null;
@@ -141,12 +143,28 @@ class AngleGen {
         this.gz /= this.gyroScaleFactor;
 
         // Convert accelerometer values to g force
-        print(this.az)
         this.ax /= this.accScaleFactor;
         this.ay /= this.accScaleFactor;
         this.az /= this.accScaleFactor;
-        print(this.az)
       }
+
+      // Get delta time and record time for next call
+      var dt = (millis() - this.dtTimer)*0.001;
+      this.dtTimer = millis();
+
+      // Acceleration vector angle
+      var accPitch = degrees(atan2(this.ay, this.az));
+      var accRoll = degrees(atan2(this.ax, this.az));
+
+      // Gyro integration angle
+      this.gyroRoll -= this.gy * dt;
+      this.gyroPitch += this.gx * dt;
+      this.gyroYaw += this.gz * dt;
+
+      // Get attitude of filter using a comp filter and gyroYaw
+      this.roll = (this.tau)*(this.roll - this.gy*dt) + (1-this.tau)*(accRoll);
+      this.pitch = (this.tau)*(this.pitch + this.gx*dt) + (1-this.tau)*(accPitch);
+      this.yaw = this.gyroYaw;
 
       // Clear the buffer
       serial.clear();
@@ -176,10 +194,14 @@ class AngleGen {
     print("\tY axis offset: " + String(round(this.gyroYcal,1)));
     print("\tZ axis offset: " + String(round(this.gyroZcal,1)) + "\n");
 
+    // Set initial conditions for sensor processing
     this.dtTimer = millis();
-  }
-
-  processIMUvalues(){
+    this.gyroRoll = 0;
+    this.gyroPitch = 0;
+    this.gyroYaw = 0;
+    this.roll = 0;
+    this.pitch = 0;
+    this.yaw = 0;
   }
 }
 
