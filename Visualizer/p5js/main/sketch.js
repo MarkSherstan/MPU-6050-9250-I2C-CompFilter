@@ -25,7 +25,7 @@ function setup() {
   angleGen.dataNumBytes = 2;
 
   // Set up serial port
-  angleGen.readSerialStart()
+  angleGen.readSerialStart();
 }
 
 
@@ -33,11 +33,21 @@ function draw() {
   // Draw a fresh bacground
   background(150);
 
-  // Get some raw data
+  // Get raw data
   angleGen.getRawData();
 
+  // Calibrate the gyroscope only once there is good data
+  if (angleGen.gz && (angleGen.dataState == 0)) {
+      angleGen.calibrateGyro(2000);
+      angleGen.dataState = 1;
+  }
+
+  // If the gyro has been calibrated process the values
+  if (angleGen.dataState == 1){
+  }
+
   // Display object to the user
-  visualizer.displayTorus(); //visualizer.displayCube();
+  visualizer.displayTorus();
 }
 
 
@@ -70,16 +80,19 @@ class AngleGen {
     this.dataNumBytes = null;
     this.numSignals = null;
     this.byteArray = []
+    this.dataState = 0;
   }
 
   readSerialStart() {
     // Attempt a connection on the given serial port
     try {
+      // Open serial port, clear buffer, and display message to user
       serial.open(this.serialPort);
-      serial.clear()
-      print("Serial port opened on " + this.serialPort)
+      serial.clear();
+      print("Serial port opened on " + this.serialPort);
     } catch {
-      print("Serial port " + this.serialport + " failed to open")
+      // Display message to user
+      print("Serial port " + this.serialport + " failed to open");
     }
   }
 
@@ -101,50 +114,59 @@ class AngleGen {
     this.byteArray = [];
 
     // Read data from serial port if available and do a header check
-    if (serial.available() > 0) {
-      if ((serial.read() == 0x9F) && (serial.read() == 0x6E)){
-        // Read the useful bytes
-        for (ii = 0; ii < (this.numSignals * this.dataNumBytes); ii++) {
-          this.byteArray.push(serial.read());
-        }
-        // Clear the buffer
-        serial.clear();
-
-        // Cast the bytes into a usable values
-        this.ax = this.bytes2num(this.byteArray[1], this.byteArray[0]);
-        this.ay = this.bytes2num(this.byteArray[3], this.byteArray[2]);
-        this.az = this.bytes2num(this.byteArray[5], this.byteArray[4]);
-        this.gx = this.bytes2num(this.byteArray[7], this.byteArray[6]);
-        this.gy = this.bytes2num(this.byteArray[9], this.byteArray[8]);
-        this.gz = this.bytes2num(this.byteArray[11], this.byteArray[10]);
+    if ((serial.available() > 0) && (serial.read() == 0x9F) && (serial.read() == 0x6E)) {
+      // Read the useful bytes
+      for (ii = 0; ii < (this.numSignals * this.dataNumBytes); ii++) {
+        this.byteArray.push(serial.read());
       }
+
+      // Cast the bytes into a usable values
+      this.ax = this.bytes2num(this.byteArray[1], this.byteArray[0]);
+      this.ay = this.bytes2num(this.byteArray[3], this.byteArray[2]);
+      this.az = this.bytes2num(this.byteArray[5], this.byteArray[4]);
+      this.gx = this.bytes2num(this.byteArray[7], this.byteArray[6]);
+      this.gy = this.bytes2num(this.byteArray[9], this.byteArray[8]);
+      this.gz = this.bytes2num(this.byteArray[11], this.byteArray[10]);
+
+      // Clear the buffer and change state variable
+      serial.clear();
     }
   }
 
   calibrateGyro(N) {
     // Display message
-    print("Calibrating gyro with " + String(N) + " points. Do not move!")
+    print("Calibrating gyro with " + String(N) + " points. Do not move!");
 
     // Take N readings for each coordinate and add to itself
     for (ii = 0; ii < N; ii++) {
-        this.getRawData()
-        this.gyroXcal += this.gx
-        this.gyroYcal += this.gy
-        this.gyroZcal += this.gz
+        this.getRawData();
+        this.gyroXcal += this.gx;
+        this.gyroYcal += this.gy;
+        this.gyroZcal += this.gz;
     }
 
     // Find average offset value
-    this.gyroXcal /= N
-    this.gyroYcal /= N
-    this.gyroZcal /= N
+    this.gyroXcal /= N;
+    this.gyroYcal /= N;
+    this.gyroZcal /= N;
 
     // Display message and restart timer for comp filter
-    print("Calibration complete")
-    print("\tX axis offset: " + String(round(this.gyroXcal,1)))
-    print("\tY axis offset: " + String(round(this.gyroYcal,1)))
-    print("\tZ axis offset: " + String(round(this.gyroZcal,1)) + "\n")
+    print("Calibration complete");
+    print("\tX axis offset: " + String(round(this.gyroXcal,1)));
+    print("\tY axis offset: " + String(round(this.gyroYcal,1)));
+    print("\tZ axis offset: " + String(round(this.gyroZcal,1)) + "\n");
 
     this.dtTimer = millis();
+  }
+
+  processIMUvalues(){
+    // Subract the offset calibration values
+    this.gx -= this.gyroXcal;
+    this.gy -= this.gyroYcal;
+    this.gz -= this.gyroZcal;
+
+    //
+
   }
 }
 
