@@ -1,6 +1,5 @@
 // Declare objects
 let angleGen;
-let visualizer;
 var serial;
 var ii;
 
@@ -9,9 +8,8 @@ function setup() {
   // Create a canvas to work on
   createCanvas(900, 700, WEBGL);
 
-  // Set up the clases
+  // Set up the classes
   angleGen = new AngleGen();
-  visualizer = new Visualizer();
   serial = new p5.SerialPort();
 
   // Set some initial values for the IMU processing
@@ -43,13 +41,13 @@ function draw() {
   }
 
   // Display data to user
-  print(angleGen.roll)
-  print(angleGen.pitch)
-  print(angleGen.yaw)
-  print("")
+  // print(angleGen.roll)
+  // print(angleGen.pitch)
+  // print(angleGen.yaw)
+  // print("")
 
   // Display object to the user
-  visualizer.displayTorus();
+  displayTorus(angleGen.roll, angleGen.pitch, angleGen.yaw);
 }
 
 
@@ -206,45 +204,21 @@ class AngleGen {
 }
 
 
+function displayTorus(roll, pitch, yaw) {
+  // Color
+  fill('#8000ff')
 
-class Visualizer {
-  constructor() {
-    this.count = 1;
-    this.solidFill = fill('#8000ff'); // normalMaterial();
-  }
+  // Start
+  push();
 
-  upDate() {
-    this.roll = this.count * 0.01;
-    this.pitch = this.count * 0.01;
-    this.yaw = this.count * 0.001;
-    this.count += 1;
-  }
+  // Update angle
+  rotateZ(radians(roll));
+  rotateX(radians(pitch));
+  rotateY(radians(yaw));
 
-  // displayUAV() { }
+  // Make the torus
+  torus(100, 40);
 
-  displayCube() {
-    this.upDate();
-
-    this.solidFill
-
-    push();
-    rotateZ(this.roll);
-    rotateX(this.pitch);
-    rotateY(this.yaw);
-    box(70, 70, 70);
-    pop();
-  }
-
-  displayTorus() {
-    this.upDate();
-
-    this.solidFill
-
-    push();
-    rotateZ(this.roll);
-    rotateX(this.pitch);
-    rotateY(this.yaw);
-    torus(100, 40);
-    pop();
-  }
+  // Finish
+  pop();
 }
