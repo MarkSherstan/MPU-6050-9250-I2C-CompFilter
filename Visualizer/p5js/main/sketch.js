@@ -33,18 +33,18 @@ function draw() {
   // Draw a fresh bacground
   background(150);
 
-  // Get raw data
-  angleGen.getRawData();
+  // Get data
+  angleGen.getData();
 
   // Calibrate the gyroscope only once there is good data
   if (angleGen.gz && (angleGen.dataState == 0)) {
-      angleGen.calibrateGyro(2000);
-      angleGen.dataState = 1;
+    angleGen.calibrateGyro(2000);
+    angleGen.dataState = 1;
   }
 
-  // If the gyro has been calibrated process the values
-  if (angleGen.dataState == 1){
-  }
+  // // If the gyro has been calibrated process the values
+  // if (angleGen.dataState == 1){
+  // }
 
   // Display object to the user
   visualizer.displayTorus();
@@ -109,7 +109,7 @@ class AngleGen {
     return temp;
   }
 
-  getRawData(){
+  getData(){
     // Reset byteArray
     this.byteArray = [];
 
@@ -128,7 +128,27 @@ class AngleGen {
       this.gy = this.bytes2num(this.byteArray[9], this.byteArray[8]);
       this.gz = this.bytes2num(this.byteArray[11], this.byteArray[10]);
 
-      // Clear the buffer and change state variable
+      // If the gyro has been calibrated give values a physical representation
+      if (this.dataState == 1){
+        // Subract the offset calibration values for gyro
+        this.gx -= this.gyroXcal;
+        this.gy -= this.gyroYcal;
+        this.gz -= this.gyroZcal;
+
+        // Convert gyro values to instantaneous degrees per second
+        this.gx /= this.gyroScaleFactor;
+        this.gy /= this.gyroScaleFactor;
+        this.gz /= this.gyroScaleFactor;
+
+        // Convert accelerometer values to g force
+        print(this.az)
+        this.ax /= this.accScaleFactor;
+        this.ay /= this.accScaleFactor;
+        this.az /= this.accScaleFactor;
+        print(this.az)
+      }
+
+      // Clear the buffer
       serial.clear();
     }
   }
@@ -139,7 +159,7 @@ class AngleGen {
 
     // Take N readings for each coordinate and add to itself
     for (ii = 0; ii < N; ii++) {
-        this.getRawData();
+        this.getData();
         this.gyroXcal += this.gx;
         this.gyroYcal += this.gy;
         this.gyroZcal += this.gz;
@@ -160,15 +180,9 @@ class AngleGen {
   }
 
   processIMUvalues(){
-    // Subract the offset calibration values
-    this.gx -= this.gyroXcal;
-    this.gy -= this.gyroYcal;
-    this.gz -= this.gyroZcal;
-
-    //
-
   }
 }
+
 
 
 class Visualizer {
