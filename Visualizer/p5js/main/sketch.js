@@ -36,9 +36,9 @@ function draw() {
   angleGen.getData();
 
   // Calibrate the gyroscope only once there is good data
-  if (angleGen.gz && (angleGen.dataState == 0)) {
+  if (angleGen.gz && (angleGen.dataFlag == 0)) {
     angleGen.calibrateGyro(500);
-    angleGen.dataState = 1;
+    angleGen.dataFlag = 1;
   }
 
   // Display object to the user
@@ -75,7 +75,8 @@ class AngleGen {
     this.dataNumBytes = null;
     this.numSignals = null;
     this.byteArray = []
-    this.dataState = 0;
+    this.dataFlag = 0;
+    this.calFlag = 0;
   }
 
   readSerialStart() {
@@ -123,8 +124,11 @@ class AngleGen {
       this.gy = this.bytes2num(this.byteArray[9], this.byteArray[8]);
       this.gz = this.bytes2num(this.byteArray[11], this.byteArray[10]);
 
+      // Celebrate new data
+      this.calFlag = 1;
+
       // If the gyro has been calibrated give values a physical representation
-      if (this.dataState == 1){
+      if (this.dataFlag == 1){
         // Subract the offset calibration values for gyro
         this.gx -= this.gyroXcal;
         this.gy -= this.gyroYcal;
@@ -139,45 +143,56 @@ class AngleGen {
         this.ax /= this.accScaleFactor;
         this.ay /= this.accScaleFactor;
         this.az /= this.accScaleFactor;
+
+        // Get delta time and record time for next call
+        var dt = (millis() - this.dtTimer)*0.001;
+        this.dtTimer = millis();
+
+        // Acceleration vector angle
+        var accPitch = degrees(atan2(this.ay, this.az));
+        var accRoll = degrees(atan2(this.ax, this.az));
+
+        // Gyro integration angle
+        this.gyroRoll -= this.gy * dt;
+        this.gyroPitch += this.gx * dt;
+        this.gyroYaw += this.gz * dt;
+
+        // Get attitude of filter using a comp filter and gyroYaw
+        this.roll = (this.tau)*(this.roll - this.gy*dt) + (1-this.tau)*(accRoll);
+        this.pitch = (this.tau)*(this.pitch + this.gx*dt) + (1-this.tau)*(accPitch);
+        this.yaw = this.gyroYaw;
       }
-
-      // Get delta time and record time for next call
-      var dt = (millis() - this.dtTimer)*0.001;
-      this.dtTimer = millis();
-
-      // Acceleration vector angle
-      var accPitch = degrees(atan2(this.ay, this.az));
-      var accRoll = degrees(atan2(this.ax, this.az));
-
-      // Gyro integration angle
-      this.gyroRoll -= this.gy * dt;
-      this.gyroPitch += this.gx * dt;
-      this.gyroYaw += this.gz * dt;
-
-      // Get attitude of filter using a comp filter and gyroYaw
-      this.roll = (this.tau)*(this.roll - this.gy*dt) + (1-this.tau)*(accRoll);
-      this.pitch = (this.tau)*(this.pitch + this.gx*dt) + (1-this.tau)*(accPitch);
-      this.yaw = this.gyroYaw;
-
-      // Clear the buffer
-      serial.clear();
     }
+
+    // Clear the buffer
+    //serial.clear();
   }
+
 
   calibrateGyro(N) {
     // Display message
     print("Calibrating gyro with " + String(N) + " points. Do not move!");
 
     // Take N readings for each coordinate and add to itself
-    for (ii = 0; ii < N; ii++) {
-        this.getData();
-        this.gyroXcal += this.gx;
-        this.gyroYcal += this.gy;
-        this.gyroZcal += this.gz;
+    ii = 0;
 
-        // Small delay (0.01 s)
-        var timeNow = millis();
-        while(millis() < timeNow + 10){}
+    while (ii < N){
+      // this.getData();
+      // // print(this.gx);
+      //
+      // if (this.calFlag == 1){
+      //   // If data is new and good record it
+      //   this.gyroXcal += this.gx;
+      //   this.gyroYcal += this.gy;
+      //   this.gyroZcal += this.gz;
+      //
+      //   // Index the counter and change state
+      //   ii += 1;
+      //   this.calFlag = 0;
+      //   //print(ii);
+      // }
+      ii = test2000(ii);
+      print(ii)
     }
 
     // Find average offset value
