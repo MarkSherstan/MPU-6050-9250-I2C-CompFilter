@@ -37,7 +37,7 @@ function draw() {
 
   // Calibrate the gyroscope only once there is good data
   if (angleGen.gz && (angleGen.dataState == 0)) {
-    angleGen.calibrateGyro(2000);
+    angleGen.calibrateGyro(500);
     angleGen.dataState = 1;
   }
 
@@ -174,6 +174,10 @@ class AngleGen {
         this.gyroXcal += this.gx;
         this.gyroYcal += this.gy;
         this.gyroZcal += this.gz;
+
+        // Small delay (0.01 s)
+        var timeNow = millis();
+        while(millis() < timeNow + 10){}
     }
 
     // Find average offset value
@@ -181,9 +185,9 @@ class AngleGen {
     this.gyroYcal /= N;
     this.gyroZcal /= N;
 
-    this.gyroXcal = 262;
-    this.gyroYcal = -28;
-    this.gyroZcal = -1;
+    // this.gyroXcal = 262;
+    // this.gyroYcal = -28;
+    // this.gyroZcal = -1;
 
     // Display message and restart timer for comp filter
     print("Calibration complete");
@@ -205,13 +209,12 @@ class AngleGen {
 
 function displayObject(roll, pitch, yaw) {
   // Color options
-  //fill('#8000ff')
   normalMaterial()
 
   // Print values to console
   print("R: " + round(roll) + " P: " + round(pitch) + " Y: " + round(yaw));
 
-  // Start display change
+  // Start display
   push();
 
   // Apply the rotation in Z-Y-X
@@ -221,8 +224,7 @@ function displayObject(roll, pitch, yaw) {
 
   // Make an object
   box(200, 200, 200);
-  //torus(140, 50);
 
-  // End display change
+  // Finish display
   pop();
 }
