@@ -28,9 +28,9 @@ function setup() {
 
 
 function draw() {
-  // Draw a fresh bacground
+  // Draw a fresh bacground and slight rotation
   background(150);
-  //rotateX(PI/2);
+  rotateX(PI/2);
 
   // Get data
   angleGen.getData();
@@ -41,14 +41,8 @@ function draw() {
     angleGen.dataState = 1;
   }
 
-  // Display data to user
-  print(updateAngle(degrees(angleGen.roll)));
-  print(updateAngle(degrees(angleGen.pitch)));
-  print(updateAngle(degrees(angleGen.yaw)));
-  print("");
-
   // Display object to the user
-  displayTorus(angleGen.roll, angleGen.pitch, angleGen.yaw);
+  displayObject(angleGen.roll, angleGen.pitch, angleGen.yaw);
 }
 
 
@@ -208,35 +202,27 @@ class AngleGen {
   }
 }
 
-function updateAngle(angle){
-  if (angle < 0){
-    angle = angle + 360;
-  }
-  else if (angle >= 360){
-    angle = angle - 360;
-  }
-  else{
-    return angle
-  }
-  return updateAngle(angle);
-}
 
+function displayObject(roll, pitch, yaw) {
+  // Color options
+  //fill('#8000ff')
+  normalMaterial()
 
-function displayTorus(roll, pitch, yaw) {
-  // Color
-  fill('#8000ff')
+  // Print values to console
+  print("R: " + round(roll) + " P: " + round(pitch) + " Y: " + round(yaw));
 
-  // Start
+  // Start display change
   push();
 
-  // Update angle
+  // Apply the rotation in Z-Y-X
   rotateZ(radians(yaw));
   rotateY(radians(roll));
-  rotateX(radians(yaw));
+  rotateX(radians(pitch));
 
-  // Make the torus
-  torus(100, 40);
+  // Make an object
+  box(200, 200, 200);
+  //torus(140, 50);
 
-  // Finish
+  // End display change
   pop();
 }
