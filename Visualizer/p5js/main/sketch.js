@@ -30,6 +30,7 @@ function setup() {
 function draw() {
   // Draw a fresh bacground
   background(150);
+  //rotateX(PI/2);
 
   // Get data
   angleGen.getData();
@@ -41,10 +42,10 @@ function draw() {
   }
 
   // Display data to user
-  // print(angleGen.roll)
-  // print(angleGen.pitch)
-  // print(angleGen.yaw)
-  // print("")
+  print(updateAngle(degrees(angleGen.roll)));
+  print(updateAngle(degrees(angleGen.pitch)));
+  print(updateAngle(degrees(angleGen.yaw)));
+  print("");
 
   // Display object to the user
   displayTorus(angleGen.roll, angleGen.pitch, angleGen.yaw);
@@ -186,6 +187,10 @@ class AngleGen {
     this.gyroYcal /= N;
     this.gyroZcal /= N;
 
+    this.gyroXcal = 262;
+    this.gyroYcal = -28;
+    this.gyroZcal = -1;
+
     // Display message and restart timer for comp filter
     print("Calibration complete");
     print("\tX axis offset: " + String(round(this.gyroXcal,1)));
@@ -203,6 +208,19 @@ class AngleGen {
   }
 }
 
+function updateAngle(angle){
+  if (angle < 0){
+    angle = angle + 360;
+  }
+  else if (angle >= 360){
+    angle = angle - 360;
+  }
+  else{
+    return angle
+  }
+  return updateAngle(angle);
+}
+
 
 function displayTorus(roll, pitch, yaw) {
   // Color
@@ -212,9 +230,9 @@ function displayTorus(roll, pitch, yaw) {
   push();
 
   // Update angle
-  rotateZ(radians(roll));
-  rotateX(radians(pitch));
-  rotateY(radians(yaw));
+  rotateZ(radians(yaw));
+  rotateY(radians(roll));
+  rotateX(radians(yaw));
 
   // Make the torus
   torus(100, 40);
