@@ -28,8 +28,21 @@ class MPU:
         self.accScaleFactor, self.accHex = self.accelerometerSensitivity(acc)
 
         self.bus = smbus.SMBus(1)
-        self.IMUaddress = 0x68
-        self.MAGaddress = 0x0C
+
+        self.WHO_AM_I_AK8963  = 0x00
+        self.MPU9250_ADDRESS  = 0x68
+        self.AK8963_ADDRESS   = 0x0C
+        self.USER_CTRL        = 0x6A
+        self.I2C_MST_CTRL     = 0x24
+        self.I2C_SLV0_ADDR    = 0x25
+        self.I2C_SLV0_REG     = 0x26
+        self.I2C_SLV0_CTRL    = 0x27
+
+        self.EXT_SENS_DATA_00 = 0x49
+        self.WHO_AM_I_MPU9250 = 0x75
+        self.PWR_MGMT_1       = 0x6B
+        self.ACCEL_CONFIG     = 0x1C
+        self.GYRO_CONFIG      = 0x1B
 
     def gyroSensitivity(self, x):
         # Create dictionary with standard value of 500 deg/s
@@ -49,24 +62,41 @@ class MPU:
             16: [2048.0,  0x18]
         }.get(x,[8192.0,  0x08])
 
-    def setUp(self):
-        # Activate the MPU
-        self.bus.write_byte_data(self.IMUaddress, 0x6B, 0x00)
+    def setUpIMU(self):
+        # Check to see if there is a good connection with the MPU 9250
+        whoAmI = self.bus.read_byte_data(self.MPU9250_ADDRESS, self.WHO_AM_I_MPU9250)
 
-        # Configure the accelerometer
-        self.bus.write_byte_data(self.IMUaddress, 0x1C, self.accHex)
+        if (whoAmI == 0x71):
+            # Connection is good! Activate/reset the IMU
+            self.bus.write_byte_data(self.MPU9250_ADDRESS, self.PWR_MGMT_1, 0x00)
 
-        # Configure the gyro
-        self.bus.write_byte_data(self.IMUaddress, 0x1B, self.gyroHex)
+            # Configure the accelerometer
+            self.bus.write_byte_data(self.MPU9250_ADDRESS, self.ACCEL_CONFIG, self.accHex)
 
-        # Configure the mag for 16 bits and continous mode 2 (100 Hz ?)
-        self.bus.write_byte_data(self.MAGaddress, 0x0A, 0x16)
+            # Configure the gyro
+            self.bus.write_byte_data(self.MPU9250_ADDRESS, self.GYRO_CONFIG, self.gyroHex)
 
-        # Display message to user
-        print("MPU set up:")
-        print('\tAccelerometer: ' + str(self.accHex) + ' ' + str(self.accScaleFactor))
-        print('\tGyro: ' + str(self.gyroHex) + ' ' + str(self.gyroScaleFactor) + "\n")
-        time.sleep(2)
+            # Display message to user
+            print("MPU set up:")
+            print('\tAccelerometer: ' + str(hex(self.accHex)) + ' ' + str(self.accScaleFactor))
+            print('\tGyro: ' + str(hex(self.gyroHex)) + ' ' + str(self.gyroScaleFactor) + "\n")
+            time.sleep(2)
+        else:
+            # Bad connection or something went wrong
+            print("WHO_AM_I was: " + hex(whoAmI) + ". Should have been " + hex(0x71))
+
+    def setUpMAG(self):
+        bus.write_byte_data(MPU9250_ADDRESS, USER_CTRL, 0x20);                         # Enable I2C Master mode
+        bus.write_byte_data(MPU9250_ADDRESS, I2C_MST_CTRL, 0x0D);                      # I2C configuration multi-master I2C 400KHz
+        bus.write_byte_data(MPU9250_ADDRESS, I2C_SLV0_ADDR, AK8963_ADDRESS | 0x80);    # Set the I2C slave address of AK8963 and set for read.
+        bus.write_byte_data(MPU9250_ADDRESS, I2C_SLV0_REG, WHO_AM_I_AK8963);           # I2C slave 0 register address from where to begin data transfer
+        bus.write_byte_data(MPU9250_ADDRESS, I2C_SLV0_CTRL, 0x81);                     # Enable I2C and transfer 1 byte
+
+        time.sleep(0.05)
+        print("Who am I MAG? Should be: " + str(0x48))
+        print(bus.read_byte_data(MPU9250_ADDRESS, EXT_SENS_DATA_00)) # Who am I -> should return 0x48
+
+
 
     def eightBit2sixteenBitIMU(self, reg):
         # Reads high and low 8 bit values and shifts them into 16 bit
