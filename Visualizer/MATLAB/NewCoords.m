@@ -4,7 +4,7 @@ function [A, Face] = NewCoords(roll, pitch, yaw)
 initial = [0 0 0; 1 0 0; 1 1 0; 0 1 0; 0 0 1; 1 0 1; 1 1 1; 0 1 1] - 0.5;
 Face = [1 2 6 5; 2 3 7 6; 3 4 8 7; 4 1 5 8; 1 2 3 4; 5 6 7 8];
 
-% Create individual trasformation matrices
+% Create individual rotation matrices
 yawMatrix   = [1  0           0;
                 0  cosd(roll)  -sind(roll);
                 0  sind(roll)   cosd(roll)];
@@ -17,6 +17,6 @@ rollMatrix  = [cosd(yaw)  -sind(yaw) 0;
                 sind(yaw)  cosd(yaw)  0;
                 0          0          1];
 
-% Calculate the final transformation matrix
+% Calculate the final rotation matrix
 rotationMatrix = yawMatrix*pitchMatrix*rollMatrix;
 A = initial * rotationMatrix;
