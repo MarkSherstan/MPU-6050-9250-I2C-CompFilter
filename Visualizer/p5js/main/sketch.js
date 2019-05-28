@@ -1,226 +1,179 @@
-// Declare objects
-let angleGen;
+////////////////////////////////////////////////////////////////////////////////
+// Variable Declarations
+////////////////////////////////////////////////////////////////////////////////
+
 var serial;
 var ii;
+var ax, ay, az;
+var gx, gy, gz;
+var accPitch, accRoll;
+var dtTimer;
+var dt;
+var byteArray = [];
 
+var portName = '/dev/cu.usbmodem14101';
+var tau = 0.98;
+var gyroScaleFactor = 65.5;
+var accScaleFactor = 8192.0;
+var calibrationPts = 500;
+var calibrationCounter = 0;
+var roll = 0;
+var pitch = 0;
+var yaw = 0;
+var gyroRoll = 0;
+var gyroPitch = 0;
+var gyroYaw = 0;
+var gyroXcal = 0;
+var gyroYcal = 0;
+var gyroZcal = 0;
+
+////////////////////////////////////////////////////////////////////////////////
+// Set Up
+////////////////////////////////////////////////////////////////////////////////
 
 function setup() {
   // Create a canvas to work on
   createCanvas(900, 700, WEBGL);
 
   // Set up the classes
-  angleGen = new AngleGen();
   serial = new p5.SerialPort();
 
-  // Set some initial values for the IMU processing
-  angleGen.tau = 0.98;
-  angleGen.gyroScaleFactor = 65.5;
-  angleGen.accScaleFactor = 8192.0;
+  // Set some callback functions for the serial port
+  serial.on('open', portOpen);
+  serial.on('data', serialEvent);
+  serial.on('error', serialError);
 
-  // Set up some initial values for the DAQ
-  angleGen.serialPort = '/dev/cu.usbmodem14101';
-  angleGen.numSignals = 6;
-  angleGen.dataNumBytes = 2;
+  // Open a serial port
+  serial.open(portName);
 
-  // Set up serial port
-  angleGen.readSerialStart();
+  // Start a timer
+  dtTimer = millis();
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// Draw
+////////////////////////////////////////////////////////////////////////////////
 
 function draw() {
-  // Draw a fresh bacground and slight rotation
+  // Draw a fresh background and rotate the frame 90 degrees
   background(150);
   rotateX(PI/2);
 
-  // Get data
-  angleGen.getData();
-
-  // Calibrate the gyroscope only once there is good data
-  if (angleGen.gz && (angleGen.dataFlag == 0)) {
-    angleGen.calibrateGyro(500);
-    angleGen.dataFlag = 1;
-  }
-
   // Display object to the user
-  displayObject(angleGen.roll, angleGen.pitch, angleGen.yaw);
+  displayObject(roll, pitch, yaw);
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// Events
+////////////////////////////////////////////////////////////////////////////////
 
-class AngleGen {
-  constructor() {
-    // IMU Processing
-    this.ax = null; this.ay = null; this.az = null;
-    this.gx = null; this.gy = null; this.gz = null;
+function portOpen() {
+  print('The serial port is opened!')
+}
 
-    this.gyroXcal = 0;
-    this.gyroYcal = 0;
-    this.gyroZcal = 0;
+function serialEvent() {
+  // Reset byteArray
+  byteArray = [];
 
-    this.gyroRoll = null;
-    this.gyroPitch = null;
-    this.gyroYaw = null;
-
-    this.roll = null;
-    this.pitch = null;
-    this.yaw = null;
-
-    self.dtTimer = null;
-    self.tau = null;
-
-    this.gyroScaleFactor = null;
-    this.accScaleFactor = null;
-
-    // Data acquisition
-    this.serialPort = '';
-    this.dataNumBytes = null;
-    this.numSignals = null;
-    this.byteArray = []
-    this.dataFlag = 0;
-    this.calFlag = 0;
-  }
-
-  readSerialStart() {
-    // Attempt a connection on the given serial port
-    try {
-      // Open serial port, clear buffer, and display message to user
-      serial.open(this.serialPort);
-      serial.clear();
-      print("Serial port opened on " + this.serialPort);
-    } catch {
-      // Display message to user
-      print("Serial port " + this.serialport + " failed to open");
-    }
-  }
-
-  bytes2num(byteA, byteB){
-    // Remove byteA sign and & it and then bit shift. Finally combine with byteB
-    var temp = ((byteA & 0x7F) << 8) | byteB;
-
-    // Sign the value
-    if (byteA & 0x80){
-      temp = temp - 32767;
+  // Read data from serial port if available and do a header check
+  if ((serial.available() > 14) && (serial.read() == 0x9F) && (serial.read() == 0x6E)) {
+    // Read the useful bytes (Number of signals * Number of bytes for data type)
+    for (ii = 0; ii < (6 * 2); ii++) {
+      byteArray.push(serial.read());
     }
 
-    // Return the number value
-    return temp;
-  }
+    // Cast the bytes into a usable values
+    ax = bytes2num(byteArray[1],  byteArray[0]);
+    ay = bytes2num(byteArray[3],  byteArray[2]);
+    az = bytes2num(byteArray[5],  byteArray[4]);
+    gx = bytes2num(byteArray[7],  byteArray[6]);
+    gy = bytes2num(byteArray[9],  byteArray[8]);
+    gz = bytes2num(byteArray[11], byteArray[10]);
 
-  getData(){
-    // Reset byteArray
-    this.byteArray = [];
 
-    // Read data from serial port if available and do a header check
-    if ((serial.available() > 0) && (serial.read() == 0x9F) && (serial.read() == 0x6E)) {
-      // Read the useful bytes
-      for (ii = 0; ii < (this.numSignals * this.dataNumBytes); ii++) {
-        this.byteArray.push(serial.read());
-      }
+    if (calibrationCounter < calibrationPts){
+      // Sum points under a quote has been met
+      gyroXcal += gx;
+      gyroYcal += gy;
+      gyroZcal += gz;
 
-      // Cast the bytes into a usable values
-      this.ax = this.bytes2num(this.byteArray[1], this.byteArray[0]);
-      this.ay = this.bytes2num(this.byteArray[3], this.byteArray[2]);
-      this.az = this.bytes2num(this.byteArray[5], this.byteArray[4]);
-      this.gx = this.bytes2num(this.byteArray[7], this.byteArray[6]);
-      this.gy = this.bytes2num(this.byteArray[9], this.byteArray[8]);
-      this.gz = this.bytes2num(this.byteArray[11], this.byteArray[10]);
+      // Incrament counter
+      calibrationCounter += 1;
+    } else if (calibrationCounter == calibrationPts) {
+      // Once quota is met find the average offset value
+      gyroXcal /= calibrationPts;
+      gyroYcal /= calibrationPts;
+      gyroZcal /= calibrationPts;
 
-      // Celebrate new data
-      this.calFlag = 1;
+      // Display message
+      print("Calibration complete");
+      print("\tX axis offset: " + String(round(gyroXcal,1)));
+      print("\tY axis offset: " + String(round(gyroYcal,1)));
+      print("\tZ axis offset: " + String(round(gyroZcal,1)) + "\n");
 
-      // If the gyro has been calibrated give values a physical representation
-      if (this.dataFlag == 1){
-        // Subract the offset calibration values for gyro
-        this.gx -= this.gyroXcal;
-        this.gy -= this.gyroYcal;
-        this.gz -= this.gyroZcal;
-
-        // Convert gyro values to instantaneous degrees per second
-        this.gx /= this.gyroScaleFactor;
-        this.gy /= this.gyroScaleFactor;
-        this.gz /= this.gyroScaleFactor;
-
-        // Convert accelerometer values to g force
-        this.ax /= this.accScaleFactor;
-        this.ay /= this.accScaleFactor;
-        this.az /= this.accScaleFactor;
-
-        // Get delta time and record time for next call
-        var dt = (millis() - this.dtTimer)*0.001;
-        this.dtTimer = millis();
-
-        // Acceleration vector angle
-        var accPitch = degrees(atan2(this.ay, this.az));
-        var accRoll = degrees(atan2(this.ax, this.az));
-
-        // Gyro integration angle
-        this.gyroRoll -= this.gy * dt;
-        this.gyroPitch += this.gx * dt;
-        this.gyroYaw += this.gz * dt;
-
-        // Get attitude of filter using a comp filter and gyroYaw
-        this.roll = (this.tau)*(this.roll - this.gy*dt) + (1-this.tau)*(accRoll);
-        this.pitch = (this.tau)*(this.pitch + this.gx*dt) + (1-this.tau)*(accPitch);
-        this.yaw = this.gyroYaw;
-      }
+      // Incrament counter once more to show calibration is complete
+      calibrationCounter += 1;
+    } else {
+      processValues();
     }
-
-    // Clear the buffer
-    //serial.clear();
-  }
-
-
-  calibrateGyro(N) {
-    // Display message
-    print("Calibrating gyro with " + String(N) + " points. Do not move!");
-
-    // Take N readings for each coordinate and add to itself
-    ii = 0;
-
-    while (ii < N){
-      // this.getData();
-      // // print(this.gx);
-      //
-      // if (this.calFlag == 1){
-      //   // If data is new and good record it
-      //   this.gyroXcal += this.gx;
-      //   this.gyroYcal += this.gy;
-      //   this.gyroZcal += this.gz;
-      //
-      //   // Index the counter and change state
-      //   ii += 1;
-      //   this.calFlag = 0;
-      //   //print(ii);
-      // }
-      ii = test2000(ii);
-      print(ii)
-    }
-
-    // Find average offset value
-    this.gyroXcal /= N;
-    this.gyroYcal /= N;
-    this.gyroZcal /= N;
-
-    // this.gyroXcal = 262;
-    // this.gyroYcal = -28;
-    // this.gyroZcal = -1;
-
-    // Display message and restart timer for comp filter
-    print("Calibration complete");
-    print("\tX axis offset: " + String(round(this.gyroXcal,1)));
-    print("\tY axis offset: " + String(round(this.gyroYcal,1)));
-    print("\tZ axis offset: " + String(round(this.gyroZcal,1)) + "\n");
-
-    // Set initial conditions for sensor processing
-    this.dtTimer = millis();
-    this.gyroRoll = 0;
-    this.gyroPitch = 0;
-    this.gyroYaw = 0;
-    this.roll = 0;
-    this.pitch = 0;
-    this.yaw = 0;
   }
 }
 
+function serialError(err) {
+  print('Something went wrong with the serial port. ' + err);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Functions
+////////////////////////////////////////////////////////////////////////////////
+
+function bytes2num(byteA, byteB){
+  // Remove byteA sign and & it and then bit shift. Finally combine with byteB
+  var temp = ((byteA & 0x7F) << 8) | byteB;
+
+  // Sign the value
+  if (byteA & 0x80){
+    temp = temp - 32767;
+  }
+
+  // Return the number value
+  return temp;
+}
+
+function processValues() {
+  // Subract the offset calibration values for gyro
+  gx -= gyroXcal;
+  gy -= gyroYcal;
+  gz -= gyroZcal;
+
+  // Convert gyro values to instantaneous degrees per second
+  gx /= gyroScaleFactor;
+  gy /= gyroScaleFactor;
+  gz /= gyroScaleFactor;
+
+  // Convert accelerometer values to g force
+  ax /= accScaleFactor;
+  ay /= accScaleFactor;
+  az /= accScaleFactor;
+
+  // Get delta time and record time for next call
+  dt = (millis() - dtTimer)*0.001;
+  dtTimer = millis();
+
+  // Acceleration vector angle
+  accPitch = degrees(atan2(ay, az));
+  accRoll = degrees(atan2(ax, az));
+
+  // Gyro integration angle
+  gyroRoll -= gy * dt;
+  gyroPitch += gx * dt;
+  gyroYaw += gz * dt;
+
+  // Get attitude of filter using a comp filter and gyroYaw
+  roll = tau*(roll - gy*dt) + (1-tau)*(accRoll);
+  pitch = tau*(pitch + gx*dt) + (1-tau)*(accPitch);
+  yaw = gyroYaw;
+}
 
 function displayObject(roll, pitch, yaw) {
   // Color options
