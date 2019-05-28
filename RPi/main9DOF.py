@@ -314,19 +314,19 @@ class MPU:
         self.ay /= self.accScaleFactor
         self.az /= self.accScaleFactor
 
-        # Multiply mag value by scale factor and cal factor and subtract bias
+        # Process mag values in milliGauss
+        # Include factory calibration per data sheet and user environmental corrections
         self.mx = self.mx * self.magScaleFactor * self.magXcal - self.magXbias
         self.my = self.my * self.magScaleFactor * self.magYcal - self.magYbias
         self.mz = self.mz * self.magScaleFactor * self.magZcal - self.magZbias
 
-        # 
         self.mx *= self.magXscale
         self.my *= self.magYscale
         self.mz *= self.magZscale
 
     def compFilter(self):
-        # Get the processed values from IMU
-        self.processIMUvalues()
+        # Get the processed values from IMU and mag
+        self.processValues()
 
         # Get delta time and record time for next call
         dt = time.time() - self.dtTimer
@@ -340,11 +340,15 @@ class MPU:
         self.gyroRoll -= self.gy * dt
         self.gyroPitch += self.gx * dt
         self.gyroYaw += self.gz * dt
-        self.yaw = self.gyroYaw
 
         # Comp filter
         self.roll = (self.tau)*(self.roll - self.gy*dt) + (1-self.tau)*(accRoll)
         self.pitch = (self.tau)*(self.pitch + self.gx*dt) + (1-self.tau)*(accPitch)
+
+    def attitude(self):
+        # Get the data
+        self.compFilter()
+        self.calcHeading()
 
         # Print data
         print(" R: " + str(round(self.roll,1)) \
@@ -370,8 +374,7 @@ def main():
     # # Run for 10 secounds
     startTime = time.time()
     while(time.time() < (startTime + 10)):
-        mpu.readRawIMU()
-        mpu.readRawMag()
+        mpu.attitude()
 
     # End
     print("Closing")
