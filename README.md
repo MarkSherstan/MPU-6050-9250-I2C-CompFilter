@@ -93,10 +93,10 @@ node startserver.js
 
 Double click on the `index.html` file located in `Visualizer/p5js/main` and the program will begin in your default browser. Alternatively you can enter the file path in a browser as such `file:///Users/MarkSherstan/Documents/GitHub/MPU-6050-9250-I2C-CompFilter/Visualizer/p5js/main/index.html`
 
-** Ensure to hold the IMU device still until an object appears on the screen. This is the IMU performing a calibration for any gyroscope offset. **
+**Ensure to hold the IMU device still until an object appears on the screen. This is the program performing a calibration for gyroscope offset.**
 
 ### MATLAB Visualizer
-
+Connect an IMU device as outlined in the Arduino section. Upload the sketch located in `Visualizer/arduinoSketch`. This sketch simply transmits the raw byte data from the sensor over a serial connection.
 
 
 ## Future Ideas
