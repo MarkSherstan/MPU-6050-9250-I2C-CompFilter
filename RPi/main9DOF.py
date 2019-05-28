@@ -54,6 +54,7 @@ class MPU:
         self.GYRO_CONFIG      = 0x1B
         self.AK8963_ASAX      = 0x10
         self.ACCEL_XOUT_H     = 0x3B
+        self.AK8963_XOUT_L    = 0x03
 
     def gyroSensitivity(self, x):
         # Create dictionary with standard value of 500 deg/s
@@ -179,7 +180,7 @@ class MPU:
             return val
 
     def readRawIMU(self):
-        # Read 14 raw values as temperature falls between the accelerometer and gyro registries
+        # Read 14 raw values [High Low] as temperature falls between the accelerometer and gyro registries
         rawData = []
         for ii in range(14):
             rawData.append(self.bus.read_byte_data(self.MPU9250_ADDRESS, self.ACCEL_XOUT_H + ii))
@@ -194,6 +195,22 @@ class MPU:
         self.gz = self.eightBit2sixteenBit(rawData[11], rawData[10])
 
     def readRawMag(self):
+        # Prepare to request values
+        self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_ADDR, self.AK8963_ADDRESS | 0x80);    # Set the I2C slave address of AK8963 and set for read.
+        self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_REG, self.AK8963_XOUT_L);             # I2C slave 0 register address from where to begin data transfer
+        self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_CTRL, 0x87);                          # Enable I2C and read 7 bytes
+        time.sleep(0.02)
+
+        # Read 7 values [Low High] and one more byte (overflow check)
+        rawData = []
+        for ii in range(7):
+            rawData.append(self.bus.read_byte_data(self.MPU9250_ADDRESS, self.EXT_SENS_DATA_00 + ii))
+
+        # If overflow check passes convert the raw values to something a little more useful
+        if not (rawData[6] & 0x08):
+            self.mx = self.eightBit2sixteenBit(rawData[0], rawData[1])
+            self.my = self.eightBit2sixteenBit(rawData[2], rawData[3])
+            self.mz = self.eightBit2sixteenBit(rawData[4], rawData[5])
 
     def calibrateGyro(self, N):
         # Display message
@@ -281,10 +298,11 @@ def main():
     # mpu.calibrateGyro(500)
     # mpu.calibrateMag(500)
 
-    # # Run for 20 secounds
-    # startTime = time.time()
-    # while(time.time() < (startTime + 5)):
-    #     mpu.compFilter()
+    # # Run for 10 secounds
+    startTime = time.time()
+    while(time.time() < (startTime + 10)):
+        mpu.readRawIMU()
+        mpu.readRawMag()
 
     # End
     print("Closing")
