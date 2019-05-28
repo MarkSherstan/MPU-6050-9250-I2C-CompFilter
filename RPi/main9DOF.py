@@ -13,6 +13,10 @@ class MPU:
         self.gyroYcal = 0
         self.gyroZcal = 0
 
+        self.magXcal = 0
+        self.magYcal = 0
+        self.magZcal = 0
+
         self.gyroRoll = 0
         self.gyroPitch = 0
         self.gyroYaw = 0
@@ -29,20 +33,25 @@ class MPU:
 
         self.bus = smbus.SMBus(1)
 
-        self.WHO_AM_I_AK8963  = 0x00
         self.MPU9250_ADDRESS  = 0x68
         self.AK8963_ADDRESS   = 0x0C
+
+        self.WHO_AM_I_MPU9250 = 0x75
+        self.WHO_AM_I_AK8963  = 0x00
+
+        self.AK8963_CNTL      = 0x0A
+        self.AK8963_CNTL2     = 0x0B
+        self.I2C_SLV0_DO      = 0x63
         self.USER_CTRL        = 0x6A
         self.I2C_MST_CTRL     = 0x24
         self.I2C_SLV0_ADDR    = 0x25
         self.I2C_SLV0_REG     = 0x26
         self.I2C_SLV0_CTRL    = 0x27
-
         self.EXT_SENS_DATA_00 = 0x49
-        self.WHO_AM_I_MPU9250 = 0x75
         self.PWR_MGMT_1       = 0x6B
         self.ACCEL_CONFIG     = 0x1C
         self.GYRO_CONFIG      = 0x1B
+        self.AK8963_ASAX      = 0x10
 
     def gyroSensitivity(self, x):
         # Create dictionary with standard value of 500 deg/s
@@ -79,24 +88,76 @@ class MPU:
             # Display message to user
             print("MPU set up:")
             print('\tAccelerometer: ' + str(hex(self.accHex)) + ' ' + str(self.accScaleFactor))
-            print('\tGyro: ' + str(hex(self.gyroHex)) + ' ' + str(self.gyroScaleFactor) + "\n")
-            time.sleep(2)
+            print('\tGyroscope: ' + str(hex(self.gyroHex)) + ' ' + str(self.gyroScaleFactor) + "\n")
         else:
             # Bad connection or something went wrong
-            print("WHO_AM_I was: " + hex(whoAmI) + ". Should have been " + hex(0x71))
+            print("IMU WHO_AM_I was: " + hex(whoAmI) + ". Should have been " + hex(0x71))
 
     def setUpMAG(self):
-        bus.write_byte_data(MPU9250_ADDRESS, USER_CTRL, 0x20);                         # Enable I2C Master mode
-        bus.write_byte_data(MPU9250_ADDRESS, I2C_MST_CTRL, 0x0D);                      # I2C configuration multi-master I2C 400KHz
-        bus.write_byte_data(MPU9250_ADDRESS, I2C_SLV0_ADDR, AK8963_ADDRESS | 0x80);    # Set the I2C slave address of AK8963 and set for read.
-        bus.write_byte_data(MPU9250_ADDRESS, I2C_SLV0_REG, WHO_AM_I_AK8963);           # I2C slave 0 register address from where to begin data transfer
-        bus.write_byte_data(MPU9250_ADDRESS, I2C_SLV0_CTRL, 0x81);                     # Enable I2C and transfer 1 byte
-
+        # Initialize connection with mag for a WHO_AM_I test
+        self.bus.write_byte_data(self.MPU9250_ADDRESS, self.USER_CTRL, 0x20);                              # Enable I2C Master mode
+        self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_MST_CTRL, 0x0D);                           # I2C configuration multi-master I2C 400KHz
+        self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_ADDR, self.AK8963_ADDRESS | 0x80);    # Set the I2C slave address of AK8963 and set for read.
+        self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_REG, self.WHO_AM_I_AK8963);           # I2C slave 0 register address from where to begin data transfer
+        self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_CTRL, 0x81);                          # Enable I2C and transfer 1 byte
         time.sleep(0.05)
-        print("Who am I MAG? Should be: " + str(0x48))
-        print(bus.read_byte_data(MPU9250_ADDRESS, EXT_SENS_DATA_00)) # Who am I -> should return 0x48
 
+        # Check to see if there is a good connection with the mag
+        whoAmI = self.bus.read_byte_data(self.MPU9250_ADDRESS, self.EXT_SENS_DATA_00)
 
+        if (whoAmI == 0x48):
+            # Connection is good! Begin the true initialization
+            self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_ADDR, self.AK8963_ADDRESS);     # Set the I2C slave address of AK8963 and set for write.
+            self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_REG, self.AK8963_CNTL2);        # I2C slave 0 register address from where to begin data transfer
+            self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_DO, 0x01);                      # Reset AK8963
+            self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_CTRL, 0x81);                    # Enable I2C and write 1 byte
+            time.sleep(0.05)
+
+            self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_ADDR, self.AK8963_ADDRESS);     # Set the I2C slave address of AK8963 and set for write.
+            self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_REG, self.AK8963_CNTL);         # I2C slave 0 register address from where to begin data transfer
+            self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_DO, 0x00);                      # Power down magnetometer
+            self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_CTRL, 0x81);                    # Enable I2C and transfer 1 byte
+            time.sleep(0.05)
+
+            self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_ADDR, self.AK8963_ADDRESS);     # Set the I2C slave address of AK8963 and set for write.
+            self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_REG, self.AK8963_CNTL);         # I2C slave 0 register address from where to begin data transfer
+            self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_DO, 0x0F);                      # Enter fuze mode
+            self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_CTRL, 0x81);                    # Enable I2C and write 1 byte
+            time.sleep(0.05)
+
+            self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_ADDR, self.AK8963_ADDRESS | 0x80);   # Set the I2C slave address of AK8963 and set for read.
+            self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_REG, self.AK8963_ASAX);              # I2C slave 0 register address from where to begin data transfer
+            self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_CTRL, 0x83);                         # Enable I2C and read 3 bytes
+            time.sleep(0.05)
+
+            # Read the x, y, and z axis calibration values
+            rawData = []
+            for ii in range(3):
+                rawData.append(self.bus.read_byte_data(self.MPU9250_ADDRESS, self.EXT_SENS_DATA_00 + ii))
+
+            # Convert values to something more usable
+            self.magXcal =  float(rawData[0] - 128)/256.0 + 1.0;
+            self.magYcal =  float(rawData[1] - 128)/256.0 + 1.0;
+            self.magZcal =  float(rawData[2] - 128)/256.0 + 1.0;
+
+            # Configure the settings for the mag
+            self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_ADDR, self.AK8963_ADDRESS);     # Set the I2C slave address of AK8963 and set for write.
+            self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_REG, self.AK8963_CNTL);         # I2C slave 0 register address from where to begin data transfer
+            self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_DO, 0x16);                      # Set magnetometer for 16 bit continous 100 Hz sample rates
+            self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_CTRL, 0x81);                    # Enable I2C and transfer 1 byte
+            time.sleep(0.05)
+
+            self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_ADDR, self.AK8963_ADDRESS | 0x80);    # Set the I2C slave address of AK8963 and set for read.
+            self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_REG, self.AK8963_CNTL);               # I2C slave 0 register address from where to begin data transfer
+            self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_CTRL, 0x81);                          # Enable I2C and transfer 1 byte
+            time.sleep(0.05)
+
+            # Display results to user
+            print("MAG set up:")
+            print("\tMagnetometer: " + hex(0x16) + " @ 16 bit 100 Hz" + "\n")
+        else:
+            # Bad connection or something went wrong
+            print("MAG WHO_AM_I was: " + hex(whoAmI) + ". Should have been " + hex(0x48))
 
     def eightBit2sixteenBitIMU(self, reg):
         # Reads high and low 8 bit values and shifts them into 16 bit
