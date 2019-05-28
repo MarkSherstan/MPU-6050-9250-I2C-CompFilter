@@ -7,6 +7,7 @@ class MPU:
         # Class / object / constructor setup
         self.gx = None; self.gy = None; self.gz = None;
         self.ax = None; self.ay = None; self.az = None;
+        self.mx = None; self.my = None; self.mz = None;
 
         self.gyroXcal = 0
         self.gyroYcal = 0
@@ -27,7 +28,8 @@ class MPU:
         self.accScaleFactor, self.accHex = self.accelerometerSensitivity(acc)
 
         self.bus = smbus.SMBus(1)
-        self.address = 0x68
+        self.IMUaddress = 0x68
+        self.MAGaddress = 0x0C
 
     def gyroSensitivity(self, x):
         # Create dictionary with standard value of 500 deg/s
@@ -48,14 +50,17 @@ class MPU:
         }.get(x,[8192.0,  0x08])
 
     def setUp(self):
-        # Activate the MPU-6050
-        self.bus.write_byte_data(self.address, 0x6B, 0x00)
+        # Activate the MPU
+        self.bus.write_byte_data(self.IMUaddress, 0x6B, 0x00)
 
         # Configure the accelerometer
-        self.bus.write_byte_data(self.address, 0x1C, self.accHex)
+        self.bus.write_byte_data(self.IMUaddress, 0x1C, self.accHex)
 
         # Configure the gyro
-        self.bus.write_byte_data(self.address, 0x1B, self.gyroHex)
+        self.bus.write_byte_data(self.IMUaddress, 0x1B, self.gyroHex)
+
+        # Configure the mag for 16 bits and continous mode 2 (100 Hz ?)
+        self.bus.write_byte_data(self.MAGaddress, 0x0A, 0x16)
 
         # Display message to user
         print("MPU set up:")
@@ -63,10 +68,22 @@ class MPU:
         print('\tGyro: ' + str(self.gyroHex) + ' ' + str(self.gyroScaleFactor) + "\n")
         time.sleep(2)
 
-    def eightBit2sixteenBit(self, reg):
+    def eightBit2sixteenBitIMU(self, reg):
         # Reads high and low 8 bit values and shifts them into 16 bit
-        h = self.bus.read_byte_data(self.address, reg)
-        l = self.bus.read_byte_data(self.address, reg+1)
+        h = self.bus.read_byte_data(self.IMUaddress, reg)
+        l = self.bus.read_byte_data(self.IMUaddress, reg+1)
+        val = (h << 8) + l
+
+        # Make 16 bit unsigned value to signed value (0 to 65535) to (-32768 to +32767)
+        if (val >= 0x8000):
+            return -((65535 - val) + 1)
+        else:
+            return val
+
+    def eightBit2sixteenBitMAG(self, reg):
+        # Reads low and high 8 bit values and shifts them into 16 bit
+        l = self.bus.read_byte_data(self.IMUaddress, reg)
+        h = self.bus.read_byte_data(self.IMUaddress, reg+1)
         val = (h << 8) + l
 
         # Make 16 bit unsigned value to signed value (0 to 65535) to (-32768 to +32767)
@@ -76,13 +93,17 @@ class MPU:
             return val
 
     def getRawData(self):
-        self.gx = self.eightBit2sixteenBit(0x43)
-        self.gy = self.eightBit2sixteenBit(0x45)
-        self.gz = self.eightBit2sixteenBit(0x47)
+        self.gx = self.eightBit2sixteenBitIMU(0x43)
+        self.gy = self.eightBit2sixteenBitIMU(0x45)
+        self.gz = self.eightBit2sixteenBitIMU(0x47)
 
-        self.ax = self.eightBit2sixteenBit(0x3B)
-        self.ay = self.eightBit2sixteenBit(0x3D)
-        self.az = self.eightBit2sixteenBit(0x3F)
+        self.ax = self.eightBit2sixteenBitIMU(0x3B)
+        self.ay = self.eightBit2sixteenBitIMU(0x3D)
+        self.az = self.eightBit2sixteenBitIMU(0x3F)
+
+        self.mx = self.eightBit2sixteenBitMAG(0x03)
+        self.my = self.eightBit2sixteenBitMAG(0x05)
+        self.mz = self.eightBit2sixteenBitMAG(0x07)
 
     def calibrateGyro(self, N):
         # Display message
