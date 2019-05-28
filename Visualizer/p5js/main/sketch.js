@@ -6,36 +6,34 @@ var serial;
 var ii;
 var ax, ay, az;
 var gx, gy, gz;
+var gyroXcal, gyroYcal, gyroZcal;
+var gyroRoll, gyroPitch, gyroYaw;
+var roll, pitch, yaw;
 var accPitch, accRoll;
 var dtTimer;
 var dt;
 var byteArray = [];
+var calibrationCounter = 0;
+roll = pitch = yaw = 0;
+gyroXcal = gyroYcal = gyroZcal = 0;
+gyroRoll = gyroPitch = gyroYaw = 0;
 
+// Customize these values
 var portName = '/dev/cu.usbmodem14101';
 var tau = 0.98;
 var gyroScaleFactor = 65.5;
 var accScaleFactor = 8192.0;
-var calibrationPts = 500;
-var calibrationCounter = 0;
-var roll = 0;
-var pitch = 0;
-var yaw = 0;
-var gyroRoll = 0;
-var gyroPitch = 0;
-var gyroYaw = 0;
-var gyroXcal = 0;
-var gyroYcal = 0;
-var gyroZcal = 0;
+var calibrationPts = 100;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Set Up
 ////////////////////////////////////////////////////////////////////////////////
 
 function setup() {
-  // Create a canvas to work on
+  // Create a 3D web canvas to work on
   createCanvas(900, 700, WEBGL);
 
-  // Set up the classes
+  // Set up the serial port class
   serial = new p5.SerialPort();
 
   // Set some callback functions for the serial port
@@ -46,8 +44,8 @@ function setup() {
   // Open a serial port
   serial.open(portName);
 
-  // Start a timer
-  dtTimer = millis();
+  // Display message for user to hold still
+  print('Calibration to begin. Hold still!\n')
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -68,7 +66,7 @@ function draw() {
 ////////////////////////////////////////////////////////////////////////////////
 
 function portOpen() {
-  print('The serial port is opened!')
+  print('The serial port is opened!');
 }
 
 function serialEvent() {
@@ -82,7 +80,7 @@ function serialEvent() {
       byteArray.push(serial.read());
     }
 
-    // Cast the bytes into a usable values
+    // Cast the bytes into usable values
     ax = bytes2num(byteArray[1],  byteArray[0]);
     ay = bytes2num(byteArray[3],  byteArray[2]);
     az = bytes2num(byteArray[5],  byteArray[4]);
@@ -90,15 +88,15 @@ function serialEvent() {
     gy = bytes2num(byteArray[9],  byteArray[8]);
     gz = bytes2num(byteArray[11], byteArray[10]);
 
-
     if (calibrationCounter < calibrationPts){
-      // Sum points under a quote has been met
+      // Sum points until a quota has been met
       gyroXcal += gx;
       gyroYcal += gy;
       gyroZcal += gz;
 
       // Incrament counter
       calibrationCounter += 1;
+
     } else if (calibrationCounter == calibrationPts) {
       // Once quota is met find the average offset value
       gyroXcal /= calibrationPts;
@@ -107,14 +105,22 @@ function serialEvent() {
 
       // Display message
       print("Calibration complete");
-      print("\tX axis offset: " + String(round(gyroXcal,1)));
-      print("\tY axis offset: " + String(round(gyroYcal,1)));
-      print("\tZ axis offset: " + String(round(gyroZcal,1)) + "\n");
+      print("\tX axis offset: " + String(round(gyroXcal)));
+      print("\tY axis offset: " + String(round(gyroYcal)));
+      print("\tZ axis offset: " + String(round(gyroZcal)) + "\n");
 
-      // Incrament counter once more to show calibration is complete
+      // Start a timer
+      dtTimer = millis();
+
+      // Incrament counter once more to show the calibration is complete
       calibrationCounter += 1;
+
     } else {
+      // Turn values into something with a physical representation
       processValues();
+
+      // Print values to console
+      print("R: " + round(roll) + " P: " + round(pitch) + " Y: " + round(yaw));
     }
   }
 }
@@ -141,7 +147,7 @@ function bytes2num(byteA, byteB){
 }
 
 function processValues() {
-  // Subract the offset calibration values for gyro
+  // Subract the offset calibration values for the gyro
   gx -= gyroXcal;
   gy -= gyroYcal;
   gz -= gyroZcal;
@@ -156,7 +162,7 @@ function processValues() {
   ay /= accScaleFactor;
   az /= accScaleFactor;
 
-  // Get delta time and record time for next call
+  // Get delta time and record time for the next call
   dt = (millis() - dtTimer)*0.001;
   dtTimer = millis();
 
@@ -177,10 +183,7 @@ function processValues() {
 
 function displayObject(roll, pitch, yaw) {
   // Color options
-  normalMaterial()
-
-  // Print values to console
-  print("R: " + round(roll) + " P: " + round(pitch) + " Y: " + round(yaw));
+  normalMaterial();
 
   // Start display
   push();
