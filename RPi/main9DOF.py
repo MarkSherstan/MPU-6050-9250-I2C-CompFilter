@@ -294,24 +294,35 @@ class MPU:
         print("\tZ Scale: " + str(self.magZscale))
         time.sleep(5)
 
-    def processIMUvalues(self):
+    def processValues(self):
         # Update the raw data
-        self.getRawData()
+        self.readRawIMU()
+        self.readRawMag()
 
-        # Subtract the offset calibration values
+        # Subtract the offset calibration values for the gyro
         self.gx -= self.gyroXcal
         self.gy -= self.gyroYcal
         self.gz -= self.gyroZcal
 
-        # Convert to instantaneous degrees per second
+        # Convert the gyro values to degrees per second
         self.gx /= self.gyroScaleFactor
         self.gy /= self.gyroScaleFactor
         self.gz /= self.gyroScaleFactor
 
-        # Convert to g force
+        # Convert the accelerometer values to g force
         self.ax /= self.accScaleFactor
         self.ay /= self.accScaleFactor
         self.az /= self.accScaleFactor
+
+        # Multiply mag value by scale factor and cal factor and subtract bias
+        self.mx = self.mx * self.magScaleFactor * self.magXcal - self.magXbias
+        self.my = self.my * self.magScaleFactor * self.magYcal - self.magYbias
+        self.mz = self.mz * self.magScaleFactor * self.magZcal - self.magZbias
+
+        # 
+        self.mx *= self.magXscale
+        self.my *= self.magYscale
+        self.mz *= self.magZscale
 
     def compFilter(self):
         # Get the processed values from IMU
