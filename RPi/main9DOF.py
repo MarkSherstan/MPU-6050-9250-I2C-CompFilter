@@ -17,6 +17,14 @@ class MPU:
         self.magYcal = 0
         self.magZcal = 0
 
+        self.magXbias = 0
+        self.magYbias = 0
+        self.magZbias = 0
+
+        self.magXscale = 0
+        self.magYscale = 0
+        self.magZscale = 0
+
         self.gyroRoll = 0
         self.gyroPitch = 0
         self.gyroYaw = 0
@@ -218,7 +226,7 @@ class MPU:
 
         # Take N readings for each coordinate and add to itself
         for ii in range(N):
-            self.getRawData()
+            self.readRawIMU()
             self.gyroXcal += self.gx
             self.gyroYcal += self.gy
             self.gyroZcal += self.gz
@@ -233,8 +241,58 @@ class MPU:
         print("\tX axis offset: " + str(round(self.gyroXcal,1)))
         print("\tY axis offset: " + str(round(self.gyroYcal,1)))
         print("\tZ axis offset: " + str(round(self.gyroZcal,1)) + "\n")
-        time.sleep(2)
+
+        # Start the timer
         self.dtTimer = time.time()
+
+    def calibrateMag(self):
+        # Local calibration variables
+        magBias = [0, 0, 0]
+        magScale = [0, 0, 0]
+        magMin = [32767, 32767, 32767]
+        magMax = [-32767, -32767, -32767]
+        magTemp = [0, 0, 0]
+
+        # Display message
+        print("Mag calibration! Wave device in a figure eight until done (~18 seconds).")
+        time.sleep(3)
+
+        # Take approx 15 seconds of mag data as we are sampling at 100 hz
+        for ii in range(1500):
+            # Read fresh values and assign to magTemp
+            self.readRawMag()
+            magTemp = [self.mx, self.my, self.mz]
+
+            # Adjust the max and min points based off of current reading
+            for jj in range(3):
+                if (magTemp[jj] > magMax[jj]):
+                    magMax[jj] = magTemp[jj]
+                if (magTemp[jj] < magMin[jj]):
+                    magMin[jj] = magTemp[jj]
+
+            # Small delay before next loop (data available every 10 ms or 100 Hz)
+            time.sleep(0.012)
+
+        # Get hard iron correction
+        self.magXbias = (magMax[0] + magMin[0])/2
+        self.magYbias = (magMax[1] + magMin[1])/2
+        self.magZbias = (magMax[2] + magMin[2])/2
+
+        # Get soft iron correction estimate
+        self.magXscale = (magMax[0] - magMin[0])/2
+        self.magYscale = (magMax[1] - magMin[1])/2
+        self.magZscale = (magMax[2] - magMin[2])/2
+
+        # Display results to user
+        print("Calibration complete")
+        print("\tX Bias: " + str(self.magXbias))
+        print("\tY Bias: " + str(self.magYbias))
+        print("\tZ Bias: " + str(self.magZbias))
+        print()
+        print("\tX Scale: " + str(self.magXscale))
+        print("\tY Scale: " + str(self.magYscale))
+        print("\tZ Scale: " + str(self.magZscale))
+        time.sleep(5)
 
     def processIMUvalues(self):
         # Update the raw data
@@ -294,9 +352,9 @@ def main():
     mpu.setUpIMU()
     mpu.setUpMAG()
 
-    # Calibrate the gyro and mag
+    # Calibrate the gyro and/or mag
     # mpu.calibrateGyro(500)
-    # mpu.calibrateMag(500)
+    # mpu.calibrateMag()
 
     # # Run for 10 secounds
     startTime = time.time()
