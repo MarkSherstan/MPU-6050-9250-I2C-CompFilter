@@ -176,23 +176,63 @@ class MPU:
             + " Y: " + str(round(self.yaw,1)))
 
 def main():
-    # Set up class
-    gyro = 250      # 250, 500, 1000, 2000 [deg/s]
-    acc = 2         # 2, 4, 7, 16 [g]
-    tau = 0.98
-    mpu = MPU(gyro, acc, tau)
+    MPU9250_ADDRESS  = 0x68
+    AK8963_ADDRESS   = 0x0C
 
-    # Set up sensor and calibrate gyro with N points
-    mpu.setUp()
-    mpu.calibrateGyro(500)
+    USER_CTRL        = 0x6A
+    I2C_MST_CTRL     = 0x24
+    I2C_SLV0_ADDR    = 0x25
+    I2C_SLV0_REG     = 0x26
+    I2C_SLV0_CTRL    = 0x27
+    WHO_AM_I_AK8963  = 0x00
+    EXT_SENS_DATA_00 = 0x49
 
-    # Run for 20 secounds
-    startTime = time.time()
-    while(time.time() < (startTime + 20)):
-        mpu.compFilter()
+    bus = smbus.SMBus(1)
 
-    # End
-    print("Closing")
+    print("Who am I IMU? Should be: " + str(0x71))
+    print(bus.read_byte_data(0x68, 0x75)) # Who am I -> should return 0x71
+
+
+    bus.write_byte_data(MPU9250_ADDRESS, USER_CTRL, 0x20);    # Enable I2C Master mode
+    bus.write_byte_data(MPU9250_ADDRESS, I2C_MST_CTRL, 0x0D); # I2C configuration multi-master I2C 400KHz
+
+    bus.write_byte_data(MPU9250_ADDRESS, I2C_SLV0_ADDR, AK8963_ADDRESS | 0x80);    # Set the I2C slave address of AK8963 and set for read.
+    bus.write_byte_data(MPU9250_ADDRESS, I2C_SLV0_REG, WHO_AM_I_AK8963);           # I2C slave 0 register address from where to begin data transfer
+    bus.write_byte_data(MPU9250_ADDRESS, I2C_SLV0_CTRL, 0x81);                     # Enable I2C and transfer 1 byte
+
+    time.sleep(1)
+
+    print("Who am I MAG? Should be: " + str(0x48))
+    print(bus.read_byte_data(MPU9250_ADDRESS, EXT_SENS_DATA_00)) # Who am I -> should return 0x48
+
+    # # Set up class
+    # gyro = 250      # 250, 500, 1000, 2000 [deg/s]
+    # acc = 2         # 2, 4, 7, 16 [g]
+    # tau = 0.98
+    # mpu = MPU(gyro, acc, tau)
+    #
+    # # Set up sensor and calibrate gyro with N points
+    # mpu.setUp()
+    # mpu.calibrateGyro(500)
+    #
+    # # Run for 20 secounds
+    # startTime = time.time()
+    # while(time.time() < (startTime + 20)):
+    #     mpu.compFilter()
+    #
+    # # End
+    # print("Closing")
+
+
+# MFS_16BITS == 0.15 mG per LSB      Mscale = MFS_16BITS
+# M}mode = M_100Hz           Mmode = M_100Hz
+
+# int16_t magCount[3];    // Stores the 16-bit signed magnetometer sensor output
+# float   magCalibration[3] = {0, 0, 0};
+
+# These can be measured once and entered here or can be calculated each time the device is powered on
+# float   magBias[3] = {71.04, 122.43, -36.90}, magScale[3]  = {1.01, 1.03, 0.96}; // Bias corrections for gyro and accelerometer
+
 
 # Main loop
 if __name__ == '__main__':
