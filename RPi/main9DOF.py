@@ -53,6 +53,7 @@ class MPU:
         self.ACCEL_CONFIG     = 0x1C
         self.GYRO_CONFIG      = 0x1B
         self.AK8963_ASAX      = 0x10
+        self.ACCEL_XOUT_H     = 0x3B
 
     def gyroSensitivity(self, x):
         # Create dictionary with standard value of 500 deg/s
@@ -167,10 +168,8 @@ class MPU:
             # Bad connection or something went wrong
             print("MAG WHO_AM_I was: " + hex(whoAmI) + ". Should have been " + hex(0x48))
 
-    def eightBit2sixteenBitIMU(self, reg):
-        # Reads high and low 8 bit values and shifts them into 16 bit
-        h = self.bus.read_byte_data(self.IMUaddress, reg)
-        l = self.bus.read_byte_data(self.IMUaddress, reg+1)
+    def eightBit2sixteenBit(self, l, h):
+        # Shift the low and high byte into a 16 bit number
         val = (h << 8) + l
 
         # Make 16 bit unsigned value to signed value (0 to 65535) to (-32768 to +32767)
@@ -179,30 +178,22 @@ class MPU:
         else:
             return val
 
-    def eightBit2sixteenBitMAG(self, reg):
-        # Reads low and high 8 bit values and shifts them into 16 bit
-        l = self.bus.read_byte_data(self.IMUaddress, reg)
-        h = self.bus.read_byte_data(self.IMUaddress, reg+1)
-        val = (h << 8) + l
+    def readRawIMU(self):
+        # Read 14 raw values as temperature falls between the accelerometer and gyro registries
+        rawData = []
+        for ii in range(14):
+            rawData.append(self.bus.read_byte_data(self.MPU9250_ADDRESS, self.ACCEL_XOUT_H + ii))
 
-        # Make 16 bit unsigned value to signed value (0 to 65535) to (-32768 to +32767)
-        if (val >= 0x8000):
-            return -((65535 - val) + 1)
-        else:
-            return val
+        # Convert the raw values to something a little more useful
+        self.ax = self.eightBit2sixteenBit(rawData[1], rawData[0])
+        self.ay = self.eightBit2sixteenBit(rawData[3], rawData[2])
+        self.az = self.eightBit2sixteenBit(rawData[5], rawData[4])
 
-    def getRawData(self):
-        self.gx = self.eightBit2sixteenBitIMU(0x43)
-        self.gy = self.eightBit2sixteenBitIMU(0x45)
-        self.gz = self.eightBit2sixteenBitIMU(0x47)
+        self.gx = self.eightBit2sixteenBit(rawData[7], rawData[6])
+        self.gy = self.eightBit2sixteenBit(rawData[9], rawData[8])
+        self.gz = self.eightBit2sixteenBit(rawData[11], rawData[10])
 
-        self.ax = self.eightBit2sixteenBitIMU(0x3B)
-        self.ay = self.eightBit2sixteenBitIMU(0x3D)
-        self.az = self.eightBit2sixteenBitIMU(0x3F)
-
-        self.mx = self.eightBit2sixteenBitMAG(0x03)
-        self.my = self.eightBit2sixteenBitMAG(0x05)
-        self.mz = self.eightBit2sixteenBitMAG(0x07)
+    def readRawMag(self):
 
     def calibrateGyro(self, N):
         # Display message
