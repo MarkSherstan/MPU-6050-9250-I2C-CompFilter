@@ -57,8 +57,10 @@ function draw() {
   background(150);
   rotateX(PI/2);
 
-  // Display object to the user
-  displayObject(roll, pitch, yaw);
+  // Display object to the user only if calibration is complete
+  if (calibrationCounter > calibrationPts){
+    displayObject(roll, pitch, yaw);
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
