@@ -33,7 +33,7 @@ Connect the sensor to the microcontroller as outlined below.
 Upload the `main.ino` sketch and observe the values in the serial port or serial plotter. The `calibrateGyro.ino` sketch can be used to retrieve the offset values which can be directly placed into the `main.ino` sketch to eliminate the need for calibration every time the microcontroller is started up. Note that this is at at the cost of performance as the sensors drift over time and between uses.
 
 ### MATLAB
-Connect an Arduino using the same wiring as outlined above. Run `main.m` and observe the values in the command line. MATLAB is extremely slow with I2C devices through an Arduino and it will be faster to run a serial connection with the data acquisition occurring on a microcontroller.
+Connect an Arduino using the same wiring as outlined above. Run `main.m` and observe the values in the command line. MATLAB is extremely slow with I2C devices through an Arduino and it will be faster to run a serial connection with the data acquisition occurring on a microcontroller (see the Visualizer section).
 
 ### RPi (Python)
 Connect your IMU sensor to 5V or 3.3V based on specific breakout board and ground to ground. Refer to the pinout of your board using [pinout.xyz](https://pinout.xyz) and match SDA and SCL accordingly.
@@ -62,16 +62,43 @@ Which should yield the table below (possible to have the value 0x69) verifying a
 ```
 Once verified run `python3 main.py` to observe the values.
 
-## Under Development
-* Create a GUI visualizer of the data.
-* RPi C++ version
+### JavaScript Visualizer
+Connect an IMU device as outlined in the Arduino section. Upload the sketch located in `Visualizer/arduinoSketch`. This sketch simply transmits the raw byte data from the sensor over a serial connection.
 
+Next, perform the following commands to add the necessary server which makes a bridge between the microcontroller and web application.  
 
-Clone this:
-https://github.com/vanevery/p5.serialport
-
-cd to directory
+```
+cd MPU-6050-9250-I2C-CompFilter/
+git submodule add https://github.com/vanevery/p5.serialport.git Visualizer/p5js/server
+cd Visualizer/p5js/server/
 npm install
-node startserver.js
+```
 
-open index.html
+Edit the file `sketch.js` file located in `Visualizer/p5js/main` to set the desired properties and correct serial port.
+
+```
+// Customize these values
+var portName = '/dev/cu.usbmodem14101';
+var tau = 0.98;
+var gyroScaleFactor = 65.5;
+var accScaleFactor = 8192.0;
+var calibrationPts = 100;
+```
+
+Once all the values are customized start the serial port server by navigating to `Visualizer/p5js/server/` and entering:
+
+```
+node startserver.js
+```
+
+Double click on the `index.html` file located in `Visualizer/p5js/main` and the program will begin in your default browser. Alternatively you can enter the file path in a browser as such `file:///Users/MarkSherstan/Documents/GitHub/MPU-6050-9250-I2C-CompFilter/Visualizer/p5js/main/index.html`
+
+** Ensure to hold the IMU device still until an object appears on the screen. This is the IMU performing a calibration for any gyroscope offset. **
+
+### MATLAB Visualizer
+
+
+
+## Future Ideas
+* RPi C++ Version
+* Add quaternion angle representation
