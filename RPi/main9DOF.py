@@ -254,7 +254,7 @@ class MPU:
         magTemp = [0, 0, 0]
 
         # Display message
-        print("Mag calibration! Wave device in a figure eight until done (~18 seconds).")
+        print("Mag calibration! Wave device in a figure eight until done (~18 seconds)\n.")
         time.sleep(3)
 
         # Take approx 15 seconds of mag data as we are sampling at 100 hz
@@ -270,29 +270,39 @@ class MPU:
                 if (magTemp[jj] < magMin[jj]):
                     magMin[jj] = magTemp[jj]
 
+            # Print percent completion every 100 iteraitions to the user
+			if (ii % 100 == 0):
+                print(str(round((ii/1500)*100)) + ' % complete')
+
             # Small delay before next loop (data available every 10 ms or 100 Hz)
             time.sleep(0.012)
 
         # Get hard iron correction
-        self.magXbias = (magMax[0] + magMin[0])/2
-        self.magYbias = (magMax[1] + magMin[1])/2
-        self.magZbias = (magMax[2] + magMin[2])/2
+        self.magXbias = ((magMax[0] + magMin[0])/2) * self.magScaleFactor * self.magXcal
+        self.magYbias = ((magMax[1] + magMin[1])/2) * self.magScaleFactor * self.magYcal
+        self.magZbias = ((magMax[2] + magMin[2])/2) * self.magScaleFactor * self.magZcal
 
         # Get soft iron correction estimate
-        self.magXscale = (magMax[0] - magMin[0])/2
-        self.magYscale = (magMax[1] - magMin[1])/2
-        self.magZscale = (magMax[2] - magMin[2])/2
+        magXchord = (magMax[0] - magMin[0])/2
+        magYchord = (magMax[1] - magMin[1])/2
+        magZchord = (magMax[2] - magMin[2])/2
 
-        # Display results to user
-        print("Calibration complete")
-        print("\tX Bias: " + str(self.magXbias))
-        print("\tY Bias: " + str(self.magYbias))
-        print("\tZ Bias: " + str(self.magZbias))
-        print()
-        print("\tX Scale: " + str(self.magXscale))
-        print("\tY Scale: " + str(self.magYscale))
-        print("\tZ Scale: " + str(self.magZscale))
-        time.sleep(5)
+		avgChord = (magXchord + magYchord + magZchord)/3
+
+        self.magXscale = avgChord/magXchord
+        self.magYscale = avgChord/magYchord
+        self.magZscale = avgChord/magZchord
+
+		# Display results to user
+		print("\nCalibration complete:")
+		print("\tX Bias: " + str(self.magXbias))
+		print("\tY Bias: " + str(self.magYbias))
+		print("\tZ Bias: " + str(self.magZbias) + "\n")
+
+		print("\tX Scale: " + str(self.magXscale))
+		print("\tY Scale: " + str(self.magYscale))
+		print("\tZ Scale: " + str(self.magZscale) + "\n")
+		time.sleep(5)
 
     def processValues(self):
         # Update the raw data
