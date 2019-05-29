@@ -3,12 +3,12 @@ from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 
 # Define the given offsets
-magXbias = 116.847
-magYbias = 281.136
-magZbias = -113.801
+magXbias = 296.949
+magYbias = 330.334
+magZbias = -105.309
 
-magXscale = 0.948
-magYscale = 1.085
+magXscale = 1.083
+magYscale = 0.949
 magZscale = 0.977
 
 # Initialize empty lists
