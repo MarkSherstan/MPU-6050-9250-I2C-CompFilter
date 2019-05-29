@@ -3,13 +3,13 @@ from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 
 # Define the given offsets
-xBias = 333.8484432234432
-yBias = 290.79956501831504
-zBias = -76.43372252747253
+magXbias = 116.847
+magYbias = 281.136
+magZbias = -113.801
 
-xScale = 1.2572463768115942
-yScale = 0.9719887955182074
-zScale = 0.8504901960784315
+magXscale = 0.948
+magYscale = 1.085
+magZscale = 0.977
 
 # Initialize empty lists
 mx = []
@@ -67,18 +67,17 @@ f.close()
 
 # Plot the raw results
 plotter(mx, my, mz, 'Raw Values')
-plotter3D(mx, my, mz, 'Raw Values')
 
 # Remove any bias and replot the results (hard iron correction)
-mx2 = [ii - xBias for ii in mx]
-my2 = [ii - yBias for ii in my]
-mz2 = [ii - zBias for ii in mz]
+mx2 = [ii - magXbias for ii in mx]
+my2 = [ii - magYbias for ii in my]
+mz2 = [ii - magZbias for ii in mz]
 
 plotter(mx2, my2, mz2, 'Bias Removed\nHard Iron Correction')
 
 # Scale and replot the results (soft iron correction)
-mx3 = [ii * xScale for ii in mx2]
-my3 = [ii * yScale for ii in my2]
-mz3 = [ii * zScale for ii in mz2]
+mx3 = [ii * magXscale for ii in mx2]
+my3 = [ii * magYscale for ii in my2]
+mz3 = [ii * magZscale for ii in mz2]
 
 plotter(mx3, my3, mz3, 'Bias Removal and Scaled Values\n Hard and Soft Iron Correction')
