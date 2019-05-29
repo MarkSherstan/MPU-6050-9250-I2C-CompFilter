@@ -245,19 +245,15 @@ class MPU:
         # Start the timer
         self.dtTimer = time.time()
 
-    def calibrateMag(self):
-        # Local calibration variables
+	def calibrateMag(self, state):
+		# Local calibration variables
         magBias = [0, 0, 0]
         magScale = [0, 0, 0]
         magMin = [32767, 32767, 32767]
         magMax = [-32767, -32767, -32767]
         magTemp = [0, 0, 0]
 
-        # Display message
-        print("Magnetometer calibration. Wave and rotate device in a figure eight until notified.\n")
-        time.sleep(3)
-
-        # Take approx 15 seconds of mag data as we are sampling at 100 hz
+		# Take approx 15 seconds of mag data as we are sampling at 100 hz
         for ii in range(1501):
             # Read fresh values and assign to magTemp
             self.readRawMag()
@@ -270,9 +266,17 @@ class MPU:
                 if (magTemp[jj] < magMin[jj]):
                     magMin[jj] = magTemp[jj]
 
-			# Print percent completion every 150 iteraitions to the user
-			if (ii % 150 == 0):
-				print(str(round((ii/1500)*100)) + ' % complete')
+			# Display some info to the user depending on the state
+			if (state == 0):
+				# Print percent completion every 150 iteraitions to the user
+				if (ii % 150 == 0):
+					print(str(round((ii/1500)*100)) + ' % complete')
+			elif (state == 1):
+				# Print raw values
+				print(str(self.mx)+','+str(self.my)+','+str(self.mz))
+			else:
+				# Display error
+				print("State unkown!")
 
             # Small delay before next loop (data available every 10 ms or 100 Hz)
             time.sleep(0.012)
@@ -293,6 +297,14 @@ class MPU:
         self.magYscale = avgChord/magYchord
         self.magZscale = avgChord/magZchord
 
+    def calibrateMagGuide(self):
+        # Display message
+        print("Magnetometer calibration. Wave and rotate device in a figure eight until notified.\n")
+        time.sleep(3)
+
+		# Run the first calibration
+		self.calibrateMag(0)
+
 		# Display results to user
 		print("\nCalibration complete:")
 		print("\tmagXbias = " + str(round(self.magXbias,3)))
@@ -303,32 +315,38 @@ class MPU:
 		print("\tmagYscale = " + str(round(self.magYscale,3)))
 		print("\tmagZscale = " + str(round(self.magZscale,3)) + "\n")
 
-		# Giver more instructions to the user
+		# Give more instructions to the user
 		print("Place above values in magCalVisualizer.py")
-		print("Recording 1500 data points to verify the calibration")
+		print("Recording additional 1501 data points to verify the calibration")
 		print("Repeat random figure eight pattern and rotations...\n")
-		time.sleep(5)
+		time.sleep(3)
 
-        # Take 1500 data points for testing the calibration
-        for ii in range(1500):
-            # Read fresh values and print to user
-            self.readRawMag()
-            print(str(self.mx)+','+str(self.my)+','+str(self.mz))
-
-            # Small delay before next loop (data available every 10 ms or 100 Hz)
-            time.sleep(0.012)
+		# Run the scecond calibration
+		self.calibrateMag(1)
 
 		# Provide final instructions
-		print("Copy the raw values into data.txt")
+		print("\nCopy the raw values into data.txt")
 		print("Run magCalVisualizer.py to validate calibration success")
 		print("See the README for more information")
+		print("Also compare the second calibration to the first:")
+
+		# Display the second results
+		print("\tmagXbias = " + str(round(self.magXbias,3)))
+		print("\tmagYbias = " + str(round(self.magYbias,3)))
+		print("\tmagZbias = " + str(round(self.magZbias,3)) + "\n")
+
+		print("\tmagXscale = " + str(round(self.magXscale,3)))
+		print("\tmagYscale = " + str(round(self.magYscale,3)))
+		print("\tmagZscale = " + str(round(self.magZscale,3)) + "\n")
+
+		# End program
 		print("Terminating program now!")
 		quit()
 
 	def setMagCalibration(self, bias, scale):
 		# Set the bias variables in all 3 axis
-        self.magXbias = bias[0]
-        self.magYbias = bias[1]
+		self.magXbias = bias[0]
+		self.magYbias = bias[1]
         self.magZbias = bias[2]
 
 		# Set the scale variables in all 3 axis
