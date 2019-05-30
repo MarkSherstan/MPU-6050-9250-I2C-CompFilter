@@ -2,6 +2,18 @@
 clear all
 close all
 
+% Set up the class
+gyro = 250;                       % 250, 500, 1000, 2000 [deg/s]
+acc = 2;                          % 2, 4, 7, 16 [g]
+tau = 0.98;                       % Time constant
+port = '/dev/cu.usbmodem14101';   % Serial port name
+
+vis = Visualizer(tau, acc, gyro, port);
+
+% Open a serial port and calibrate the gyro
+s = vis.openSerial();
+vis.calibrateGyro(500, s);
+
 % Configure the GUI
 figureHandle = figure(1);
 StopButton = uicontrol('Style','pushbutton','String','Stop & Close Serial Port','pos',[0, 0, 200, 25],'Callback','delete(gcbo)');
@@ -10,22 +22,10 @@ degreeLabelY = uicontrol('Style','text','String','Y:  0 Degrees','pos',[450, 30,
 degreeLabelZ = uicontrol('Style','text','String','Z:  0 Degrees','pos',[450, 10, 100, 20],'parent',figureHandle);
 set(gcf,'Color','black');
 
-% Set up the class
-gyro = 250;                			  % 250, 500, 1000, 2000 [deg/s]
-acc = 2;                    			% 2, 4, 7, 16 [g]
-tau = 0.98;                 			% Time constant
-port = '/dev/cu.usbmodem14101';   % Serial port name
-
-vis = Visualizer(tau, acc, gyro, port);
-
-% Open a serial port and calibrate the gyro
-vis.readSerialStart();
-vis.calibrateGyro(500);
-
 % Loop until stopped by the user
 while ishandle(StopButton)
 	% Get the most up to date data
-	vis.cubeGenerator();
+	vis.cubeGenerator(s);
 
 	% Construct the cube
 	view([1, 0, 0]);
@@ -49,4 +49,4 @@ while ishandle(StopButton)
 end
 
 % Close serial port and windows
-vis.closeSerial()
+vis.closeSerial(s)
