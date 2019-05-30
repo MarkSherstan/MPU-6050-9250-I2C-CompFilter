@@ -206,6 +206,15 @@ classdef Visualizer < handle
 			obj.cube = obj.cube0 * rotationMatrix;
 		end
 
+		function closeSerial(obj)
+			# Close the serial port
+			fclose(obj.s);
+			delete(obj.s);
+			clear obj.s;
+			close all;
+			fprintf('Serial port closed\n')
+		end
+
 		function angle = angleConstrain(obj, angle)
 			% Update angle to fall between 0 and 360
 			if (angle < 0)
