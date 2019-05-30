@@ -15,6 +15,8 @@ classdef Visualizer < handle
 		gyroScaleFactor;
 		accScaleFactor;
 
+		s;
+
 		port;
 
 		cube;
@@ -65,26 +67,26 @@ classdef Visualizer < handle
 					fprintf('\t1000 [deg/s]\n')
 					fprintf('\t2000 [deg/s]\n')
 			end
-		end
 
-		function readSerialStart(obj)
+			% Establish serial port connection
 			try
 				% Open the serial port with specified parameters
-				s = serial(obj.port, 'BaudRate', 9600);
-				s.InputBufferSize = 20;
-				s.Timeout = 4;
-				fopen(s);
+				obj.s = serial(obj.port, 'BaudRate', 9600);
+				obj.s.InputBufferSize = 20;
+				obj.s.Timeout = 4;
+				fopen(obj.s);
 				fprintf('Serial port connection established on %s', obj.port);
 				pause(2);
 			catch ME
 				% If serial port fails display error and terminate program
 				fprintf('Error: %s\n', ME.message);
-				fclose(s);
-				delete(s);
-				clear s;
+				fclose(obj.s);
+				delete(obj.s);
+				clear obj.s;
 				fprintf('Terminating program\n');
 				quit cancel;
 			end
+
 		end
 
 		function getRawData(obj)
@@ -92,11 +94,11 @@ classdef Visualizer < handle
 			temp = [];
 
 		  % Perform the header checks
-		  if (fread(s, 1) == 159)
-		  	if (fread(s, 1) == 110)
+		  if (fread(obj.s, 1) == 159)
+		  	if (fread(obj.s, 1) == 110)
 					% Read 12 bytes of data
 					for ii = 1:6
-						x = fread(s, 2);
+						x = fread(obj.s, 2);
 		        temp(ii) = typecast(uint8(x), 'uint16');
 					end
 
@@ -112,6 +114,9 @@ classdef Visualizer < handle
 		end
 
 		function calibrateGyro(obj, N)
+			% Display message to the user
+			fprintf('Calibrating gyro, do not move!')
+
 			% Take N readings for each coordinate and add to itself
 			for ii = 1:N
 				obj.getRawData();
@@ -180,6 +185,9 @@ classdef Visualizer < handle
 		end
 
 		function cubeGenerator(obj)
+			% Run the comp filter and its dependicies
+			obj.compFilter();
+
 			% Create rotation matrices
 			rollMatrix  = [cosd(obj.yaw)  -sind(obj.yaw)	0;
 			               sind(obj.yaw)   cosd(obj.yaw)  0;
@@ -196,6 +204,7 @@ classdef Visualizer < handle
 			% Calculate final rotation matrix
 			rotationMatrix = rollMatrix*pitchMatrix*yawMatrix;
 			obj.cube = obj.cube0 * rotationMatrix;
+		end
 
 		function angle = angleConstrain(obj, angle)
 			% Update angle to fall between 0 and 360
