@@ -16,6 +16,10 @@ classdef Visualizer < handle
 		accScaleFactor;
 
 		port;
+
+		cube;
+		cube0 = [0 0 0; 1 0 0; 1 1 0; 0 1 0; 0 0 1; 1 0 1; 1 1 1; 0 1 1] - 0.5;
+		face = [1 2 6 5; 2 3 7 6; 3 4 8 7; 4 1 5 8; 1 2 3 4; 5 6 7 8];
 	end
 
 	methods
@@ -175,6 +179,24 @@ classdef Visualizer < handle
 			obj.yaw = obj.gyroYaw;
 		end
 
+		function cubeGenerator(obj)
+			% Create rotation matrices
+			rollMatrix  = [cosd(obj.yaw)  -sind(obj.yaw)	0;
+			               sind(obj.yaw)   cosd(obj.yaw)  0;
+			               0          		 0          		1];
+
+			pitchMatrix = [cosd(obj.pitch)   0  	sind(obj.pitch);
+			               0             		 1  	0;
+			               -sind(obj.pitch)  0  	cosd(obj.pitch)];
+
+			yawMatrix   = [1  0           		 0;
+			               0  cosd(obj.roll)  -sind(obj.roll);
+			               0  sind(obj.roll)   cosd(obj.roll)];
+
+			% Calculate final rotation matrix
+			rotationMatrix = rollMatrix*pitchMatrix*yawMatrix;
+			obj.cube = obj.cube0 * rotationMatrix;
+
 		function angle = angleConstrain(obj, angle)
 			% Update angle to fall between 0 and 360
 			if (angle < 0)
@@ -188,7 +210,6 @@ classdef Visualizer < handle
 			% Recursive function
 			angle = obj.angleConstrain(angle);
 		end
-
  	end
 
 end
