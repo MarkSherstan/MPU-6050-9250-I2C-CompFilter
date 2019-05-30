@@ -1,4 +1,4 @@
-classdef MPU < handle
+classdef Visualizer < handle
 	properties
 		gx; gy; gz;
 		ax; ay; az;
@@ -19,7 +19,7 @@ classdef MPU < handle
 	end
 
 	methods
-		function obj = MPU(tau, accFSR, gyroFSR, port)
+		function obj = Visualizer(tau, accFSR, gyroFSR, port)
 			% Set tau value
 			obj.tau = tau;
 
