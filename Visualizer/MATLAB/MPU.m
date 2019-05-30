@@ -70,6 +70,8 @@ classdef MPU < handle
 				s.InputBufferSize = 20;
 				s.Timeout = 4;
 				fopen(s);
+				fprintf('Serial port connection established on %s', obj.port);
+				pause(2);
 			catch ME
 				% If serial port fails display error and terminate program
 				fprintf('Error: %s\n', ME.message);
@@ -82,12 +84,27 @@ classdef MPU < handle
 		end
 
 		function getRawData(obj)
-			obj.ax = rand();
-			obj.ay = rand();
-			obj.az = rand();
-			obj.gx = rand();
-			obj.gy = rand();
-			obj.gz = rand();
+			% Initialize empty array
+			temp = [];
+
+		  % Perform the header checks
+		  if (fread(s, 1) == 159)
+		  	if (fread(s, 1) == 110)
+					% Read 12 bytes of data
+					for ii = 1:6
+						x = fread(s, 2);
+		        temp(ii) = typecast(uint8(x), 'uint16');
+					end
+
+					% Assign temp values to the class
+					obj.ax = temp(1);
+					obj.ay = temp(2);
+					obj.az = temp(3);
+					obj.gx = temp(4);
+					obj.gy = temp(5);
+					obj.gz = temp(6);
+				end
+			end
 		end
 
 		function calibrateGyro(obj, N)
