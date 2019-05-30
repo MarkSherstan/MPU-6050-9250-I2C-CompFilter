@@ -1,6 +1,8 @@
+% Clear up the workspace and visuals
 clear all
 close all
 
+% Configure the GUI
 figureHandle = figure(1);
 StopButton = uicontrol('Style','pushbutton','String','Stop & Close Serial Port','pos',[0, 0, 200, 25],'Callback','delete(gcbo)');
 degreeLabelX = uicontrol('Style','text','String','X:  0 Degrees','pos',[450, 50, 100, 20],'parent',figureHandle);
@@ -8,44 +10,43 @@ degreeLabelY = uicontrol('Style','text','String','Y:  0 Degrees','pos',[450, 30,
 degreeLabelZ = uicontrol('Style','text','String','Z:  0 Degrees','pos',[450, 10, 100, 20],'parent',figureHandle);
 set(gcf,'Color','black');
 
-x = 0;
-y = 0;
-z = 0;
-i = 1;
+% Set up the class
+gyro = 250;                			  % 250, 500, 1000, 2000 [deg/s]
+acc = 2;                    			% 2, 4, 7, 16 [g]
+tau = 0.98;                 			% Time constant
+port = '/dev/cu.usbmodem14101';   % Serial port name
 
+vis = Visualizer(tau, acc, gyro, port);
+
+% Open a serial port and calibrate the gyro
+vis.readSerialStart();
+vis.calibrateGyro(500);
+
+% Loop until stopped by the user
 while ishandle(StopButton)
+	% Get the most up to date data
+	vis.cubeGenerator();
 
-	[vert, face] = NewCoords(x,y,z);
+	% Construct the cube
 	view([1, 0, 0]);
+	h = patch('Vertices',vis.cube,'Faces',vis.face,'FaceVertexCData',3,'FaceColor','flat');
 
-	h = patch('Vertices',vert,'Faces',face,'FaceVertexCData',3,'FaceColor','flat');
+	% Display the current angle
+	set(degreeLabelX,'String', ['Roll:  '  num2str(round(vis.roll)) ' degrees']);
+	set(degreeLabelY,'String', ['Pitch:  ' num2str(round(vis.pitch)) ' degrees']);
+	set(degreeLabelZ,'String', ['Yaw:  '   num2str(round(vis.yaw)) ' degrees']);
 
-	set(degreeLabelX,'String', ['X:  ' num2str(round(x)) ' degrees']);
-	set(degreeLabelY,'String', ['Y:  ' num2str(round(y)) ' degrees']);
-	set(degreeLabelZ,'String', ['Z:  ' num2str(round(z)) ' degrees']);
-
+	% More visual formatting
 	axis off;
 	axis([-1.1,1.1,-1.1,1.1,-1.1,1.1]);
 
-i = i + 0.5;
+	% Small delay for fresh data and for everything to process
+	pause(0.001);
 
-	x = i;
-	x = updateAngle(x);
-	% x = 0;
-
-	y = i;
-	y = updateAngle(y);
-	% y = 0;
-
-	z = i;
-	z = updateAngle(z);
-	% z = 0;
-
-	pause(0.0001);
-
+	% Update the graphic
 	drawnow;
 	delete(h);
-
 end
 
-close all
+% Close serial port and windows
+vis.closeSerial()
