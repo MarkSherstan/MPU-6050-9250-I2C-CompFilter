@@ -1,22 +1,24 @@
 classdef Visualizer < handle
 	properties
+		% Sensor Values
 		gx; gy; gz;
 		ax; ay; az;
 
+		% Calibration values
 		gyroXcal = 0; gyroYcal = 0; gyroZcal = 0;
 
+		# Sensor fusions values
 		gyroRoll = 0; gyroPitch = 0; gyroYaw = 0;
-
 		roll = 0; pitch = 0; yaw = 0;
+		dtTimer = 0;
 
-		dtTimer;
-
+		% Settable values
 		tau;
-		gyroScaleFactor;
 		accScaleFactor;
-
+		gyroScaleFactor;
 		port;
 
+		% Visualization values 
 		cube;
 		cube0 = [0 0 0; 1 0 0; 1 1 0; 0 1 0; 0 0 1; 1 0 1; 1 1 1; 0 1 1] - 0.5;
 		face = [1 2 6 5; 2 3 7 6; 3 4 8 7; 4 1 5 8; 1 2 3 4; 5 6 7 8];
