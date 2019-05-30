@@ -174,6 +174,21 @@ classdef Visualizer < handle
 			obj.pitch = (obj.tau)*(obj.pitch + obj.gx * dt) + (1 - obj.tau)*(accelPitch);
 			obj.yaw = obj.gyroYaw;
 		end
+
+		function angle = angleConstrain(obj, angle)
+			% Update angle to fall between 0 and 360
+			if (angle < 0)
+				angle = angle + 360;
+			elseif (angle >= 360)
+				angle = angle - 360;
+			else
+				return
+			end
+
+			% Recursive function
+			angle = obj.angleConstrain(angle);
+		end
+
  	end
 
 end
