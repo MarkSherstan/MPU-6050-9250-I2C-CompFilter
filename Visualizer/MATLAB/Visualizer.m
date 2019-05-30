@@ -15,8 +15,6 @@ classdef Visualizer < handle
 		gyroScaleFactor;
 		accScaleFactor;
 
-		s;
-
 		port;
 
 		cube;
@@ -67,39 +65,46 @@ classdef Visualizer < handle
 					fprintf('\t1000 [deg/s]\n')
 					fprintf('\t2000 [deg/s]\n')
 			end
+		end
 
+		function s = openSerial(obj)
 			% Establish serial port connection
 			try
 				% Open the serial port with specified parameters
-				obj.s = serial(obj.port, 'BaudRate', 9600);
-				obj.s.InputBufferSize = 20;
-				obj.s.Timeout = 4;
-				fopen(obj.s);
-				fprintf('Serial port connection established on %s', obj.port);
+				s = serial(obj.port, 'BaudRate', 9600);
+				s.InputBufferSize = 20;
+				s.Timeout = 4;
+				fopen(s);
+				fprintf('Serial port connection established on %s\n', obj.port);
 				pause(2);
 			catch ME
 				% If serial port fails display error and terminate program
 				fprintf('Error: %s\n', ME.message);
-				fclose(obj.s);
-				delete(obj.s);
-				clear obj.s;
+				fclose(s);
+				delete(s);
+				clear s;
 				fprintf('Terminating program\n');
 				quit cancel;
 			end
-
 		end
 
-		function getRawData(obj)
+		function getRawData(obj, s)
 			% Initialize empty array
 			temp = [];
 
 		  % Perform the header checks
-		  if (fread(obj.s, 1) == 159)
-		  	if (fread(obj.s, 1) == 110)
+		  if (fread(s, 1) == 159)
+		  	if (fread(s, 1) == 110)
 					% Read 12 bytes of data
 					for ii = 1:6
-						x = fread(obj.s, 2);
-		        temp(ii) = typecast(uint8(x), 'uint16');
+						x = fread(s, 2);
+		        temp(ii) = typecast(uint8(x), 'int16');
+
+						% Make 16 bit unsigned value to signed value (0 to 65535) to (-32768 to +32767)
+						if (temp(ii) >= 32768)
+							temp(ii) = -((65535 - temp(ii)) + 1);
+						end
+
 					end
 
 					% Assign temp values to the class
@@ -113,13 +118,13 @@ classdef Visualizer < handle
 			end
 		end
 
-		function calibrateGyro(obj, N)
+		function calibrateGyro(obj, N, s)
 			% Display message to the user
-			fprintf('Calibrating gyro, do not move!')
+			fprintf('Calibrating gyro, do not move!\n')
 
 			% Take N readings for each coordinate and add to itself
 			for ii = 1:N
-				obj.getRawData();
+				obj.getRawData(s);
 				obj.gyroXcal = obj.gyroXcal + obj.gx;
 				obj.gyroYcal = obj.gyroYcal + obj.gy;
 				obj.gyroZcal = obj.gyroZcal + obj.gz;
@@ -141,9 +146,9 @@ classdef Visualizer < handle
 			obj.dtTimer = toc;
 		end
 
-		function processIMUvalues(obj)
+		function processIMUvalues(obj, s)
 			% Get raw data
-			obj.getRawData();
+			obj.getRawData(s);
 
 			% Subtract the offset calibration values for the gyro
 			obj.gx = obj.gx - obj.gyroXcal;
@@ -161,9 +166,9 @@ classdef Visualizer < handle
 			obj.az = obj.az / obj.accScaleFactor;
 		end
 
-		function compFilter(obj)
+		function compFilter(obj, s)
 			% Get processed values from the IMU
-			obj.processIMUvalues();
+			obj.processIMUvalues(s);
 
 			% Calculate dt
 			dt = toc - obj.dtTimer;
@@ -184,9 +189,9 @@ classdef Visualizer < handle
 			obj.yaw = obj.gyroYaw;
 		end
 
-		function cubeGenerator(obj)
+		function cubeGenerator(obj, s)
 			% Run the comp filter and its dependicies
-			obj.compFilter();
+			obj.compFilter(s);
 
 			% Create rotation matrices
 			rollMatrix  = [cosd(obj.yaw)  -sind(obj.yaw)	0;
@@ -206,11 +211,11 @@ classdef Visualizer < handle
 			obj.cube = obj.cube0 * rotationMatrix;
 		end
 
-		function closeSerial(obj)
-			# Close the serial port
-			fclose(obj.s);
-			delete(obj.s);
-			clear obj.s;
+		function closeSerial(obj, s)
+			% Close the serial port
+			fclose(s);
+			delete(s);
+			clear s;
 			close all;
 			fprintf('Serial port closed\n')
 		end
