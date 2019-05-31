@@ -456,24 +456,24 @@ class MPU:
 	  bx_4 = 2 * bx_2
 	  bz_4 = 2 * bz_2
 
-      # Gradient decent algorithm corrective step
-      s1 = -q3x2 * (2 * q2q4 - q1q3x2 - ax) + q2x2 * (2 * q1q2 + q3q4x2 - ay) - bz_2 * q3 * (bx_2 * (0.5 - q3q3 - q4q4) + bz_2 * (q2q4 - q1q3) - mx) + (-bx_2 * q4 + bz_2 * q2) * (bx_2 * (q2q3 - q1q4) + bz_2 * (q1q2 + q3q4) - my) + bx_2 * q3 * (bx_2 * (q1q3 + q2q4) + bz_2 * (0.5 - q2q2 - q3q3) - mz)
-      s2 = q4x2 * (2 * q2q4 - q1q3x2 - ax) + q1x2 * (2 * q1q2 + q3q4x2 - ay) - 4 * q2 * (1 - 2 * q2q2 - 2 * q3q3 - az) + bz_2 * q4 * (bx_2 * (0.5 - q3q3 - q4q4) + bz_2 * (q2q4 - q1q3) - mx) + (bx_2 * q3 + bz_2 * q1) * (bx_2 * (q2q3 - q1q4) + bz_2 * (q1q2 + q3q4) - my) + (bx_2 * q4 - bz_4 * q2) * (bx_2 * (q1q3 + q2q4) + bz_2 * (0.5 - q2q2 - q3q3) - mz)
-      s3 = -q1x2 * (2 * q2q4 - q1q3x2 - ax) + q4x2 * (2 * q1q2 + q3q4x2 - ay) - 4 * q3 * (1 - 2 * q2q2 - 2 * q3q3 - az) + (-bx_4 * q3 - bz_2 * q1) * (bx_2 * (0.5 - q3q3 - q4q4) + bz_2 * (q2q4 - q1q3) - mx) + (bx_2 * q2 + bz_2 * q4) * (bx_2 * (q2q3 - q1q4) + bz_2 * (q1q2 + q3q4) - my) + (bx_2 * q1 - bz_4 * q3) * (bx_2 * (q1q3 + q2q4) + bz_2 * (0.5 - q2q2 - q3q3) - mz)
-      s4 = q2x2 * (2 * q2q4 - q1q3x2 - ax) + q3x2 * (2 * q1q2 + q3q4x2 - ay) + (-bx_4 * q4 + bz_2 * q2) * (bx_2 * (0.5 - q3q3 - q4q4) + bz_2 * (q2q4 - q1q3) - mx) + (-bx_2 * q1 + bz_2 * q3) * (bx_2 * (q2q3 - q1q4) + bz_2 * (q1q2 + q3q4) - my) + bx_2 * q2 * (bx_2 * (q1q3 + q2q4) + bz_2 * (0.5 - q2q2 - q3q3) - mz)
+	  # Gradient decent algorithm corrective step
+	  s1 = -q3x2 * (2 * q2q4 - q1q3x2 - ax) + q2x2 * (2 * q1q2 + q3q4x2 - ay) - bz_2 * q3 * (bx_2 * (0.5 - q3q3 - q4q4) + bz_2 * (q2q4 - q1q3) - mx) + (-bx_2 * q4 + bz_2 * q2) * (bx_2 * (q2q3 - q1q4) + bz_2 * (q1q2 + q3q4) - my) + bx_2 * q3 * (bx_2 * (q1q3 + q2q4) + bz_2 * (0.5 - q2q2 - q3q3) - mz)
+	  s2 = q4x2 * (2 * q2q4 - q1q3x2 - ax) + q1x2 * (2 * q1q2 + q3q4x2 - ay) - 4 * q2 * (1 - 2 * q2q2 - 2 * q3q3 - az) + bz_2 * q4 * (bx_2 * (0.5 - q3q3 - q4q4) + bz_2 * (q2q4 - q1q3) - mx) + (bx_2 * q3 + bz_2 * q1) * (bx_2 * (q2q3 - q1q4) + bz_2 * (q1q2 + q3q4) - my) + (bx_2 * q4 - bz_4 * q2) * (bx_2 * (q1q3 + q2q4) + bz_2 * (0.5 - q2q2 - q3q3) - mz)
+	  s3 = -q1x2 * (2 * q2q4 - q1q3x2 - ax) + q4x2 * (2 * q1q2 + q3q4x2 - ay) - 4 * q3 * (1 - 2 * q2q2 - 2 * q3q3 - az) + (-bx_4 * q3 - bz_2 * q1) * (bx_2 * (0.5 - q3q3 - q4q4) + bz_2 * (q2q4 - q1q3) - mx) + (bx_2 * q2 + bz_2 * q4) * (bx_2 * (q2q3 - q1q4) + bz_2 * (q1q2 + q3q4) - my) + (bx_2 * q1 - bz_4 * q3) * (bx_2 * (q1q3 + q2q4) + bz_2 * (0.5 - q2q2 - q3q3) - mz)
+	  s4 = q2x2 * (2 * q2q4 - q1q3x2 - ax) + q3x2 * (2 * q1q2 + q3q4x2 - ay) + (-bx_4 * q4 + bz_2 * q2) * (bx_2 * (0.5 - q3q3 - q4q4) + bz_2 * (q2q4 - q1q3) - mx) + (-bx_2 * q1 + bz_2 * q3) * (bx_2 * (q2q3 - q1q4) + bz_2 * (q1q2 + q3q4) - my) + bx_2 * q2 * (bx_2 * (q1q3 + q2q4) + bz_2 * (0.5 - q2q2 - q3q3) - mz)
 
 	  # Normalize step magnitude
 	  norm = math.sqrt(s1 * s1 + s2 * s2 + s3 * s3 + s4 * s4)
-      s1 /= norm
-      s2 /= norm
-      s3 /= norm
-      s4 /= norm
+	  s1 /= norm
+	  s2 /= norm
+	  s3 /= norm
+	  s4 /= norm
 
 	  # Compute rate of change of quaternion
-      qDot1 = 0.5 * (-q2 * gx - q3 * gy - q4 * gz) - self.beta * s1
-      qDot2 = 0.5 * (q1 * gx + q3 * gz - q4 * gy) - self.beta * s2
-      qDot3 = 0.5 * (q1 * gy - q2 * gz + q4 * gx) - self.beta * s3
-      qDot4 = 0.5 * (q1 * gz + q2 * gy - q3 * gx) - self.beta * s4
+	  qDot1 = 0.5 * (-q2 * gx - q3 * gy - q4 * gz) - self.beta * s1
+	  qDot2 = 0.5 * (q1 * gx + q3 * gz - q4 * gy) - self.beta * s2
+	  qDot3 = 0.5 * (q1 * gy - q2 * gz + q4 * gx) - self.beta * s3
+	  qDot4 = 0.5 * (q1 * gz + q2 * gy - q3 * gx) - self.beta * s4
 
 	  # Integrate to yield quaternion
 	  q1 += qDot1 * deltat
@@ -500,16 +500,11 @@ class MPU:
 
 def main():
 	# Set up class
-	gyro = 250      # 250, 500, 1000, 2000 [deg/s]
-	acc = 2         # 2, 4, 7, 16 [g]
+	gyro = 500      # 250, 500, 1000, 2000 [deg/s]
+	acc = 4         # 2, 4, 7, 16 [g]
 	mag = 16        # 14, 16 [bit]
 	tau = 0.98
 	mpu = MPU(gyro, acc, mag, tau)
-
-	# Set up the sensors and calibrate the gyro with N points
-	mpu.setUpIMU()
-	mpu.setUpMAG()
-	mpu.calibrateGyro(500)
 
 	# Calibrate the mag or provide values that have been verified with the visualizer
 	# mpu.calibrateMagGuide()
@@ -517,13 +512,32 @@ def main():
 	scale = [1.083, 0.949, 0.977]
 	mpu.setMagCalibration(bias, scale)
 
-	# Run for 20 secounds
-	startTime = time.time()
-	while(time.time() < (startTime + 20)):
-		mpu.attitude()
+	# Set up the sensors and calibrate the gyro with N points
+	mpu.setUpIMU()
+	mpu.setUpMAG()
+	mpu.calibrateGyro(500)
 
-	# End
-	print("Closing")
+	# Set timer
+	lastUpdate = time.perf_counter()
+
+	# Run until stopped
+	try:
+		while(True):
+			# Get new values
+			mpu.processValues()
+
+			for ii in range(10):
+				# Integration timer
+				now = time.perf_counter()
+				deltat = ((now - lastUpdate))
+				lastUpdate = now
+
+				# Run the sensor fusion
+				mpu.madgwickFilter(mpu.ax, mpu.ay, mpu.az, mpu.gx, mpu.gy, mpu.gz, mpu.mx, mpu.my, mpu.mz, deltat)
+
+	except KeyboardInterrupt:
+		# End if user hits control c
+		print("Closing")
 
 # Main loop
 if __name__ == '__main__':
