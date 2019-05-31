@@ -40,13 +40,23 @@ def plotter3D(mx, my, mz, title):
     # Plot the results
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
-    ax.scatter(mx, my, mz)
+    ax.scatter(mx, my, mz, c='#606060')
+
+    # Plot projection
+    ax.plot(mx, my, 'r.', zdir='z', zs=-500)
+    ax.plot(mx, mz, 'g.', zdir='y', zs=500)
+    ax.plot(my, mz, 'b.', zdir='x', zs=-500)
 
     # Set title and labels
     ax.set_title(title, fontsize=14, fontweight='bold')
-    ax.set_xlabel('Magnetic Field [mG]', fontweight='bold')
-    ax.set_ylabel('Magnetic Field [mG]', fontweight='bold')
-    ax.set_zlabel('Magnetic Field [mG]', fontweight='bold')
+    ax.set_xlabel('Magnetic Field X [mG]', fontweight='bold')
+    ax.set_ylabel('Magnetic Field Y [mG]', fontweight='bold')
+    ax.set_zlabel('Magnetic Field Z [mG]', fontweight='bold')
+
+    # Set limits on axis
+    ax.set_xlim([-500, 500])
+    ax.set_ylim([-500, 500])
+    ax.set_zlim([-500, 500])
 
     # Show the plot
     plt.show()
@@ -81,3 +91,4 @@ my3 = [ii * magYscale for ii in my2]
 mz3 = [ii * magZscale for ii in mz2]
 
 plotter(mx3, my3, mz3, 'Bias Removal and Scaled Values\n Hard and Soft Iron Correction')
+plotter3D(mx3, my3, mz3, 'Bias Removal and Scaled Values\n Hard and Soft Iron Correction')
