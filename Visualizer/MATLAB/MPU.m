@@ -1,13 +1,13 @@
-classdef Visualizer < handle
+classdef MPU < handle
 	properties
 		% Sensor Values
-		gx; gy; gz;
 		ax; ay; az;
+		gx; gy; gz;
 
 		% Calibration values
 		gyroXcal = 0; gyroYcal = 0; gyroZcal = 0;
 
-		# Sensor fusions values
+		% Sensor fusions values
 		gyroRoll = 0; gyroPitch = 0; gyroYaw = 0;
 		roll = 0; pitch = 0; yaw = 0;
 		dtTimer = 0;
@@ -17,15 +17,10 @@ classdef Visualizer < handle
 		accScaleFactor;
 		gyroScaleFactor;
 		port;
-
-		% Visualization values 
-		cube;
-		cube0 = [0 0 0; 1 0 0; 1 1 0; 0 1 0; 0 0 1; 1 0 1; 1 1 1; 0 1 1] - 0.5;
-		face = [1 2 6 5; 2 3 7 6; 3 4 8 7; 4 1 5 8; 1 2 3 4; 5 6 7 8];
 	end
 
 	methods
-		function obj = Visualizer(tau, accFSR, gyroFSR, port)
+		function obj = MPU(tau, accFSR, gyroFSR, port)
 			% Set tau value
 			obj.tau = tau;
 
@@ -191,28 +186,6 @@ classdef Visualizer < handle
 			obj.yaw = obj.gyroYaw;
 		end
 
-		function cubeGenerator(obj, s)
-			% Run the comp filter and its dependicies
-			obj.compFilter(s);
-
-			% Create rotation matrices
-			rollMatrix  = [cosd(obj.yaw)  -sind(obj.yaw)	0;
-			               sind(obj.yaw)   cosd(obj.yaw)  0;
-			               0          		 0          		1];
-
-			pitchMatrix = [cosd(obj.pitch)   0  	sind(obj.pitch);
-			               0             		 1  	0;
-			               -sind(obj.pitch)  0  	cosd(obj.pitch)];
-
-			yawMatrix   = [1  0           		 0;
-			               0  cosd(obj.roll)  -sind(obj.roll);
-			               0  sind(obj.roll)   cosd(obj.roll)];
-
-			% Calculate final rotation matrix
-			rotationMatrix = rollMatrix*pitchMatrix*yawMatrix;
-			obj.cube = obj.cube0 * rotationMatrix;
-		end
-
 		function closeSerial(obj, s)
 			% Close the serial port
 			fclose(s);
@@ -220,20 +193,6 @@ classdef Visualizer < handle
 			clear s;
 			close all;
 			fprintf('Serial port closed\n')
-		end
-
-		function angle = angleConstrain(obj, angle)
-			% Update angle to fall between 0 and 360
-			if (angle < 0)
-				angle = angle + 360;
-			elseif (angle >= 360)
-				angle = angle - 360;
-			else
-				return
-			end
-
-			% Recursive function
-			angle = obj.angleConstrain(angle);
 		end
  	end
 
