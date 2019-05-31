@@ -249,7 +249,7 @@ class MPU:
 		# Start the timer
 		self.dtTimer = time.time()
 
-	def calibrateMag(self, state):
+	def calibrateMag(self, N):
 		# Local calibration variables
 		magBias = [0, 0, 0]
 		magScale = [0, 0, 0]
@@ -257,8 +257,8 @@ class MPU:
 		magMax = [-32767, -32767, -32767]
 		magTemp = [0, 0, 0]
 
-		# Take approx 15 seconds of mag data as we are sampling at 100 hz
-		for ii in range(1501):
+		# Take N readings of mag data
+		for ii in range(N):
 			# Read fresh values and assign to magTemp
 			self.readRawMag()
 			magTemp = [self.mx, self.my, self.mz]
@@ -270,17 +270,8 @@ class MPU:
 				if (magTemp[jj] < magMin[jj]):
 					magMin[jj] = magTemp[jj]
 
-			# Display some info to the user depending on the state
-			if (state == 0):
-				# Print percent completion every 150 iteraitions to the user
-				if (ii % 150 == 0):
-					print(str(round((ii/1500)*100)) + ' % complete')
-			elif (state == 1):
-				# Print raw values
-				print(str(self.mx)+','+str(self.my)+','+str(self.mz))
-			else:
-				# Display error
-				print("State unkown!")
+			# Display some info to the user
+			print(str(self.mx)+','+str(self.my)+','+str(self.mz))
 
 			# Small delay before next loop (data available every 10 ms or 100 Hz)
 			time.sleep(0.012)
@@ -307,7 +298,7 @@ class MPU:
 		time.sleep(3)
 
 		# Run the first calibration
-		self.calibrateMag(0)
+		self.calibrateMag(3000)
 
 		# Display results to user
 		print("\nCalibration complete:")
@@ -321,12 +312,12 @@ class MPU:
 
 		# Give more instructions to the user
 		print("Place above values in magCalVisualizer.py")
-		print("Recording additional 1501 data points to verify the calibration")
+		print("Recording additional 1000 data points to verify the calibration")
 		print("Repeat random figure eight pattern and rotations...\n")
 		time.sleep(3)
 
 		# Run the scecond calibration
-		self.calibrateMag(1)
+		self.calibrateMag(1000)
 
 		# Provide final instructions
 		print("\nCopy the raw values into data.txt")
@@ -506,15 +497,17 @@ def main():
 	tau = 0.98
 	mpu = MPU(gyro, acc, mag, tau)
 
-	# Calibrate the mag or provide values that have been verified with the visualizer
-	# mpu.calibrateMagGuide()
-	bias = [296.949, 330.334, -105.309]
-	scale = [1.083, 0.949, 0.977]
-	mpu.setMagCalibration(bias, scale)
-
-	# Set up the sensors and calibrate the gyro with N points
+	# Set up the IMU and mag sensors
 	mpu.setUpIMU()
 	mpu.setUpMAG()
+
+	# Calibrate the mag or provide values that have been verified with the visualizer
+	# mpu.calibrateMagGuide()
+	bias = [282.893, 300.464, -91.72]
+	scale = [1.014, 1.054, 0.939]
+	mpu.setMagCalibration(bias, scale)
+
+	# Calibrate the gyro with N points
 	mpu.calibrateGyro(500)
 
 	# Set timer
