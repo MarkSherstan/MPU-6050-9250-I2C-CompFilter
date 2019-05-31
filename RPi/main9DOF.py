@@ -36,6 +36,10 @@ class MPU:
 		self.dtTimer = 0
 		self.tau = tau
 
+		self.q = [1,0,0,0]
+		self.beta = 1
+
+
 		self.gyroScaleFactor, self.gyroHex = self.gyroSensitivity(gyro)
 		self.accScaleFactor, self.accHex = self.accelerometerSensitivity(acc)
 		self.magScaleFactor, self.magHex = self.magnetometerSensitivity(mag)
@@ -404,6 +408,85 @@ class MPU:
 		# Comp filter
 		self.roll = (self.tau)*(self.roll - self.gy*dt) + (1-self.tau)*(accRoll)
 		self.pitch = (self.tau)*(self.pitch + self.gx*dt) + (1-self.tau)*(accPitch)
+
+	def madgwickFilter(self, ax, ay, az, gx, gy, gz, mx, my, mz, deltat):
+	  # Quaternion values
+	  q1 = self.q[0]
+	  q2 = self.q[1]
+	  q3 = self.q[2]
+	  q4 = self.q[3]
+
+	  # Auxiliary variables
+	  q1x2 = 2 * q1
+	  q2x2 = 2 * q2
+	  q3x2 = 2 * q3
+	  q4x2 = 2 * q4
+	  q1q3x2 = 2 * q1 * q3
+	  q3q4x2 = 2 * q3 * q4
+	  q1q1 = q1 * q1
+	  q1q2 = q1 * q2
+	  q1q3 = q1 * q3
+	  q1q4 = q1 * q4
+	  q2q2 = q2 * q2
+	  q2q3 = q2 * q3
+	  q2q4 = q2 * q4
+	  q3q3 = q3 * q3
+	  q3q4 = q3 * q4
+	  q4q4 = q4 * q4
+
+	  # Normalize accelerometer measurement
+	  norm = math.sqrt(ax * ax + ay * ay + az * az)
+	  if norm is 0: return
+	  ax /= norm
+	  ay /= norm
+	  az /= norm
+
+	  # Normalize magnetometer measurement
+	  norm = math.sqrt(mx * mx + my * my + mz * mz)
+	  if norm is 0: return
+	  mx /= norm
+	  my /= norm
+	  mz /= norm
+
+	  # Reference direction of Earth's magnetic field
+	  hx = mx * q1q1 - (2*q1*my) * q4 + (2*q1*mz) * q3 + mx * q2q2 + q2x2 * my * q3 + q2x2 * mz * q4 - mx * q3q3 - mx * q4q4
+	  hy = (2*q1*mx) * q4 + my * q1q1 - (2*q1*mz) * q2 + (2*q2*mx) * q3 - my * q2q2 + my * q3q3 + q3x2 * mz * q4 - my * q4q4
+	  bx_2 = math.sqrt(hx * hx + hy * hy)
+	  bz_2 = -(2*q1*mx) * q3 + (2*q1*my) * q2 + mz * q1q1 + (2*q2*mx) * q4 - mz * q2q2 + q3x2 * my * q4 - mz * q3q3 + mz * q4q4
+	  bx_4 = 2 * bx_2
+	  bz_4 = 2 * bz_2
+
+      # Gradient decent algorithm corrective step
+      s1 = -q3x2 * (2 * q2q4 - q1q3x2 - ax) + q2x2 * (2 * q1q2 + q3q4x2 - ay) - bz_2 * q3 * (bx_2 * (0.5 - q3q3 - q4q4) + bz_2 * (q2q4 - q1q3) - mx) + (-bx_2 * q4 + bz_2 * q2) * (bx_2 * (q2q3 - q1q4) + bz_2 * (q1q2 + q3q4) - my) + bx_2 * q3 * (bx_2 * (q1q3 + q2q4) + bz_2 * (0.5 - q2q2 - q3q3) - mz)
+      s2 = q4x2 * (2 * q2q4 - q1q3x2 - ax) + q1x2 * (2 * q1q2 + q3q4x2 - ay) - 4 * q2 * (1 - 2 * q2q2 - 2 * q3q3 - az) + bz_2 * q4 * (bx_2 * (0.5 - q3q3 - q4q4) + bz_2 * (q2q4 - q1q3) - mx) + (bx_2 * q3 + bz_2 * q1) * (bx_2 * (q2q3 - q1q4) + bz_2 * (q1q2 + q3q4) - my) + (bx_2 * q4 - bz_4 * q2) * (bx_2 * (q1q3 + q2q4) + bz_2 * (0.5 - q2q2 - q3q3) - mz)
+      s3 = -q1x2 * (2 * q2q4 - q1q3x2 - ax) + q4x2 * (2 * q1q2 + q3q4x2 - ay) - 4 * q3 * (1 - 2 * q2q2 - 2 * q3q3 - az) + (-bx_4 * q3 - bz_2 * q1) * (bx_2 * (0.5 - q3q3 - q4q4) + bz_2 * (q2q4 - q1q3) - mx) + (bx_2 * q2 + bz_2 * q4) * (bx_2 * (q2q3 - q1q4) + bz_2 * (q1q2 + q3q4) - my) + (bx_2 * q1 - bz_4 * q3) * (bx_2 * (q1q3 + q2q4) + bz_2 * (0.5 - q2q2 - q3q3) - mz)
+      s4 = q2x2 * (2 * q2q4 - q1q3x2 - ax) + q3x2 * (2 * q1q2 + q3q4x2 - ay) + (-bx_4 * q4 + bz_2 * q2) * (bx_2 * (0.5 - q3q3 - q4q4) + bz_2 * (q2q4 - q1q3) - mx) + (-bx_2 * q1 + bz_2 * q3) * (bx_2 * (q2q3 - q1q4) + bz_2 * (q1q2 + q3q4) - my) + bx_2 * q2 * (bx_2 * (q1q3 + q2q4) + bz_2 * (0.5 - q2q2 - q3q3) - mz)
+
+	  # Normalize step magnitude
+	  norm = math.sqrt(s1 * s1 + s2 * s2 + s3 * s3 + s4 * s4)
+      s1 /= norm
+      s2 /= norm
+      s3 /= norm
+      s4 /= norm
+
+	  # Compute rate of change of quaternion
+      qDot1 = 0.5 * (-q2 * gx - q3 * gy - q4 * gz) - self.beta * s1
+      qDot2 = 0.5 * (q1 * gx + q3 * gz - q4 * gy) - self.beta * s2
+      qDot3 = 0.5 * (q1 * gy - q2 * gz + q4 * gx) - self.beta * s3
+      qDot4 = 0.5 * (q1 * gz + q2 * gy - q3 * gx) - self.beta * s4
+
+	  # Integrate to yield quaternion
+	  q1 += qDot1 * deltat
+	  q2 += qDot2 * deltat
+	  q3 += qDot3 * deltat
+	  q4 += qDot4 * deltat
+
+	  # Normalize quaternion
+	  norm = math.sqrt(q1 * q1 + q2 * q2 + q3 * q3 + q4 * q4)
+	  self.q[0] = q1 / norm
+	  self.q[1] = q2 / norm
+	  self.q[2] = q3 / norm
+	  self.q[3] = q4 / norm
 
 	def attitude(self):
 		# Get the data
