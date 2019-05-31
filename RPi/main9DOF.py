@@ -379,27 +379,6 @@ class MPU:
 		self.my *= self.magYscale
 		self.mz *= self.magZscale
 
-	def compFilter(self):
-		# Get the processed values from IMU and mag
-		self.processValues()
-
-		# Get delta time and record time for next call
-		dt = time.time() - self.dtTimer
-		self.dtTimer = time.time()
-
-		# Acceleration vector angle
-		accPitch = math.degrees(math.atan2(self.ay, self.az))
-		accRoll = math.degrees(math.atan2(self.ax, self.az))
-
-		# Gyro integration angle
-		self.gyroRoll -= self.gy * dt
-		self.gyroPitch += self.gx * dt
-		self.gyroYaw += self.gz * dt
-
-		# Comp filter
-		self.roll = (self.tau)*(self.roll - self.gy*dt) + (1-self.tau)*(accRoll)
-		self.pitch = (self.tau)*(self.pitch + self.gx*dt) + (1-self.tau)*(accPitch)
-
 	def madgwickFilter(self, ax, ay, az, gx, gy, gz, mx, my, mz, deltat):
 	  # Quaternion values
 	  q1 = self.q[0]
@@ -479,15 +458,25 @@ class MPU:
 	  self.q[2] = q3 / norm
 	  self.q[3] = q4 / norm
 
-	def attitude(self):
+	def attitudeEuler(self):
 		# Get the data
-		self.compFilter()
-		self.calcHeading()
+		a12 = 2 * (self.q[1] * self.q[2] + self.q[0] * self.q[3])
+		a22 = self.q[0] * self.q[0] + self.q[1] * self.q[1] - self.q[2] * self.q[2] - self.q[3] * self.q[3]
+		a31 = 2 * (self.q[0] * self.q[1] + self.q[2] * self.q[3])
+		a32 = 2 * (self.q[1] * self.q[3] - self.q[0] * self.q[2])
+		a33 = self.q[0] * self.q[0] - self.q[1] * self.q[1] - self.q[2] * self.q[2] + self.q[3] * self.q[3]
+
+		# Perform the conversion to euler
+		self.roll  = math.degrees(math.atan2(a31, a33))
+		self.pitch = math.degrees(-math.asin(a32))
+		self.yaw   = math.degrees(math.atan2(a12, a22))
+
+		# Declination 14 deg 7 minutes at Edmonton May 31, 2019. Bound yaw between [0 360]
+		self.yaw += 14.1
+		if (self.yaw < 0): self.yaw += 360
 
 		# Print data
-		print(" R: " + str(round(self.roll,1)) \
-			+ " P: " + str(round(self.pitch,1)) \
-			+ " Y: " + str(round(self.yaw,1)))
+		print('R: {:<8.1f} P: {:<8.1f} Y: {:<8.1f}'.format(self.roll,self.pitch,self.yaw))
 
 def main():
 	# Set up class
@@ -525,8 +514,13 @@ def main():
 				deltat = ((now - lastUpdate))
 				lastUpdate = now
 
-				# Run the sensor fusion
-				mpu.madgwickFilter(mpu.ax, mpu.ay, mpu.az, mpu.gx, mpu.gy, mpu.gz, mpu.mx, mpu.my, mpu.mz, deltat)
+				# Run the sensor fusion (must be aligned to NED)
+				mpu.madgwickFilter(mpu.ax, -mpu.ay, mpu.az, \
+					math.radians(mpu.gx), -math.radians(mpu.gy), -math.radians(mpu.gz), \
+					mpu.my, -mpu.mx, mpu.mz, deltat)
+
+			# Print results to screen
+			mpu.attitudeEuler()
 
 	except KeyboardInterrupt:
 		# End if user hits control c
