@@ -33,7 +33,17 @@ Connect the sensor to the microcontroller as outlined below.
 Upload the `main.ino` sketch and observe the values in the serial port or serial plotter. The `calibrateGyro.ino` sketch can be used to retrieve the offset values which can be directly placed into the `main.ino` sketch to eliminate the need for calibration every time the microcontroller is started up. Note that this is at at the cost of performance as the sensors drift over time and between uses.
 
 ### MATLAB
-Connect an Arduino using the same wiring as outlined above. Run `main.m` and observe the values in the command line. MATLAB is extremely slow with I2C devices through an Arduino and it will be faster to run a serial connection with the data acquisition occurring on a microcontroller (see the Visualizer section).
+Connect an Arduino using the same wiring as outlined above. Run `MATLAB\I2C\main.m` and observe the values in the command line. MATLAB is extremely slow when using an Arduino/I2C connection.
+
+A faster method is to read data through a serial connection. Using the same wiring connection, upload the sketch in `Visualizer\arduinoSketch` to the Arduino board. Adjust any desired parameters as outlined below in the `MATLAB\serial\main.m` file. Run and observe the values in the command line.  
+
+```
+% Set up the class
+gyro = 250;                       % 250, 500, 1000, 2000 [deg/s]
+acc = 2;                          % 2, 4, 7, 16 [g]
+tau = 0.98;                       % Time constant
+port = '/dev/cu.usbmodem14101';   % Serial port name
+```
 
 ### RPi (Python)
 Connect your IMU sensor to 5V or 3.3V based on specific breakout board and ground to ground. Refer to the pinout of your board using [pinout.xyz](https://pinout.xyz) and match SDA and SCL accordingly.
@@ -62,7 +72,7 @@ Which should yield the table below (possible to have the value 0x69) verifying a
 ```
 Once verified run `python3 main.py` to observe the values.
 
-### JavaScript Visualizer
+### JavaScript (p5.js) Visualizer
 Connect an IMU device as outlined in the Arduino section. Upload the sketch located in `Visualizer/arduinoSketch`. This sketch simply transmits the raw byte data from the sensor over a serial connection.
 
 Next, perform the following commands to add the necessary server which makes a bridge between the microcontroller and web application.  
