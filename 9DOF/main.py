@@ -39,7 +39,6 @@ class MPU:
 		self.q = [1,0,0,0]
 		self.beta = 1
 
-
 		self.gyroScaleFactor, self.gyroHex = self.gyroSensitivity(gyro)
 		self.accScaleFactor, self.accHex = self.accelerometerSensitivity(acc)
 		self.magScaleFactor, self.magHex = self.magnetometerSensitivity(mag)
@@ -54,19 +53,20 @@ class MPU:
 
 		self.AK8963_CNTL      = 0x0A
 		self.AK8963_CNTL2     = 0x0B
-		self.I2C_SLV0_DO      = 0x63
 		self.USER_CTRL        = 0x6A
+		self.AK8963_XOUT_L    = 0x03
+		self.I2C_SLV0_DO      = 0x63
+
+		self.AK8963_ASAX      = 0x10
 		self.I2C_MST_CTRL     = 0x24
 		self.I2C_SLV0_ADDR    = 0x25
 		self.I2C_SLV0_REG     = 0x26
 		self.I2C_SLV0_CTRL    = 0x27
 		self.EXT_SENS_DATA_00 = 0x49
+		self.GYRO_CONFIG      = 0x1B
+		self.ACCEL_XOUT_H     = 0x3B
 		self.PWR_MGMT_1       = 0x6B
 		self.ACCEL_CONFIG     = 0x1C
-		self.GYRO_CONFIG      = 0x1B
-		self.AK8963_ASAX      = 0x10
-		self.ACCEL_XOUT_H     = 0x3B
-		self.AK8963_XOUT_L    = 0x03
 
 	def gyroSensitivity(self, x):
 		# Create dictionary with standard value of 500 deg/s
