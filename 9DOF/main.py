@@ -492,8 +492,8 @@ def main():
 
 	# Calibrate the mag or provide values that have been verified with the visualizer
 	# mpu.calibrateMagGuide()
-	bias = [282.893, 300.464, -91.72]
-	scale = [1.014, 1.054, 0.939]
+	bias = [125, 140, -150]
+	scale = [0.996, 1.011, 0.993]
 	mpu.setMagCalibration(bias, scale)
 
 	# Calibrate the gyro with N points
