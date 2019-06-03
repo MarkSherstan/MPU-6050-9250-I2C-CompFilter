@@ -87,7 +87,7 @@ scale = [1.014, 1.054, 0.939]
 mpu.setMagCalibration(bias, scale)
 ```
 
-To verify the results of the calibration refer to the two articles located [here](https://github.com/kriswiner/MPU6050/wiki/Simple-and-Effective-Magnetometer-Calibration) and [here](https://appelsiini.net/2018/calibrate-magnetometer/). Place the values from the calibration into `data.txt` and `magCalVisualizer.py` as described in the program guide during calibration. The `magCalVisualizer.py`  script will provide all the required plots to aid in verifying the results.
+To verify the results of the calibration refer to the two articles located [here](https://github.com/kriswiner/MPU6050/wiki/Simple-and-Effective-Magnetometer-Calibration) and [here](https://appelsiini.net/2018/calibrate-magnetometer/). Place the values from the calibration into `data.txt` and `magCalVisualizer.py` as described in the program guide during calibration. The `magCalVisualizer.py`  script will provide all the required plots to aid in verifying the results (feel free to adjust them manually as you see fit).
 
 ### JavaScript (p5.js) Visualizer
 Connect an IMU device as outlined in the Arduino section. Upload the sketch located in `Visualizer/arduinoSketch`. This sketch simply transmits the raw byte data from the sensor over a serial connection.
