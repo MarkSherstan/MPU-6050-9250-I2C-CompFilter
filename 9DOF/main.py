@@ -379,6 +379,63 @@ class MPU:
 		self.my *= self.magYscale
 		self.mz *= self.magZscale
 
+	def compFilter(self):
+		# Get the processed values from IMU
+		self.processValues()
+
+		# Get delta time and record time for next call
+		dt = time.time() - self.dtTimer
+		self.dtTimer = time.time()
+
+		# Acceleration vector angle
+		accRoll = math.degrees(math.atan2(self.ay, self.az))
+		accPitch = math.degrees(math.atan2(self.ax, self.az))
+
+		# Gyro integration angle
+		self.gyroRoll += self.gx * dt
+		self.gyroPitch -= self.gy * dt
+		self.gyroYaw += self.gz * dt
+
+		# Comp filter
+		self.roll = (self.tau)*(self.roll + self.gx*dt) + (1-self.tau)*(accRoll)
+		self.pitch = (self.tau)*(self.pitch - self.gy*dt) + (1-self.tau)*(accPitch)
+
+		# Convert roll and pitch to radians for heading calculation
+		rollRads = math.radians(self.roll)
+		pitchRads = math.radians(self.pitch)
+
+		# Reassign mag X and Y values in accordance to MPU-9250
+		Mx = self.my
+		My = self.mx
+		Mz = self.mz
+
+		# Normalize the values
+		norm = math.sqrt(Mx * Mx + My * My + Mz * Mz)
+		Mx1 = Mx / norm
+		My1 = My / norm
+		Mz1 = Mz / norm
+
+		# Apply tilt compensation
+		Mx2 = Mx1*math.cos(pitchRads) + Mz1*math.sin(pitchRads)
+		My2 = Mx1*math.sin(rollRads)*math.sin(pitchRads) + My1*math.cos(rollRads) - Mz1*math.sin(rollRads)*math.cos(pitchRads)
+
+		# Heading calculation
+		if ((Mx2 > 0) and (My2 >=0)):
+			self.yaw = math.degrees(math.atan(My2/Mx2))
+		elif (Mx2 < 0):
+			self.yaw = 180 + math.degrees(math.atan(My2/Mx2))
+		elif ((Mx2 > 0) and (My2 <= 0)):
+			self.yaw = 360 + math.degrees(math.atan(My2/Mx2))
+		elif ((Mx2 == 0) and (My2 < 0)):
+			self.yaw = 90
+		elif ((Mx2 == 0) and (My2 > 0)):
+			self.yaw = 270
+		else:
+			print('Error')
+
+		# Print results to screen
+		print('R: {:<8.1f} P: {:<8.1f} Y: {:<8.1f}'.format(self.roll,self.pitch,self.yaw))
+
 	def madgwickFilter(self, ax, ay, az, gx, gy, gz, mx, my, mz, deltat):
 	  # Quaternion values
 	  q1 = self.q[0]
