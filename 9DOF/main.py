@@ -197,14 +197,14 @@ class MPU:
 		for ii in range(14):
 			rawData.append(self.bus.read_byte_data(self.MPU9250_ADDRESS, self.ACCEL_XOUT_H + ii))
 
-		# Convert the raw values to something a little more useful
+		# Convert the raw values to something a little more useful (middle value is temperature)
 		self.ax = self.eightBit2sixteenBit(rawData[1], rawData[0])
 		self.ay = self.eightBit2sixteenBit(rawData[3], rawData[2])
 		self.az = self.eightBit2sixteenBit(rawData[5], rawData[4])
 
-		self.gx = self.eightBit2sixteenBit(rawData[7], rawData[6])
-		self.gy = self.eightBit2sixteenBit(rawData[9], rawData[8])
-		self.gz = self.eightBit2sixteenBit(rawData[11], rawData[10])
+		self.gx = self.eightBit2sixteenBit(rawData[9], rawData[8])
+		self.gy = self.eightBit2sixteenBit(rawData[11], rawData[10])
+		self.gz = self.eightBit2sixteenBit(rawData[13], rawData[12])
 
 	def readRawMag(self):
 		# Prepare to request values
