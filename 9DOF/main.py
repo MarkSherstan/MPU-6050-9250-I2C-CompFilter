@@ -5,25 +5,17 @@ import time
 class MPU:
 	def __init__(self, gyro, acc, mag, tau):
 		# Class / object / constructor setup
-		self.gx = None; self.gy = None; self.gz = None;
 		self.ax = None; self.ay = None; self.az = None;
+		self.gx = None; self.gy = None; self.gz = None;
 		self.mx = None; self.my = None; self.mz = None;
 
 		self.gyroXcal = 0
 		self.gyroYcal = 0
 		self.gyroZcal = 0
 
-		self.magXcal = 0
-		self.magYcal = 0
-		self.magZcal = 0
-
-		self.magXbias = 0
-		self.magYbias = 0
-		self.magZbias = 0
-
-		self.magXscale = 0
-		self.magYscale = 0
-		self.magZscale = 0
+		self.magXcal = 0; self.magXbias = 0; self.magXscale = 0;
+		self.magYcal = 0; self.magYbias = 0; self.magYscale = 0;
+		self.magZcal = 0; self.magZbias = 0; self.magZscale = 0;
 
 		self.gyroRoll = 0
 		self.gyroPitch = 0
@@ -40,21 +32,20 @@ class MPU:
 		self.beta = 1
 
 		self.gyroScaleFactor, self.gyroHex = self.gyroSensitivity(gyro)
-		self.accScaleFactor, self.accHex = self.accelerometerSensitivity(acc)
-		self.magScaleFactor, self.magHex = self.magnetometerSensitivity(mag)
+		self.accScaleFactor,  self.accHex  = self.accelerometerSensitivity(acc)
+		self.magScaleFactor,  self.magHex  = self.magnetometerSensitivity(mag)
 
 		self.bus = smbus.SMBus(1)
 
 		self.MPU9250_ADDRESS  = 0x68
 		self.AK8963_ADDRESS   = 0x0C
-
 		self.WHO_AM_I_MPU9250 = 0x75
 		self.WHO_AM_I_AK8963  = 0x00
 
+		self.AK8963_XOUT_L    = 0x03
 		self.AK8963_CNTL      = 0x0A
 		self.AK8963_CNTL2     = 0x0B
 		self.USER_CTRL        = 0x6A
-		self.AK8963_XOUT_L    = 0x03
 		self.I2C_SLV0_DO      = 0x63
 
 		self.AK8963_ASAX      = 0x10
@@ -161,6 +152,12 @@ class MPU:
 			self.magXcal =  float(rawData[0] - 128)/256.0 + 1.0;
 			self.magYcal =  float(rawData[1] - 128)/256.0 + 1.0;
 			self.magZcal =  float(rawData[2] - 128)/256.0 + 1.0;
+
+			# Flush the sysem
+			self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_ADDR, self.AK8963_ADDRESS);     # Set the I2C slave address of AK8963 and set for write.
+			self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_REG, self.AK8963_CNTL);         # I2C slave 0 register address from where to begin data transfer
+			self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_DO, 0x00);                      # Power down magnetometer
+			self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_CTRL, 0x81);                    # Enable I2C and write 1 byte
 
 			# Configure the settings for the mag
 			self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_ADDR, self.AK8963_ADDRESS);     # Set the I2C slave address of AK8963 and set for write.
@@ -311,7 +308,7 @@ class MPU:
 		print("\tmagZscale = " + str(round(self.magZscale,3)) + "\n")
 
 		# Give more instructions to the user
-		print("Place above values in magCalVisualizer.py")
+		print("Place above values in magCalVisualizer.py and magCalSlider.py")
 		print("Recording additional 1000 data points to verify the calibration")
 		print("Repeat random figure eight pattern and rotations...\n")
 		time.sleep(3)
@@ -321,7 +318,7 @@ class MPU:
 
 		# Provide final instructions
 		print("\nCopy the raw values into data.txt")
-		print("Run magCalVisualizer.py to validate calibration success")
+		print("Run magCalVisualizer.py and magCalSlider.py to validate calibration success")
 		print("See the README for more information")
 		print("Also compare the second calibration to the first:")
 
@@ -516,7 +513,7 @@ class MPU:
 	  self.q[3] = q4 / norm
 
 	def attitudeEuler(self):
-		# Get the data
+		# Get the data from the matrix
 		a12 = 2 * (self.q[1] * self.q[2] + self.q[0] * self.q[3])
 		a22 = self.q[0] * self.q[0] + self.q[1] * self.q[1] - self.q[2] * self.q[2] - self.q[3] * self.q[3]
 		a31 = 2 * (self.q[0] * self.q[1] + self.q[2] * self.q[3])
@@ -525,7 +522,7 @@ class MPU:
 
 		# Perform the conversion to euler
 		self.roll  = math.degrees(math.atan2(a31, a33))
-		self.pitch = math.degrees(-math.asin(a32))
+		self.pitch = -math.degrees(math.asin(a32))
 		self.yaw   = math.degrees(math.atan2(a12, a22))
 
 		# Declination 14 deg 7 minutes at Edmonton May 31, 2019. Bound yaw between [0 360]
@@ -554,7 +551,7 @@ def main():
 	mpu.setMagCalibration(bias, scale)
 
 	# Calibrate the gyro with N points
-	mpu.calibrateGyro(500)
+	mpu.calibrateGyro(1000)
 
 	# Set timer
 	lastUpdate = time.perf_counter()
