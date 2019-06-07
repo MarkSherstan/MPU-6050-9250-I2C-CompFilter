@@ -415,6 +415,7 @@ class MPU:
 		# Apply tilt compensation
 		Mx2 = Mx1*math.cos(pitchRads) + Mz1*math.sin(pitchRads)
 		My2 = Mx1*math.sin(rollRads)*math.sin(pitchRads) + My1*math.cos(rollRads) - Mz1*math.sin(rollRads)*math.cos(pitchRads)
+		Mz2 = -Mx1*math.cos(rollRads)*math.sin(pitchRads) + My1*math.sin(rollRads) + Mz1*math.cos(rollRads)*math.cos(pitchRads)
 
 		# Heading calculation
 		if ((Mx2 > 0) and (My2 >=0)):
@@ -432,6 +433,8 @@ class MPU:
 
 		# Print results to screen
 		print('R: {:<8.1f} P: {:<8.1f} Y: {:<8.1f}'.format(self.roll,self.pitch,self.yaw))
+		# print(math.sqrt(Mx2 * Mx2 + My2 * My2 + Mz2 * Mz2))
+		# print(math.sqrt(Mx1 * Mx1 + My1 * My1 + Mz1 * Mz1))
 
 	def madgwickFilter(self, ax, ay, az, gx, gy, gz, mx, my, mz, deltat):
 	  # Quaternion values
@@ -546,8 +549,8 @@ def main():
 
 	# Calibrate the mag or provide values that have been verified with the visualizer
 	# mpu.calibrateMagGuide()
-	bias = [125, 140, -150]
-	scale = [0.996, 1.011, 0.993]
+	bias = [145, 145, -155]
+	scale = [1.10, 1.05, 1.05]
 	mpu.setMagCalibration(bias, scale)
 
 	# Calibrate the gyro with N points
