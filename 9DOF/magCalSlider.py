@@ -4,13 +4,13 @@ import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider, Button
 
 # Define the given offsets and scale
-magXbias = 100
-magYbias = 150
-magZbias = -250
+magXbias = 145
+magYbias = 145
+magZbias = -155
 
-magXscale = 1.101
-magYscale = 1.029
-magZscale = 0.893
+magXscale = 1.10
+magYscale = 1.05
+magZscale = 1.05
 
 # Initialize empty lists
 mx = []
@@ -45,9 +45,9 @@ mz3 = [ii * magZscale for ii in mz2]
 fig, ax = plt.subplots()
 plt.subplots_adjust(bottom=0.5)
 
-a = ax.scatter(mx3, my3, label='XY')
-b = ax.scatter(mx3, mz3, label='XZ')
-c = ax.scatter(my3, mz3, label='YZ')
+a = ax.scatter(mx3, my3, c='#FFAA41', marker='o', alpha=0.7, label='XY')
+b = ax.scatter(mx3, mz3, c='#2EC6FF', marker='o', alpha=0.7, label='XZ')
+c = ax.scatter(my3, mz3, c='#79C850', marker='o', alpha=0.7, label='YZ')
 
 # Set title and labels
 ax.set_title('Hard and Soft Iron Correction Slider', fontsize=14, fontweight='bold')
@@ -60,22 +60,22 @@ ax.axis('equal')
 plt.legend(loc='upper left');
 
 # Create the sliders (hard iron)
-X = plt.axes([0.2, 0.35, 0.65, 0.03], facecolor='#606060')
-Y = plt.axes([0.2, 0.30, 0.65, 0.03], facecolor='#606060')
-Z = plt.axes([0.2, 0.25, 0.65, 0.03], facecolor='#606060')
+X = plt.axes([0.2, 0.35, 0.65, 0.03], facecolor='#C0C0C0')
+Y = plt.axes([0.2, 0.30, 0.65, 0.03], facecolor='#C0C0C0')
+Z = plt.axes([0.2, 0.25, 0.65, 0.03], facecolor='#C0C0C0')
 
-sliderX = Slider(X, 'X Bias', -400, 400, valinit=magXbias, valstep=5)
-sliderY = Slider(Y, 'Y Bias', -400, 400, valinit=magYbias, valstep=5)
-sliderZ = Slider(Z, 'Z Bias', -400, 400, valinit=magZbias, valstep=5)
+sliderX = Slider(X, 'X Bias', -400, 400, color='#5862C2', valfmt='%i', valinit=magXbias, valstep=5)
+sliderY = Slider(Y, 'Y Bias', -400, 400, color='#5862C2', valfmt='%i', valinit=magYbias, valstep=5)
+sliderZ = Slider(Z, 'Z Bias', -400, 400, color='#5862C2', valfmt='%i', valinit=magZbias, valstep=5)
 
 # Create the sliders (soft iron)
-XX = plt.axes([0.2, 0.20, 0.65, 0.03], facecolor='#606060')
-YY = plt.axes([0.2, 0.15, 0.65, 0.03], facecolor='#606060')
-ZZ = plt.axes([0.2, 0.10, 0.65, 0.03], facecolor='#606060')
+XX = plt.axes([0.2, 0.20, 0.65, 0.03], facecolor='#C0C0C0')
+YY = plt.axes([0.2, 0.15, 0.65, 0.03], facecolor='#C0C0C0')
+ZZ = plt.axes([0.2, 0.10, 0.65, 0.03], facecolor='#C0C0C0')
 
-sliderXX = Slider(XX, 'X Scale', 0.8, 1.4, valinit=magXscale, valstep=0.05)
-sliderYY = Slider(YY, 'Y Scale', 0.8, 1.4, valinit=magYscale, valstep=0.05)
-sliderZZ = Slider(ZZ, 'Z Scale', 0.8, 1.4, valinit=magZscale, valstep=0.05)
+sliderXX = Slider(XX, 'X Scale', 0.8, 1.4, color='#5862C2', valinit=magXscale, valstep=0.05)
+sliderYY = Slider(YY, 'Y Scale', 0.8, 1.4, color='#5862C2', valinit=magYscale, valstep=0.05)
+sliderZZ = Slider(ZZ, 'Z Scale', 0.8, 1.4, color='#5862C2', valinit=magZscale, valstep=0.05)
 
 # Update function
 def update(val):
