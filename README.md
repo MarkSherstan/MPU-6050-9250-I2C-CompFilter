@@ -122,9 +122,6 @@ Double click on the `index.html` file located in `Visualizer/p5js/main` and the 
 
 **Ensure to hold the IMU device still until an object appears on the screen. This is the program performing a calibration for gyroscope offset.**
 
-### MATLAB Visualizer
-Connect an IMU device as outlined in the Arduino section. Upload the sketch located in `Visualizer/arduinoSketch`. This sketch simply transmits the raw byte data from the sensor over a serial connection.
-
 ## Future Ideas
 * RPi C++ Version
 * Add quaternion angle representation
