@@ -5,39 +5,19 @@ MPU9250::MPU9250(char addr, i2c_device_t i2c_dev){
   _i2c_dev = i2c_dev;
 }
 
-void MPU9250::setUpRegisters() {
-  //Activate the MPU-6050
-  data[0] = 0x6B;
-  data[1] = 0x00;
-  _i2c_dev.i2c_write(_addr, data, 2);
+void MPU9250::initIMU() {
+  // Check if a valid connection has been established
+  char whoAmI = _i2c_dev.i2c_read(_addr, WHO_AM_I_MPU9250, 1);
 
-  // Change all of this to the self checks and what not....
-}
+  if (whoAmI == 0x71){
+    // Activate/reset the IMU
+    _i2c_dev.i2c_write(_addr, {PWR_MGMT_1, 0x00}, 2);
 
-float MPU9250::getGres(int Gscale) {
-  // Set the full scale range for the gyroscope
-  switch (Gscale){
-    case GFS_250DPS:
-      _gRes = 131.0;
-      _i2c_dev.i2c_write(_addr, {GYRO_CONFIG, 0x00}, 2);
-      return _gRes;
-      break;
-    case GFS_500DPS:
-      _gRes = 65.5;
-      _i2c_dev.i2c_write(_addr, {GYRO_CONFIG, 0x08}, 2);
-      return _gRes;
-      break;
-    case GFS_1000DPS:
-      _gRes = 32.8;
-      _i2c_dev.i2c_write(_addr, {GYRO_CONFIG, 0x10}, 2);
-      return _gRes;
-      break;
-    case GFS_2000DPS:
-      _gRes = 16.4;
-      _i2c_dev.i2c_write(_addr, {GYRO_CONFIG, 0x18}, 2);
-      return _gRes;
-      break;
+    return true;
+    break;
   }
+
+  return false;
 }
 
 float MPU9250::getAres(int Ascale) {
@@ -62,6 +42,32 @@ float MPU9250::getAres(int Ascale) {
       _aRes = 2048.0;
       _i2c_dev.i2c_write(_addr, {ACCEL_CONFIG, 0x18}, 2);
       return _aRes;
+      break;
+  }
+}
+
+float MPU9250::getGres(int Gscale) {
+  // Set the full scale range for the gyroscope
+  switch (Gscale){
+    case GFS_250DPS:
+      _gRes = 131.0;
+      _i2c_dev.i2c_write(_addr, {GYRO_CONFIG, 0x00}, 2);
+      return _gRes;
+      break;
+    case GFS_500DPS:
+      _gRes = 65.5;
+      _i2c_dev.i2c_write(_addr, {GYRO_CONFIG, 0x08}, 2);
+      return _gRes;
+      break;
+    case GFS_1000DPS:
+      _gRes = 32.8;
+      _i2c_dev.i2c_write(_addr, {GYRO_CONFIG, 0x10}, 2);
+      return _gRes;
+      break;
+    case GFS_2000DPS:
+      _gRes = 16.4;
+      _i2c_dev.i2c_write(_addr, {GYRO_CONFIG, 0x18}, 2);
+      return _gRes;
       break;
   }
 }
