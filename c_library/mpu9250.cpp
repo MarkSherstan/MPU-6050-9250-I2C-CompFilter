@@ -7,11 +7,10 @@ MPU9250::MPU9250(char addr, i2c_device_t i2c_dev){
 
 void MPU9250::readRawData() {
   // Subroutine for reading the raw data
-  data[0] = 0x3B;
-  _i2c_dev.i2c_write(_addr, data, 1);
-  _i2c_dev.i2c_read(_addr, data, 14);
+  _i2c_dev.i2c_write(_addr, ACCEL_XOUT_H, 1);
+  _i2c_dev.i2c_read(_addr, ACCEL_XOUT_H, 14);
 
-  // Read data --> Temperature falls between acc and gyro registers
+  // Read data - Temperature falls between acc and gyro registers
   imu_raw.ax = data[0]  << 8 | data[1];
   imu_raw.ay = data[2]  << 8 | data[3];
   imu_raw.az = data[4]  << 8 | data[5];
@@ -20,7 +19,7 @@ void MPU9250::readRawData() {
   imu_raw.gy = data[10] << 8 | data[11];
   imu_raw.gz = data[12] << 8 | data[13];
 
-  temp   = data[6]  << 8 | data[7];
+  temperature = data[6] << 8 | data[7];
 }
 
 void MPU9250::setUpRegisters() {
@@ -45,7 +44,7 @@ void MPU9250::setUpRegisters() {
 }
 
 bool MPU9250::gyroCalibration(int numCalPoints) {
-  // Initialize arrays for calibration checks
+  // Initialize standard deviation variabls
   float std2_x, std2_y, std2_z;
   float numeratorX, numeratorY, numeratorZ;
 
@@ -79,6 +78,26 @@ bool MPU9250::gyroCalibration(int numCalPoints) {
   gyro_cal.z /= numCalPoints;
 
   return true;
+}
+
+bool MPU9250::accelCalibration(int numCalPointsPerAxis) {
+  // Initialize arrays for calibration
+  int max[3] = {-32767, -32767, -32767}, min[3] = {32767, 32767, 32767}, temp[3] = {0, 0, 0};
+
+  // Loop through each axis (X, y, z) recording max and min values
+  for (ii = 0; ii < 3; ii++){
+    for(jj = 0; jj < numCalPointsPerAxis; jj++){
+      mpu9250.readRawData();
+
+      for (int kk = 0; kk < 3; kk++){
+        if(temp[kk] > max[kk]) max[kk] = temp[kk];
+        if(temp[kk] < min[kk]) min[kk] = temp[kk];
+      }
+    }
+    // Delay for user to swtich axis
+  }
+
+  // Do scaling or bias removal calculations here. 
 }
 
 gyro_calib_t MPU9250::getGyroCalibration() {
