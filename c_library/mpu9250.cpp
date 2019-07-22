@@ -5,6 +5,67 @@ MPU9250::MPU9250(char addr, i2c_device_t i2c_dev){
   _i2c_dev = i2c_dev;
 }
 
+void MPU9250::setUpRegisters() {
+  //Activate the MPU-6050
+  data[0] = 0x6B;
+  data[1] = 0x00;
+  _i2c_dev.i2c_write(_addr, data, 2);
+
+  // Change all of this to the self checks and what not....
+}
+
+float MPU9250::getGres(int Gscale) {
+  // Set the full scale range for the gyroscope
+  switch (Gscale){
+    case GFS_250DPS:
+      _gRes = 131.0;
+      _i2c_dev.i2c_write(_addr, {GYRO_CONFIG, 0x00}, 2);
+      return _gRes;
+      break;
+    case GFS_500DPS:
+      _gRes = 65.5;
+      _i2c_dev.i2c_write(_addr, {GYRO_CONFIG, 0x08}, 2);
+      return _gRes;
+      break;
+    case GFS_1000DPS:
+      _gRes = 32.8;
+      _i2c_dev.i2c_write(_addr, {GYRO_CONFIG, 0x10}, 2);
+      return _gRes;
+      break;
+    case GFS_2000DPS:
+      _gRes = 16.4;
+      _i2c_dev.i2c_write(_addr, {GYRO_CONFIG, 0x18}, 2);
+      return _gRes;
+      break;
+  }
+}
+
+float MPU9250::getAres(int Ascale) {
+  // Set the full scale range for the accelerometer
+  switch (Ascale){
+    case AFS_2G:
+      _aRes = 16384.0;
+      _i2c_dev.i2c_write(_addr, {ACCEL_CONFIG, 0x00}, 2);
+      return _aRes;
+      break;
+    case AFS_4G:
+      _aRes = 8192.0;
+      _i2c_dev.i2c_write(_addr, {ACCEL_CONFIG, 0x08}, 2);
+      return _aRes;
+      break;
+    case AFS_8G:
+      _aRes = 4096.0;
+      _i2c_dev.i2c_write(_addr, {ACCEL_CONFIG, 0x10}, 2);
+      return _aRes;
+      break;
+    case AFS_16G:
+      _aRes = 2048.0;
+      _i2c_dev.i2c_write(_addr, {ACCEL_CONFIG, 0x18}, 2);
+      return _aRes;
+      break;
+  }
+}
+
 void MPU9250::readRawData() {
   // Subroutine for reading the raw data
   _i2c_dev.i2c_write(_addr, ACCEL_XOUT_H, 1);
@@ -20,27 +81,6 @@ void MPU9250::readRawData() {
   imu_raw.gz = data[12] << 8 | data[13];
 
   temperature = data[6] << 8 | data[7];
-}
-
-void MPU9250::setUpRegisters() {
-  //Activate the MPU-6050
-  data[0] = 0x6B;
-  data[1] = 0x00;
-  _i2c_dev.i2c_write(_addr, data, 2);
-
-  // Configure the accelerometer
-  // Wire.write(0x__);
-  // Wire.write; 2g --> 0x00, 4g --> 0x08, 8g --> 0x10, 16g --> 0x18
-  data[0] = 0x1C;
-  data[1] = 0x08;
-  _i2c_dev.i2c_write(_addr, data, 2);
-
-  // Configure the gyro
-  // Wire.write(0x__);
-  // 250 deg/s --> 0x00, 500 deg/s --> 0x08, 1000 deg/s --> 0x10, 2000 deg/s --> 0x18
-  data[0] = 0x1B;
-  data[1] = 0x08;
-  _i2c_dev.i2c_write(_addr, data, 2);
 }
 
 bool MPU9250::gyroCalibration(int numCalPoints) {
@@ -68,6 +108,7 @@ bool MPU9250::gyroCalibration(int numCalPoints) {
 
       if ((abs(imu_raw.gx) > std2_x) || (abs(imu_raw.gy) > std2_y) || (abs(imu_raw.gz) > std2_z) ){
         return false;
+        break;
       }
     }
   }
@@ -97,7 +138,7 @@ bool MPU9250::accelCalibration(int numCalPointsPerAxis) {
     // Delay for user to swtich axis
   }
 
-  // Do scaling or bias removal calculations here. 
+  // Do scaling or bias removal calculations here.
 }
 
 gyro_calib_t MPU9250::getGyroCalibration() {
