@@ -77,7 +77,7 @@ void MPU9250::readRawData() {
   _i2c_dev.i2c_write(_addr, ACCEL_XOUT_H, 1);
   _i2c_dev.i2c_read(_addr, ACCEL_XOUT_H, 14);
 
-  // Read data - Temperature falls between acc and gyro registers
+  // Read data - Temperature falls between accel and gyro registers
   imu_raw.ax = data[0]  << 8 | data[1];
   imu_raw.ay = data[2]  << 8 | data[3];
   imu_raw.az = data[4]  << 8 | data[5];
@@ -153,8 +153,4 @@ gyro_calib_t MPU9250::getGyroCalibration() {
 
 accel_calib_t MPU9250::getAccelCalibration() {
   return accel_cal;
-}
-
-mag_calib_t MPU9250::getMagCalibration() {
-  return mag_cal;
 }

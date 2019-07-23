@@ -61,14 +61,7 @@ struct gyro_cal_t {
 // Accelerometer calibration structure
 struct accel_cal_t {
   float x, y, z;
-  // Scale or bias values???
 };
-
-struct mag_cal_t {
-  float magXbias, magYbias, magZbias;
-  float magXscale, magYscale, magZscale;
-};
-
 
 
 class MPU9250 {
@@ -81,30 +74,29 @@ private:
 public:
   MPU9250(char addr, i2c_device_t i2c_dev);
 
+  // Functions
+  bool initIMU();
+  void readRawData();
+
+  float getAres();
+  float getGres();
+
   bool gyroCalibration(int numCalPoints = 500);
   bool accelCalibration(int numCalPointsPerAxis = 200);
-  bool startMagCalibration();
 
   gyro_calib_t getGyroCalibration();
   accel_calib_t getAccelCalibration();
-  mag_calib_t getMagCalibration();
 
-  void readRawData();
-  void readMagData();
-
-  bool initIMU();
-  bool initMAG();
+  // Variables
+  float _aRes, _gRes;
 
   imu_t imu_raw;
   imu_t imu_cal;
 
   gyro_cal_t gyro_cal;
   accel_cal_t accel_cal;
-  mag_cal_t mag_cal;
 
   int temperature;
-
-  float _aRes, _gRes, _mRes;
 }
 
 #endif //MPU9250_H
