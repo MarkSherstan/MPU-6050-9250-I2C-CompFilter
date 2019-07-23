@@ -60,7 +60,8 @@ struct gyro_cal_t {
 
 // Accelerometer calibration structure
 struct accel_cal_t {
-  float x, y, z;
+  float sx, sy, sz;
+  float bx, by, bz;
 };
 
 

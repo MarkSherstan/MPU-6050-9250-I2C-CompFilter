@@ -89,6 +89,31 @@ void MPU9250::readRawData() {
   temperature = data[6] << 8 | data[7];
 }
 
+void MPU9250::readCalData() {
+  // Get new data
+  mpu9250.readRawData();
+
+  // Remove accelerometer offset and scale values
+  imu_cal.ax = (imu_raw.ax - accel_cal.bx) / accel_cal.sx;
+  imu_cal.ay = (imu_raw.ay - accel_cal.by) / accel_cal.sy;
+  imu_cal.az = (imu_raw.az - accel_cal.bz) / accel_cal.sz;
+
+  // Convert accelerometer values to g
+  imu_cal.ax /= _aRes;
+  imu_cal.ay /= _aRes;
+  imu_cal.az /= _aRes;
+
+  // Remove gyro offset
+  imu_cal.gx = imu_raw.gx - gyro_cal.x;
+  imu_cal.gy = imu_raw.gy - gyro_cal.y;
+  imu_cal.gz = imu_raw.gz - gyro_cal.z;
+
+  // Convert gyro values to degrees per second
+  imu_cal.gx /= _gRes;
+  imu_cal.gy /= _gRes;
+  imu_cal.gz /= _gRes;
+}
+
 bool MPU9250::gyroCalibration(int numCalPoints) {
   // Initialize standard deviation variabls
   float std2_x, std2_y, std2_z;
