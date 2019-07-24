@@ -7,14 +7,16 @@ MPU9250::MPU9250(char addr, i2c_device_t i2c_dev){
 
 void MPU9250::initIMU() {
   // Check if a valid connection has been established
-  char whoAmI = _i2c_dev.i2c_read(_addr, WHO_AM_I_MPU9250, 1);
+  data[0] = WHO_AM_I_MPU9250;
+  _i2c_dev.i2c_write(_addr, data, 1);
+  _i2c_dev.i2c_read(_addr, data, 1);
+  whoAmI = data[0];
 
   if (whoAmI == 0x71){
     // Activate/reset the IMU
     _i2c_dev.i2c_write(_addr, {PWR_MGMT_1, 0x00}, 2);
 
     return true;
-    break;
   }
 
   return false;
@@ -27,22 +29,20 @@ float MPU9250::getAres(int Ascale) {
       _aRes = 16384.0;
       _i2c_dev.i2c_write(_addr, {ACCEL_CONFIG, 0x00}, 2);
       return _aRes;
-      break;
     case AFS_4G:
       _aRes = 8192.0;
       _i2c_dev.i2c_write(_addr, {ACCEL_CONFIG, 0x08}, 2);
       return _aRes;
-      break;
     case AFS_8G:
       _aRes = 4096.0;
       _i2c_dev.i2c_write(_addr, {ACCEL_CONFIG, 0x10}, 2);
       return _aRes;
-      break;
     case AFS_16G:
       _aRes = 2048.0;
       _i2c_dev.i2c_write(_addr, {ACCEL_CONFIG, 0x18}, 2);
       return _aRes;
-      break;
+    case default:
+      return 0;
   }
 }
 
@@ -53,29 +53,28 @@ float MPU9250::getGres(int Gscale) {
       _gRes = 131.0;
       _i2c_dev.i2c_write(_addr, {GYRO_CONFIG, 0x00}, 2);
       return _gRes;
-      break;
     case GFS_500DPS:
       _gRes = 65.5;
       _i2c_dev.i2c_write(_addr, {GYRO_CONFIG, 0x08}, 2);
       return _gRes;
-      break;
     case GFS_1000DPS:
       _gRes = 32.8;
       _i2c_dev.i2c_write(_addr, {GYRO_CONFIG, 0x10}, 2);
       return _gRes;
-      break;
     case GFS_2000DPS:
       _gRes = 16.4;
       _i2c_dev.i2c_write(_addr, {GYRO_CONFIG, 0x18}, 2);
       return _gRes;
-      break;
+    case default:
+      return 0;
   }
 }
 
 void MPU9250::readRawData() {
   // Subroutine for reading the raw data
-  _i2c_dev.i2c_write(_addr, ACCEL_XOUT_H, 1);
-  _i2c_dev.i2c_read(_addr, ACCEL_XOUT_H, 14);
+  data[0] = ACCEL_XOUT_H;
+  _i2c_dev.i2c_write(_addr, data, 1);
+  _i2c_dev.i2c_read(_addr, data, 14);
 
   // Read data - Temperature falls between accel and gyro registers
   imu_raw.ax = data[0]  << 8 | data[1];
@@ -139,7 +138,6 @@ bool MPU9250::gyroCalibration(int numCalPoints) {
 
       if ((abs(imu_raw.gx) > std2_x) || (abs(imu_raw.gy) > std2_y) || (abs(imu_raw.gz) > std2_z) ){
         return false;
-        break;
       }
     }
   }
