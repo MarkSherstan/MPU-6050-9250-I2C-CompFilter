@@ -79,11 +79,11 @@ public:
   bool initIMU();
   void readRawData();
 
-  float getAres();
-  float getGres();
+  float getAres(int Ascale);
+  float getGres(int Gscale);
 
   bool gyroCalibration(int numCalPoints = 500);
-  bool accelCalibration(int numCalPointsPerAxis = 200);
+  bool accelCalibration(int Ascale);
 
   gyro_calib_t getGyroCalibration();
   accel_calib_t getAccelCalibration();

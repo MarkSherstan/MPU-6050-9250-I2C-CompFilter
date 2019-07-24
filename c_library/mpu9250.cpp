@@ -150,24 +150,89 @@ bool MPU9250::gyroCalibration(int numCalPoints) {
   return true;
 }
 
-bool MPU9250::accelCalibration(int numCalPointsPerAxis) {
+bool MPU9250::accelCalibration(int Ascale) {
   // Initialize arrays for calibration
   int max[3] = {-32767, -32767, -32767}, min[3] = {32767, 32767, 32767}, temp[3] = {0, 0, 0};
+  float numeratorX, numeratorY, numeratorZ;
+  float stdX, stdY, stdZ;
+  float sumX, sumY, sumZ;
 
-  // Loop through each axis (X, y, z) recording max and min values
-  for (ii = 0; ii < 3; ii++){
-    for(jj = 0; jj < numCalPointsPerAxis; jj++){
+  // Record max and min values for each axis. Maximum of 100 attempts
+  for (int ii = 0; ii < 100; ii++){
+
+    // Build a small sample before running checks
+    for(int jj = 1; jj < 6; jj++){
+      // Read new data
       mpu9250.readRawData();
 
-      for (int kk = 0; kk < 3; kk++){
-        if(temp[kk] > max[kk]) max[kk] = temp[kk];
-        if(temp[kk] < min[kk]) min[kk] = temp[kk];
+      // Sum values for calculating average (x bar)
+      sumX += imu_raw.ax;
+      sumY += imu_raw.ay;
+      sumZ += imu_raw.az;
+
+      // Standard deviation numerator calculation
+      numeratorX += (imu_raw.ax - (sumX / jj) )^2;
+      numeratorY += (imu_raw.ay - (sumY / jj) )^2;
+      numeratorZ += (imu_raw.az - (sumZ / jj) )^2;
+    }
+
+    // Run the checks and record data
+    while(true){
+      // Read new data and increase counter
+      mpu9250.readRawData();
+      jj += 1;
+
+      // Sum values for calculating average (x bar)
+      sumX += imu_raw.ax;
+      sumY += imu_raw.ay;
+      sumZ += imu_raw.az;
+
+      // Standard deviation numerator calculation
+      numeratorX += (imu_raw.ax - (sumX / jj) )^2;
+      numeratorY += (imu_raw.ay - (sumY / jj) )^2;
+      numeratorZ += (imu_raw.az - (sumZ / jj) )^2;
+
+      // Calculate standard deviation with a scaling factor
+      stdX = sqrt(numeratorX / jj) * 0.2;
+      stdY = sqrt(numeratorY / jj) * 0.2;
+      stdZ = sqrt(numeratorZ / jj) * 0.2;
+
+      // If accel is stationary record data otherwise reset
+      if ((abs(imu_raw.ax) > stdX) || (abs(imu_raw.ay) > stdY) || (abs(imu_raw.az) > stdZ) ){
+        // Stop recording data and reset values
+        numeratorX = 0; numeratorY = 0; numeratorZ = 0;
+        sumX = 0; sumY = 0; sumZ = 0;
+        break
+      } else {
+        // Store the largest and smallest value
+        temp[0] = imu_raw.ax;
+        temp[1] = imu_raw.ay;
+        temp[2] = imu_raw.az;
+
+        for (int kk = 0; kk < 3; kk++){
+          if(temp[kk] > max[kk]) max[kk] = temp[kk];
+          if(temp[kk] < min[kk]) min[kk] = temp[kk];
+        }
       }
     }
-    // Delay for user to swtich axis
   }
 
-  // Do scaling or bias removal calculations here.
+  if (max[0] < 0 || max[1] < 0 || max[2] < 0 || min[0] > 0 || min[1] > 0 || min[2] > 0){
+    // Failed calibration
+    return false;
+  } else {
+  // Bias calculation
+  accel_cal.bx = (max[0] + min[0]) / 2;
+  accel_cal.by = (max[1] + min[1]) / 2;
+  accel_cal.bz = (max[2] + min[2]) / 2;
+
+  // Scaling calculation
+  accel_cal.sx = (max[0] - min[0]) / (2 * _aRes);
+  accel_cal.sy = (max[1] - min[1]) / (2 * _aRes);
+  accel_cal.sz = (max[2] - min[2]) / (2 * _aRes);
+
+  return true;
+  }
 }
 
 gyro_calib_t MPU9250::getGyroCalibration() {
