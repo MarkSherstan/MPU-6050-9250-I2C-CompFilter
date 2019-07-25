@@ -247,19 +247,18 @@ bool MPU9250::accelCalibration(int Ascale) {
   }
 }
 
-gyro_cal_t MPU9250::getGyroCalibration() {
-  return gyro_cal;
-}
-
-
-accel_cal_t MPU9250::getAccelCalibration() {
-  return accel_cal;
-}
-
 void MPU9250::setGyroCalibration(gyro_cal_t gyro) {
   gyro_cal = gyro;
 }
 
-void MPU9250::setAccelCalibration(accel_cal_t accel){
+void MPU9250::setAccelCalibration(accel_cal_t accel) {
   accel_cal = accel;
+}
+
+gyro_cal_t MPU9250::getGyroCalibration() {
+  return gyro_cal;
+}
+
+accel_cal_t MPU9250::getAccelCalibration() {
+  return accel_cal;
 }
