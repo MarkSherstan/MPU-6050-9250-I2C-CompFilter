@@ -1,25 +1,36 @@
 #include "mpu9250.h"
 
+#ifdef ARDUINO
+#include <arduino.h>
+#else
+#include <math.h>
+#endif
+
 MPU9250::MPU9250(char addr, i2c_device_t i2c_dev){
   _addr = addr;
   _i2c_dev = i2c_dev;
 }
 
-void MPU9250::initIMU() {
+bool MPU9250::initIMU() {
   // Check if a valid connection has been established
   data[0] = WHO_AM_I_MPU9250;
   _i2c_dev.i2c_write(_addr, data, 1);
   _i2c_dev.i2c_read(_addr, data, 1);
-  whoAmI = data[0];
+  char whoAmI = data[0];
 
   if (whoAmI == 0x71){
     // Activate/reset the IMU
-    _i2c_dev.i2c_write(_addr, {PWR_MGMT_1, 0x00}, 2);
-
+    write2bytes(PWR_MGMT_1, 0x00);
     return true;
   }
 
   return false;
+}
+
+int MPU9250::write2bytes(char byte0, char byte1) {
+  data[0] = byte0;
+  data[1] = byte1;
+  _i2c_dev.i2c_write(_addr, data, 2);
 }
 
 float MPU9250::getAres(int Ascale) {
@@ -27,21 +38,21 @@ float MPU9250::getAres(int Ascale) {
   switch (Ascale){
     case AFS_2G:
       _aRes = 16384.0;
-      _i2c_dev.i2c_write(_addr, {ACCEL_CONFIG, 0x00}, 2);
+      write2bytes(ACCEL_CONFIG, 0x00);
       return _aRes;
     case AFS_4G:
       _aRes = 8192.0;
-      _i2c_dev.i2c_write(_addr, {ACCEL_CONFIG, 0x08}, 2);
+      write2bytes(ACCEL_CONFIG, 0x08);
       return _aRes;
     case AFS_8G:
       _aRes = 4096.0;
-      _i2c_dev.i2c_write(_addr, {ACCEL_CONFIG, 0x10}, 2);
+      write2bytes(ACCEL_CONFIG, 0x10);
       return _aRes;
     case AFS_16G:
       _aRes = 2048.0;
-      _i2c_dev.i2c_write(_addr, {ACCEL_CONFIG, 0x18}, 2);
+      write2bytes(ACCEL_CONFIG, 0x18);
       return _aRes;
-    case default:
+    default:
       return 0;
   }
 }
@@ -51,21 +62,21 @@ float MPU9250::getGres(int Gscale) {
   switch (Gscale){
     case GFS_250DPS:
       _gRes = 131.0;
-      _i2c_dev.i2c_write(_addr, {GYRO_CONFIG, 0x00}, 2);
+      write2bytes(GYRO_CONFIG, 0x00);
       return _gRes;
     case GFS_500DPS:
       _gRes = 65.5;
-      _i2c_dev.i2c_write(_addr, {GYRO_CONFIG, 0x08}, 2);
+      write2bytes(GYRO_CONFIG, 0x08);
       return _gRes;
     case GFS_1000DPS:
       _gRes = 32.8;
-      _i2c_dev.i2c_write(_addr, {GYRO_CONFIG, 0x10}, 2);
+      write2bytes(GYRO_CONFIG, 0x10);
       return _gRes;
     case GFS_2000DPS:
       _gRes = 16.4;
-      _i2c_dev.i2c_write(_addr, {GYRO_CONFIG, 0x18}, 2);
+      write2bytes(GYRO_CONFIG, 0x18);
       return _gRes;
-    case default:
+    default:
       return 0;
   }
 }
@@ -90,7 +101,7 @@ void MPU9250::readRawData() {
 
 void MPU9250::readCalData() {
   // Get new data
-  mpu9250.readRawData();
+  readRawData();
 
   // Remove accelerometer offset and scale values
   imu_cal.ax = (imu_raw.ax - accel_cal.bx) / accel_cal.sx;
@@ -120,15 +131,15 @@ bool MPU9250::gyroCalibration(int numCalPoints) {
 
   // Run calibration for given number of points
   for (int ii = 0; ii < numCalPoints; ii++){
-    mpu9250.readRawData();
+    readRawData();
     gyro_cal.x += imu_raw.gx;
     gyro_cal.y += imu_raw.gy;
     gyro_cal.z += imu_raw.gz;
 
     // Standard deviation numerator calculation
-    numeratorX += (imu_raw.gx - (gyro_cal.x / (ii+1)) )^2;
-    numeratorY += (imu_raw.gy - (gyro_cal.y / (ii+1)) )^2;
-    numeratorZ += (imu_raw.gz - (gyro_cal.z / (ii+1)) )^2;
+    numeratorX += (imu_raw.gx - (gyro_cal.x / (ii+1)) ) * (imu_raw.gx - (gyro_cal.x / (ii+1)) );
+    numeratorY += (imu_raw.gy - (gyro_cal.y / (ii+1)) ) * (imu_raw.gy - (gyro_cal.y / (ii+1)) );
+    numeratorZ += (imu_raw.gz - (gyro_cal.z / (ii+1)) ) * (imu_raw.gz - (gyro_cal.z / (ii+1)) );
 
     // Build a small sample before checking if gyro values are within 2 standard deviations
     if (ii > 5){
@@ -161,9 +172,10 @@ bool MPU9250::accelCalibration(int Ascale) {
   for (int ii = 0; ii < 100; ii++){
 
     // Build a small sample before running checks
-    for(int jj = 1; jj < 6; jj++){
+    int jj;
+    for(jj = 1; jj < 6; jj++){
       // Read new data
-      mpu9250.readRawData();
+      readRawData();
 
       // Sum values for calculating average (x bar)
       sumX += imu_raw.ax;
@@ -171,15 +183,15 @@ bool MPU9250::accelCalibration(int Ascale) {
       sumZ += imu_raw.az;
 
       // Standard deviation numerator calculation
-      numeratorX += (imu_raw.ax - (sumX / jj) )^2;
-      numeratorY += (imu_raw.ay - (sumY / jj) )^2;
-      numeratorZ += (imu_raw.az - (sumZ / jj) )^2;
+      numeratorX += (imu_raw.ax - (sumX / jj) ) * (imu_raw.ax - (sumX / jj) );
+      numeratorY += (imu_raw.ay - (sumY / jj) ) * (imu_raw.ay - (sumY / jj) );
+      numeratorZ += (imu_raw.az - (sumZ / jj) ) * (imu_raw.az - (sumZ / jj) );
     }
 
     // Run the checks and record data
     while(true){
       // Read new data and increase counter
-      mpu9250.readRawData();
+      readRawData();
       jj += 1;
 
       // Sum values for calculating average (x bar)
@@ -188,9 +200,9 @@ bool MPU9250::accelCalibration(int Ascale) {
       sumZ += imu_raw.az;
 
       // Standard deviation numerator calculation
-      numeratorX += (imu_raw.ax - (sumX / jj) )^2;
-      numeratorY += (imu_raw.ay - (sumY / jj) )^2;
-      numeratorZ += (imu_raw.az - (sumZ / jj) )^2;
+      numeratorX += (imu_raw.ax - (sumX / jj) ) * (imu_raw.ax - (sumX / jj) );
+      numeratorY += (imu_raw.ay - (sumY / jj) ) * (imu_raw.ay - (sumY / jj) );
+      numeratorZ += (imu_raw.az - (sumZ / jj) ) * (imu_raw.az - (sumZ / jj) );
 
       // Calculate standard deviation with a scaling factor
       stdX = sqrt(numeratorX / jj) * 0.2;
@@ -202,7 +214,7 @@ bool MPU9250::accelCalibration(int Ascale) {
         // Stop recording data and reset values
         numeratorX = 0; numeratorY = 0; numeratorZ = 0;
         sumX = 0; sumY = 0; sumZ = 0;
-        break
+        break;
       } else {
         // Store the largest and smallest value
         temp[0] = imu_raw.ax;
@@ -235,10 +247,19 @@ bool MPU9250::accelCalibration(int Ascale) {
   }
 }
 
-gyro_calib_t MPU9250::getGyroCalibration() {
+gyro_cal_t MPU9250::getGyroCalibration() {
   return gyro_cal;
 }
 
-accel_calib_t MPU9250::getAccelCalibration() {
+
+accel_cal_t MPU9250::getAccelCalibration() {
   return accel_cal;
+}
+
+void MPU9250::setGyroCalibration(gyro_cal_t gyro) {
+  gyro_cal = gyro;
+}
+
+void MPU9250::setAccelCalibration(accel_cal_t accel){
+  accel_cal = accel;
 }

@@ -72,11 +72,14 @@ private:
 
   char data[14];
 
+  int write2bytes(char byte0, char byte1);
+
 public:
   MPU9250(char addr, i2c_device_t i2c_dev);
 
   // Functions
   bool initIMU();
+  void readCalData();
   void readRawData();
 
   float getAres(int Ascale);
@@ -85,8 +88,11 @@ public:
   bool gyroCalibration(int numCalPoints = 500);
   bool accelCalibration(int Ascale);
 
-  gyro_calib_t getGyroCalibration();
-  accel_calib_t getAccelCalibration();
+  void setGyroCalibration(gyro_cal_t gyro);
+  void setAccelCalibration(accel_cal_t accel);
+
+  gyro_cal_t getGyroCalibration();
+  accel_cal_t getAccelCalibration();
 
   // Variables
   float _aRes, _gRes;
@@ -98,6 +104,6 @@ public:
   accel_cal_t accel_cal;
 
   int temperature;
-}
+};
 
 #endif //MPU9250_H
