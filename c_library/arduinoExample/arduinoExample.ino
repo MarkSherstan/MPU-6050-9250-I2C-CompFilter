@@ -45,12 +45,11 @@ void setup() {
   mpu9250->getGres(GFS_500DPS);
 
   // Calibrate the IMU
+  Serial.println("Calibrating gyroscope, hold IMU stationary"); delay(2000);
   if (!mpu9250->gyroCalibration(500)) Serial.println("Gyroscope calibration failed");
-  if (!mpu9250->accelCalibration(AFS_4G)) Serial.println("Accelerometer calibration failed");
 
-  // Get the calibration values
-  gyro_cal_t gyro_cal = mpu9250->getGyroCalibration();
-  accel_cal_t accel_cal = mpu9250->getAccelCalibration();
+  Serial.println("Calibrating accelerometer, hold IMU stationary in all six directions"); delay(2000);
+  if (!mpu9250->accelCalibration(AFS_4G)) Serial.println("Accelerometer calibration failed");
 
   // Load saved calibration values
   // gyro_cal_t gyro_cal;
@@ -64,6 +63,24 @@ void setup() {
   // accel_cal.sy = 1; accel_cal.by = 0;
   // accel_cal.sz = 1; accel_cal.bz = 0;
   // mpu9250->setAccelCalibration(accel_cal);
+
+  // Get the calibration values and print
+  gyro_cal_t gyro_cal = mpu9250->getGyroCalibration();
+  Serial.println("Gyroscope bias values:\n")
+  Serial.print(mpu9250->gyro_cal.x); Serial.print(",");
+  Serial.print(mpu9250->gyro_cal.y); Serial.print(",");
+  Serial.println(mpu9250->gyro_cal.z);
+
+  accel_cal_t accel_cal = mpu9250->getAccelCalibration();
+  Serial.println("\nAccelerometer bias values:")
+  Serial.print(mpu9250->accel_cal.bx); Serial.print(",");
+  Serial.print(mpu9250->accel_cal.by); Serial.print(",");
+  Serial.println(mpu9250->accel_cal.bz);
+
+  Serial.println("\nAccelerometer scale values:")
+  Serial.print(mpu9250->accel_cal.sx); Serial.print(",");
+  Serial.print(mpu9250->accel_cal.sy); Serial.print(",");
+  Serial.println(mpu9250->accel_cal.sz);
 }
 
 
