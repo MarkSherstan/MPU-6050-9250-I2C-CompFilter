@@ -18,7 +18,7 @@ bool MPU9250::initIMU() {
   _i2c_dev.i2c_read(_addr, data, 1);
   char whoAmI = data[0];
 
-  if (whoAmI == 0x71){
+  if (whoAmI == 0x71 || whoAmI == 0x68){
     // Activate/reset the IMU
     write2bytes(PWR_MGMT_1, 0x00);
     return true;

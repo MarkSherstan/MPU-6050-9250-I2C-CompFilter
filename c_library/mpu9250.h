@@ -70,7 +70,7 @@ private:
   char _addr;
   i2c_device_t _i2c_dev;
 
-  char data[14];
+  unsigned char data[14];
 
   int write2bytes(char byte0, char byte1);
 
