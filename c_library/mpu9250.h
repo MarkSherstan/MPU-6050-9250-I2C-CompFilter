@@ -85,7 +85,7 @@ public:
   float getAres(int Ascale);
   float getGres(int Gscale);
 
-  bool gyroCalibration(int numCalPoints = 500);
+  bool gyroCalibration(int numCalPoints = 1000);
   bool accelCalibration(int Ascale);
 
   void setGyroCalibration(gyro_cal_t gyro);

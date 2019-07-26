@@ -125,9 +125,16 @@ void MPU9250::readCalData() {
 }
 
 bool MPU9250::gyroCalibration(int numCalPoints) {
-  // Initialize standard deviation variabls
-  float std2_x, std2_y, std2_z;
+  // Initialize standard deviation and check variabls
+  float stdX, stdY, stdZ;
+  float xCheckL, yCheckL, zCheckL;
+  float xCheckH, yCheckH, zCheckH;
   float numeratorX, numeratorY, numeratorZ;
+
+  // Clear out any bad start up data
+  for (int ii = 0; ii < 5; ii++){
+    readRawData();
+  }
 
   // Run calibration for given number of points
   for (int ii = 0; ii < numCalPoints; ii++){
@@ -137,26 +144,38 @@ bool MPU9250::gyroCalibration(int numCalPoints) {
     gyro_cal.z += imu_raw.gz;
 
     // Standard deviation numerator calculation
-    numeratorX += (imu_raw.gx - (gyro_cal.x / (ii+1)) ) * (imu_raw.gx - (gyro_cal.x / (ii+1)) );
-    numeratorY += (imu_raw.gy - (gyro_cal.y / (ii+1)) ) * (imu_raw.gy - (gyro_cal.y / (ii+1)) );
-    numeratorZ += (imu_raw.gz - (gyro_cal.z / (ii+1)) ) * (imu_raw.gz - (gyro_cal.z / (ii+1)) );
+    numeratorX += ((imu_raw.gx - (gyro_cal.x / (ii+1)) ) * (imu_raw.gx - (gyro_cal.x / (ii+1)) ));
+    numeratorY += ((imu_raw.gy - (gyro_cal.y / (ii+1)) ) * (imu_raw.gy - (gyro_cal.y / (ii+1)) ));
+    numeratorZ += ((imu_raw.gz - (gyro_cal.z / (ii+1)) ) * (imu_raw.gz - (gyro_cal.z / (ii+1)) ));
 
-    // Build a small sample before checking if gyro values are within 2 standard deviations
-    if (ii > 5){
-      std2_x = sqrt(numeratorX / ii) * 2;
-      std2_y = sqrt(numeratorY / ii) * 2;
-      std2_z = sqrt(numeratorZ / ii) * 2;
+    // Build a small sample before checking if current gyro values are within a standard deviation
+    if (ii > 25){
+      stdX = sqrt(numeratorX / (ii+1));
+      stdY = sqrt(numeratorY / (ii+1));
+      stdZ = sqrt(numeratorZ / (ii+1));
 
-      if ((abs(imu_raw.gx) > std2_x) || (abs(imu_raw.gy) > std2_y) || (abs(imu_raw.gz) > std2_z) ){
+      xCheckH = (gyro_cal.x / (ii+1)) + stdX;
+      yCheckH = (gyro_cal.y / (ii+1)) + stdY;
+      zCheckH = (gyro_cal.z / (ii+1)) + stdZ;
+
+      xCheckL = (gyro_cal.x / (ii+1)) - stdX;
+      yCheckL = (gyro_cal.y / (ii+1)) - stdY;
+      zCheckL = (gyro_cal.z / (ii+1)) - stdZ;
+
+      if ((imu_raw.gx >= xCheckL && imu_raw.gx <= xCheckH)
+            || (imu_raw.gy >= yCheckL && imu_raw.gy <= yCheckH)
+                || (imu_raw.gz >= zCheckL && imu_raw.gz <= zCheckH) ){
+        continue;
+      } else {
         return false;
+        }
       }
     }
-  }
 
-  // Average the averge offset values and return true if everything passes
-  gyro_cal.x /= numCalPoints;
-  gyro_cal.y /= numCalPoints;
-  gyro_cal.z /= numCalPoints;
+  // Find the averge offset values and return true if everything passes
+  gyro_cal.x /= (float)numCalPoints;
+  gyro_cal.y /= (float)numCalPoints;
+  gyro_cal.z /= (float)numCalPoints;
 
   return true;
 }
