@@ -58,12 +58,6 @@ struct gyro_cal_t {
   float x, y, z;
 };
 
-// Accelerometer calibration structure
-struct accel_cal_t {
-  float sx, sy, sz;
-  float bx, by, bz;
-};
-
 
 class MPU9250 {
 private:
@@ -86,13 +80,8 @@ public:
   float getGres(int Gscale);
 
   bool gyroCalibration(int numCalPoints = 1000);
-  bool accelCalibration(int Ascale);
-
   void setGyroCalibration(gyro_cal_t gyro);
-  void setAccelCalibration(accel_cal_t accel);
-
   gyro_cal_t getGyroCalibration();
-  accel_cal_t getAccelCalibration();
 
   // Variables
   float _aRes, _gRes;
@@ -101,7 +90,6 @@ public:
   imu_t imu_cal;
 
   gyro_cal_t gyro_cal;
-  accel_cal_t accel_cal;
 
   int temperature;
 };

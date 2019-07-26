@@ -103,12 +103,7 @@ void MPU9250::readCalData() {
   // Get new data
   readRawData();
 
-  // Remove accelerometer offset and scale values
-  imu_cal.ax = (imu_raw.ax - accel_cal.bx) / accel_cal.sx;
-  imu_cal.ay = (imu_raw.ay - accel_cal.by) / accel_cal.sy;
-  imu_cal.az = (imu_raw.az - accel_cal.bz) / accel_cal.sz;
-
-  // Convert accelerometer values to g
+  // Convert accelerometer values to g's
   imu_cal.ax /= _aRes;
   imu_cal.ay /= _aRes;
   imu_cal.az /= _aRes;
@@ -180,104 +175,10 @@ bool MPU9250::gyroCalibration(int numCalPoints) {
   return true;
 }
 
-bool MPU9250::accelCalibration(int Ascale) {
-  // Initialize arrays for calibration
-  int max[3] = {-32767, -32767, -32767}, min[3] = {32767, 32767, 32767}, temp[3] = {0, 0, 0};
-  float numeratorX, numeratorY, numeratorZ;
-  float stdX, stdY, stdZ;
-  float sumX, sumY, sumZ;
-
-  // Record max and min values for each axis. Maximum of 100 attempts
-  for (int ii = 0; ii < 100; ii++){
-
-    // Build a small sample before running checks
-    int jj;
-    for(jj = 1; jj < 6; jj++){
-      // Read new data
-      readRawData();
-
-      // Sum values for calculating average (x bar)
-      sumX += imu_raw.ax;
-      sumY += imu_raw.ay;
-      sumZ += imu_raw.az;
-
-      // Standard deviation numerator calculation
-      numeratorX += (imu_raw.ax - (sumX / jj) ) * (imu_raw.ax - (sumX / jj) );
-      numeratorY += (imu_raw.ay - (sumY / jj) ) * (imu_raw.ay - (sumY / jj) );
-      numeratorZ += (imu_raw.az - (sumZ / jj) ) * (imu_raw.az - (sumZ / jj) );
-    }
-
-    // Run the checks and record data
-    while(true){
-      // Read new data and increase counter
-      readRawData();
-      jj += 1;
-
-      // Sum values for calculating average (x bar)
-      sumX += imu_raw.ax;
-      sumY += imu_raw.ay;
-      sumZ += imu_raw.az;
-
-      // Standard deviation numerator calculation
-      numeratorX += (imu_raw.ax - (sumX / jj) ) * (imu_raw.ax - (sumX / jj) );
-      numeratorY += (imu_raw.ay - (sumY / jj) ) * (imu_raw.ay - (sumY / jj) );
-      numeratorZ += (imu_raw.az - (sumZ / jj) ) * (imu_raw.az - (sumZ / jj) );
-
-      // Calculate standard deviation with a scaling factor
-      stdX = sqrt(numeratorX / jj) * 0.2;
-      stdY = sqrt(numeratorY / jj) * 0.2;
-      stdZ = sqrt(numeratorZ / jj) * 0.2;
-
-      // If accel is stationary record data otherwise reset
-      if ((abs(imu_raw.ax) > stdX) || (abs(imu_raw.ay) > stdY) || (abs(imu_raw.az) > stdZ) ){
-        // Stop recording data and reset values
-        numeratorX = 0; numeratorY = 0; numeratorZ = 0;
-        sumX = 0; sumY = 0; sumZ = 0;
-        break;
-      } else {
-        // Store the largest and smallest value
-        temp[0] = imu_raw.ax;
-        temp[1] = imu_raw.ay;
-        temp[2] = imu_raw.az;
-
-        for (int kk = 0; kk < 3; kk++){
-          if(temp[kk] > max[kk]) max[kk] = temp[kk];
-          if(temp[kk] < min[kk]) min[kk] = temp[kk];
-        }
-      }
-    }
-  }
-
-  if (max[0] < 0 || max[1] < 0 || max[2] < 0 || min[0] > 0 || min[1] > 0 || min[2] > 0){
-    // Failed calibration
-    return false;
-  } else {
-  // Bias calculation
-  accel_cal.bx = (max[0] + min[0]) / 2;
-  accel_cal.by = (max[1] + min[1]) / 2;
-  accel_cal.bz = (max[2] + min[2]) / 2;
-
-  // Scaling calculation
-  accel_cal.sx = (max[0] - min[0]) / (2 * _aRes);
-  accel_cal.sy = (max[1] - min[1]) / (2 * _aRes);
-  accel_cal.sz = (max[2] - min[2]) / (2 * _aRes);
-
-  return true;
-  }
-}
-
 void MPU9250::setGyroCalibration(gyro_cal_t gyro) {
   gyro_cal = gyro;
 }
 
-void MPU9250::setAccelCalibration(accel_cal_t accel) {
-  accel_cal = accel;
-}
-
 gyro_cal_t MPU9250::getGyroCalibration() {
   return gyro_cal;
-}
-
-accel_cal_t MPU9250::getAccelCalibration() {
-  return accel_cal;
 }
