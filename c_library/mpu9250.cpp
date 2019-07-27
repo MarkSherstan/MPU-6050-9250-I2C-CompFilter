@@ -104,9 +104,9 @@ void MPU9250::readCalData() {
   readRawData();
 
   // Convert accelerometer values to g's
-  imu_cal.ax /= _aRes;
-  imu_cal.ay /= _aRes;
-  imu_cal.az /= _aRes;
+  imu_cal.ax = imu_raw.ax / _aRes;
+  imu_cal.ay = imu_raw.ay / _aRes;
+  imu_cal.az = imu_raw.az / _aRes;
 
   // Remove gyro offset
   imu_cal.gx = imu_raw.gx - gyro_cal.x;
@@ -125,11 +125,6 @@ bool MPU9250::gyroCalibration(int numCalPoints) {
   float xCheckL, yCheckL, zCheckL;
   float xCheckH, yCheckH, zCheckH;
   float numeratorX, numeratorY, numeratorZ;
-
-  // Clear out any bad start up data
-  for (int ii = 0; ii < 5; ii++){
-    readRawData();
-  }
 
   // Run calibration for given number of points
   for (int ii = 0; ii < numCalPoints; ii++){
