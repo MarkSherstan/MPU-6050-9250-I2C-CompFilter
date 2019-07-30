@@ -6,7 +6,7 @@
 #include <math.h>
 #endif
 
-MPU9250::MPU9250(char addr, i2c_device_t i2c_dev){
+MPU9250::MPU9250(unsigned char addr, i2c_device_t i2c_dev){
   _addr = addr;
   _i2c_dev = i2c_dev;
 }
@@ -16,7 +16,7 @@ bool MPU9250::initIMU() {
   data[0] = WHO_AM_I_MPU9250;
   _i2c_dev.i2c_write(_addr, data, 1);
   _i2c_dev.i2c_read(_addr, data, 1);
-  char whoAmI = data[0];
+  unsigned char whoAmI = data[0];
 
   if (whoAmI == 0x71 || whoAmI == 0x68){
     // Activate/reset the IMU
@@ -27,7 +27,7 @@ bool MPU9250::initIMU() {
   return false;
 }
 
-int MPU9250::write2bytes(char byte0, char byte1) {
+int MPU9250::write2bytes(unsigned char byte0, unsigned char byte1) {
   data[0] = byte0;
   data[1] = byte1;
   _i2c_dev.i2c_write(_addr, data, 2);
@@ -88,15 +88,15 @@ void MPU9250::readRawData() {
   _i2c_dev.i2c_read(_addr, data, 14);
 
   // Read data - Temperature falls between accel and gyro registers
-  imu_raw.ax = data[0]  << 8 | data[1];
-  imu_raw.ay = data[2]  << 8 | data[3];
-  imu_raw.az = data[4]  << 8 | data[5];
+  imu_raw.ax = (short) (data[0]  << 8 | data[1]);
+  imu_raw.ay = (short) (data[2]  << 8 | data[3]);
+  imu_raw.az = (short) (data[4]  << 8 | data[5]);
 
-  imu_raw.gx = data[8]  << 8 | data[9];
-  imu_raw.gy = data[10] << 8 | data[11];
-  imu_raw.gz = data[12] << 8 | data[13];
+  imu_raw.gx = (short) (data[8]  << 8 | data[9]);
+  imu_raw.gy = (short) (data[10] << 8 | data[11]);
+  imu_raw.gz = (short) (data[12] << 8 | data[13]);
 
-  temperature = data[6] << 8 | data[7];
+  temperature = (short) (data[6] << 8 | data[7]);
 }
 
 void MPU9250::readCalData() {

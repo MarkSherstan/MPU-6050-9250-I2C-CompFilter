@@ -40,7 +40,7 @@
 #define GFS_2000DPS 3
 
 // Type def for function pointer
-typedef int (*i2c_read_write_t)(char addr, char *data, char len);
+typedef int (*i2c_read_write_t)(unsigned char addr, unsigned char *data, unsigned char len);
 
 // Read and write struct
 struct i2c_device_t {
@@ -61,15 +61,15 @@ struct gyro_cal_t {
 
 class MPU9250 {
 private:
-  char _addr;
+  unsigned char _addr;
   i2c_device_t _i2c_dev;
 
   unsigned char data[14];
 
-  int write2bytes(char byte0, char byte1);
+  int write2bytes(unsigned char byte0, unsigned char byte1);
 
 public:
-  MPU9250(char addr, i2c_device_t i2c_dev);
+  MPU9250(unsigned char addr, i2c_device_t i2c_dev);
 
   // Functions
   bool initIMU();
