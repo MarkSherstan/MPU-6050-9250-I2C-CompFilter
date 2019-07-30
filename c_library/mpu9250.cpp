@@ -119,7 +119,7 @@ void MPU9250::readCalData() {
   imu_cal.gz /= _gRes;
 }
 
-bool MPU9250::gyroCalibration(int numCalPoints) {
+void MPU9250::gyroCalibration(int numCalPoints) {
   // Initialize standard deviation and check variabls
   float stdX, stdY, stdZ;
   float xCheckL, yCheckL, zCheckL;
@@ -132,42 +132,12 @@ bool MPU9250::gyroCalibration(int numCalPoints) {
     gyro_cal.x += imu_raw.gx;
     gyro_cal.y += imu_raw.gy;
     gyro_cal.z += imu_raw.gz;
+  }
 
-    // Standard deviation numerator calculation
-    numeratorX += ((imu_raw.gx - (gyro_cal.x / (ii+1)) ) * (imu_raw.gx - (gyro_cal.x / (ii+1)) ));
-    numeratorY += ((imu_raw.gy - (gyro_cal.y / (ii+1)) ) * (imu_raw.gy - (gyro_cal.y / (ii+1)) ));
-    numeratorZ += ((imu_raw.gz - (gyro_cal.z / (ii+1)) ) * (imu_raw.gz - (gyro_cal.z / (ii+1)) ));
-
-    // Build a small sample before checking if current gyro values are within a standard deviation
-    if (ii > 25){
-      stdX = sqrt(numeratorX / (ii+1));
-      stdY = sqrt(numeratorY / (ii+1));
-      stdZ = sqrt(numeratorZ / (ii+1));
-
-      xCheckH = (gyro_cal.x / (ii+1)) + stdX;
-      yCheckH = (gyro_cal.y / (ii+1)) + stdY;
-      zCheckH = (gyro_cal.z / (ii+1)) + stdZ;
-
-      xCheckL = (gyro_cal.x / (ii+1)) - stdX;
-      yCheckL = (gyro_cal.y / (ii+1)) - stdY;
-      zCheckL = (gyro_cal.z / (ii+1)) - stdZ;
-
-      if ((imu_raw.gx >= xCheckL && imu_raw.gx <= xCheckH)
-            || (imu_raw.gy >= yCheckL && imu_raw.gy <= yCheckH)
-                || (imu_raw.gz >= zCheckL && imu_raw.gz <= zCheckH) ){
-        continue;
-      } else {
-        return false;
-        }
-      }
-    }
-
-  // Find the averge offset values and return true if everything passes
+  // Find the averge offset values
   gyro_cal.x /= (float)numCalPoints;
   gyro_cal.y /= (float)numCalPoints;
   gyro_cal.z /= (float)numCalPoints;
-
-  return true;
 }
 
 void MPU9250::setGyroCalibration(gyro_cal_t gyro) {
