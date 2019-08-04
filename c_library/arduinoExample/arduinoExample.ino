@@ -26,15 +26,9 @@ void setup() {
   // Initialize the IMU and set the senstivity values
   Serial.println("---------------------------------------");
   Serial.print("IMU initialize. Pass/Fail: "); Serial.println(mpuXX50->initIMU(MPU6050));
-  Serial.println(mpuXX50->getAres(AFS_4G));
-  Serial.println(mpuXX50->getGres(GFS_500DPS));
+  mpuXX50->getAres(AFS_4G);
+  mpuXX50->getGres(GFS_500DPS);
   delay(1000);
-
-  // // Flush out initial data
-  // for (int cal_int = 0; cal_int < 5; cal_int ++){
-  //   mpuXX50->readRawData();
-  //   delay(100);
-  // }
 
   // Calibrate the gyroscope
   gyro_cal_t gyro_cal;
@@ -94,7 +88,7 @@ void loop() {
 
   Serial.print(mpuXX50->attitude.roll,2); Serial.print(" , ");
   Serial.print(mpuXX50->attitude.pitch,2); Serial.print(" , ");
-  Serial.print(mpuXX50->attitude.yaw,2);
+  Serial.println(mpuXX50->attitude.yaw,2);
 }
 
 // I2C read and write functions
