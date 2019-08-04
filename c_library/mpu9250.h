@@ -61,7 +61,7 @@ struct gyro_cal_t {
 // Attitude structure
 struct attitude_t {
   float roll, pitch, yaw;
-}
+};
 
 class MPU9250 {
 private:
