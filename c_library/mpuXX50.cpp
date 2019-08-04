@@ -129,7 +129,7 @@ void MPUXX50::compFilter(float dt, float tau) {
 
   attitude.roll = (tau)*(attitude.roll - imu_cal.gy*dt) + (1-tau)*(accelRoll);
   attitude.pitch = (tau)*(attitude.pitch + imu_cal.gx*dt) + (1-tau)*(accelPitch);
-  attitude.yaw = imu_cal.gz*dt;
+  attitude.yaw += imu_cal.gz*dt;
 }
 
 void MPUXX50::gyroCalibration(int numCalPoints) {
