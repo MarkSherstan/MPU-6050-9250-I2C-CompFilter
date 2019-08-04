@@ -119,6 +119,19 @@ void MPU9250::readCalData() {
   imu_cal.gz /= _gRes;
 }
 
+void MPU9250::compFilter(float dt, float tau) {
+  // Read calibrated data
+  readCalData();
+
+  // Complementary filter
+  accelPitch = atan2(imu_cal.ay, imu_cal.az) * (180 / M_PI);
+  accelRoll = atan2(imu_cal.ax, imu_cal.az) * (180 / M_PI);
+
+  attitude.roll = (tau)*(attitude.roll - imu_cal.gy*dt) + (1-tau)*(accelRoll);
+  attitude.pitch = (tau)*(attitude.pitch + imu_cal.gx*dt) + (1-tau)*(accelPitch);
+  attitude.yaw = imu_cal.gz*dt;
+}
+
 void MPU9250::gyroCalibration(int numCalPoints) {
   // Initialize standard deviation and check variabls
   float stdX, stdY, stdZ;

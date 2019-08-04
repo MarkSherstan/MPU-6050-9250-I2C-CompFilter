@@ -58,6 +58,10 @@ struct gyro_cal_t {
   float x, y, z;
 };
 
+// Attitude structure
+struct attitude_t {
+  float roll, pitch, yaw;
+}
 
 class MPU9250 {
 private:
@@ -65,6 +69,8 @@ private:
   i2c_device_t _i2c_dev;
 
   unsigned char data[14];
+
+  float accelPitch, accelRoll;
 
   int write2bytes(unsigned char byte0, unsigned char byte1);
 
@@ -75,6 +81,7 @@ public:
   bool initIMU();
   void readCalData();
   void readRawData();
+  void compFilter(float dt, float tau);
 
   float getAres(int Ascale);
   float getGres(int Gscale);
@@ -88,6 +95,7 @@ public:
 
   imu_t imu_raw;
   imu_t imu_cal;
+  attitude_t attitude;
 
   gyro_cal_t gyro_cal;
 
