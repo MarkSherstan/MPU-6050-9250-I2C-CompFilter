@@ -3,14 +3,14 @@
 #include "MPU9250.h"
 
 // Variable definition
-long loopTimer;
+unsigned long loopTimer;
+float dt;
 
 // Setup class
 struct i2c_device_t i2c_dev;
 MPU9250 *mpu9250;
 
-
-
+// Sensor setup and calibration
 void setup() {
   // Start wire and serial
   Wire.begin();
@@ -26,19 +26,20 @@ void setup() {
   // Initialize the IMU and set the senstivity values
   Serial.println("---------------------------------------");
   Serial.print("IMU initialize. Pass/Fail: "); Serial.println(mpu9250->initIMU());
-  mpu9250->getAres(AFS_4G);
-  mpu9250->getGres(GFS_500DPS);
+  Serial.println(mpu9250->getAres(AFS_4G));
+  Serial.println(mpu9250->getGres(GFS_500DPS));
+  delay(1000);
 
-  // Flush out initial data
-  for (int cal_int = 0; cal_int < 5; cal_int ++){
-    mpu9250->readRawData();
-    delay(100);
-  }
+  // // Flush out initial data
+  // for (int cal_int = 0; cal_int < 5; cal_int ++){
+  //   mpu9250->readRawData();
+  //   delay(100);
+  // }
 
   // Calibrate the gyroscope
   gyro_cal_t gyro_cal;
-  Serial.print("Calibrating gyroscope, hold IMU stationary. Pass/Fail: "); delay(2000);
-  Serial.println(mpu9250->gyroCalibration(1000));
+  Serial.println("Calibrating gyroscope, hold IMU stationary."); delay(2000);
+  mpu9250->gyroCalibration(1000);
 
   // Load saved gyroscope calibration values
   // gyro_cal.x = 0;
@@ -61,13 +62,16 @@ void setup() {
   loopTimer = micros();
 }
 
-
-
+// Sensor processing and printing
 void loop() {
-  // Read data
-  mpu9250->readCalData();
+  // Loop timing (4000 us = 250 Hz)
+  while (micros() - loopTimer <= 4000);
+  dt = (float)(micros() - loopTimer) / 1000000;
+  loopTimer = micros();
 
   // Print raw data to the serial monitor
+  // mpu9250->readRawData();
+  //
   // Serial.print(mpu9250->imu_raw.ax,2); Serial.print(" , ");
   // Serial.print(mpu9250->imu_raw.ay,2); Serial.print(" , ");
   // Serial.print(mpu9250->imu_raw.az,2); Serial.print(" , ");
@@ -76,19 +80,22 @@ void loop() {
   // Serial.println(mpu9250->imu_raw.gz,2);
 
   // Print calibrated data to the serial monitor
-  Serial.print(mpu9250->imu_cal.ax,2); Serial.print(" , ");
-  Serial.print(mpu9250->imu_cal.ay,2); Serial.print(" , ");
-  Serial.print(mpu9250->imu_cal.az,2); Serial.print(" , ");
-  Serial.print(mpu9250->imu_cal.gx,2); Serial.print(" , ");
-  Serial.print(mpu9250->imu_cal.gy,2); Serial.print(" , ");
-  Serial.println(mpu9250->imu_cal.gz,2);
+  // mpu9250->readCalData();
+  //
+  // Serial.print(mpu9250->imu_cal.ax,2); Serial.print(" , ");
+  // Serial.print(mpu9250->imu_cal.ay,2); Serial.print(" , ");
+  // Serial.print(mpu9250->imu_cal.az,2); Serial.print(" , ");
+  // Serial.print(mpu9250->imu_cal.gx,2); Serial.print(" , ");
+  // Serial.print(mpu9250->imu_cal.gy,2); Serial.print(" , ");
+  // Serial.println(mpu9250->imu_cal.gz,2);
 
-  // Wait until the loopTimer reaches 4000us (250Hz) before next loop
-  while (micros() - loopTimer <= 4000);
-  loopTimer = micros();
+  // Print complementary filter attitude to the serial monitor
+  mpu9250->compFilter(dt, 0.98);
+
+  Serial.print(mpu9250->attitude.roll,2); Serial.print(" , ");
+  Serial.print(mpu9250->attitude.pitch,2); Serial.print(" , ");
+  Serial.print(mpu9250->attitude.yaw,2);
 }
-
-
 
 // I2C read and write functions
 int i2c_read(char addr, byte *data, char len){
