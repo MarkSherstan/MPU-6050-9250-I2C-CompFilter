@@ -1,4 +1,4 @@
-#include "mpu9250.h"
+#include "mpuXX50.h"
 
 #ifdef ARDUINO
 #include <arduino.h>
@@ -6,12 +6,12 @@
 #include <math.h>
 #endif
 
-MPU9250::MPU9250(unsigned char addr, i2c_device_t i2c_dev){
+MPUXX50::MPUXX50(unsigned char addr, i2c_device_t i2c_dev){
   _addr = addr;
   _i2c_dev = i2c_dev;
 }
 
-bool MPU9250::initIMU(int sensor) {
+bool MPUXX50::initIMU(int sensor) {
   // Check if a valid connection has been established
   data[0] = WHO_AM_I;
   _i2c_dev.i2c_write(_addr, data, 1);
@@ -27,13 +27,13 @@ bool MPU9250::initIMU(int sensor) {
   return false;
 }
 
-int MPU9250::write2bytes(unsigned char byte0, unsigned char byte1) {
+int MPUXX50::write2bytes(unsigned char byte0, unsigned char byte1) {
   data[0] = byte0;
   data[1] = byte1;
   _i2c_dev.i2c_write(_addr, data, 2);
 }
 
-float MPU9250::getAres(int Ascale) {
+float MPUXX50::getAres(int Ascale) {
   // Set the full scale range for the accelerometer
   switch (Ascale){
     case AFS_2G:
@@ -57,7 +57,7 @@ float MPU9250::getAres(int Ascale) {
   }
 }
 
-float MPU9250::getGres(int Gscale) {
+float MPUXX50::getGres(int Gscale) {
   // Set the full scale range for the gyroscope
   switch (Gscale){
     case GFS_250DPS:
@@ -81,7 +81,7 @@ float MPU9250::getGres(int Gscale) {
   }
 }
 
-void MPU9250::readRawData() {
+void MPUXX50::readRawData() {
   // Subroutine for reading the raw data
   data[0] = ACCEL_XOUT_H;
   _i2c_dev.i2c_write(_addr, data, 1);
@@ -99,7 +99,7 @@ void MPU9250::readRawData() {
   temperature = (short) (data[6] << 8 | data[7]);
 }
 
-void MPU9250::readCalData() {
+void MPUXX50::readCalData() {
   // Get new data
   readRawData();
 
@@ -119,7 +119,7 @@ void MPU9250::readCalData() {
   imu_cal.gz /= _gRes;
 }
 
-void MPU9250::compFilter(float dt, float tau) {
+void MPUXX50::compFilter(float dt, float tau) {
   // Read calibrated data
   readCalData();
 
@@ -132,7 +132,7 @@ void MPU9250::compFilter(float dt, float tau) {
   attitude.yaw = imu_cal.gz*dt;
 }
 
-void MPU9250::gyroCalibration(int numCalPoints) {
+void MPUXX50::gyroCalibration(int numCalPoints) {
   // Initialize standard deviation and check variabls
   float stdX, stdY, stdZ;
   float xCheckL, yCheckL, zCheckL;
@@ -153,10 +153,10 @@ void MPU9250::gyroCalibration(int numCalPoints) {
   gyro_cal.z /= (float)numCalPoints;
 }
 
-void MPU9250::setGyroCalibration(gyro_cal_t gyro) {
+void MPUXX50::setGyroCalibration(gyro_cal_t gyro) {
   gyro_cal = gyro;
 }
 
-gyro_cal_t MPU9250::getGyroCalibration() {
+gyro_cal_t MPUXX50::getGyroCalibration() {
   return gyro_cal;
 }

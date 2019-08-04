@@ -1,6 +1,6 @@
 // Include gaurd
-#ifndef MPU9250_H
-#define MPU9250_H
+#ifndef MPUXX50_H
+#define MPUXX50_H
 
 // Define sensors
 #define MPU6050 0
@@ -67,7 +67,7 @@ struct attitude_t {
   float roll, pitch, yaw;
 };
 
-class MPU9250 {
+class MPUXX50 {
 private:
   unsigned char _addr;
   i2c_device_t _i2c_dev;
@@ -79,7 +79,7 @@ private:
   int write2bytes(unsigned char byte0, unsigned char byte1);
 
 public:
-  MPU9250(unsigned char addr, i2c_device_t i2c_dev);
+  MPUXX50(unsigned char addr, i2c_device_t i2c_dev);
 
   // Functions
   bool initIMU(int sensor);
@@ -106,4 +106,4 @@ public:
   int temperature;
 };
 
-#endif //MPU9250_H
+#endif //MPUXX50_H
