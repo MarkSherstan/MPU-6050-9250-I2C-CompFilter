@@ -11,14 +11,14 @@ MPU9250::MPU9250(unsigned char addr, i2c_device_t i2c_dev){
   _i2c_dev = i2c_dev;
 }
 
-bool MPU9250::initIMU() {
+bool MPU9250::initIMU(int sensor) {
   // Check if a valid connection has been established
-  data[0] = WHO_AM_I_MPU9250;
+  data[0] = WHO_AM_I;
   _i2c_dev.i2c_write(_addr, data, 1);
   _i2c_dev.i2c_read(_addr, data, 1);
   unsigned char whoAmI = data[0];
 
-  if (whoAmI == 0x71 || whoAmI == 0x68){
+  if ( (whoAmI == 0x68 && sensor == MPU6050) || (whoAmI == 0x71 && sensor == MPU9250) ){
     // Activate/reset the IMU
     write2bytes(PWR_MGMT_1, 0x00);
     return true;

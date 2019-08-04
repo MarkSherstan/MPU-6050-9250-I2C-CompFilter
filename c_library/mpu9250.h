@@ -2,10 +2,14 @@
 #ifndef MPU9250_H
 #define MPU9250_H
 
+// Define sensors
+#define MPU6050 0
+#define MPU9250 1
+
 // IMU configuration and check registries
-#define WHO_AM_I_MPU9250  0x75
-#define GYRO_CONFIG       0x1B
-#define ACCEL_CONFIG      0x1C
+#define WHO_AM_I        0x75
+#define GYRO_CONFIG     0x1B
+#define ACCEL_CONFIG    0x1C
 
 // Other IMU registeries
 #define PWR_MGMT_1  0x6B
@@ -78,7 +82,7 @@ public:
   MPU9250(unsigned char addr, i2c_device_t i2c_dev);
 
   // Functions
-  bool initIMU();
+  bool initIMU(int sensor);
   void readCalData();
   void readRawData();
   void compFilter(float dt, float tau);
