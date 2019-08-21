@@ -2,10 +2,11 @@
 CC = g++
 
 # Names and flags
-CPPSOURCES += $(wildcard *.cpp)
+INC_DIR = test
+CPPSOURCES += $(wildcard *.cpp $(INC_DIR)/*.cpp)
 OBJECTS = $(CPPSOURCES:.cpp=.o)
 EXECUTABLE = mpuXX50
-CFLAGS = -c -g -Wall
+CFLAGS = -c -g -Wall -I $(INC_DIR)
 LIBS = -lwiringPi
 
 # Compile and clean
