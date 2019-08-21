@@ -30,7 +30,7 @@ bool MPUXX50::initIMU(int sensor) {
 int MPUXX50::write2bytes(unsigned char byte0, unsigned char byte1) {
   data[0] = byte0;
   data[1] = byte1;
-  _i2c_dev.i2c_write(_addr, data, 2);
+  return _i2c_dev.i2c_write(_addr, data, 2);
 }
 
 float MPUXX50::getAres(int Ascale) {
@@ -133,12 +133,6 @@ void MPUXX50::compFilter(float dt, float tau) {
 }
 
 void MPUXX50::gyroCalibration(int numCalPoints) {
-  // Initialize standard deviation and check variabls
-  float stdX, stdY, stdZ;
-  float xCheckL, yCheckL, zCheckL;
-  float xCheckH, yCheckH, zCheckH;
-  float numeratorX, numeratorY, numeratorZ;
-
   // Run calibration for given number of points
   for (int ii = 0; ii < numCalPoints; ii++){
     readRawData();
