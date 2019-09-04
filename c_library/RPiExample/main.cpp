@@ -1,7 +1,9 @@
-#include <wiringPi.h>
-#include <wiringPiI2C.h>
-#include <iostream>
 #include <unistd.h>
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <linux/i2c-dev.h>
+#include <iostream>
+#include <iomanip>
 #include <time.h>
 #include "mpuXX50.h"
 
@@ -12,23 +14,23 @@ clock_t t;
 
 // I2C read and write functions
 int i2c_read(int addr, unsigned char *data, char len){
-  char a = data[0];
-
-  for (int ii = 0; ii < len; ii++){
-    data[ii] = wiringPiI2CReadReg8(addr, a);
-    a++;
-  }
-
-  return 0;
+	if (read(addr, data, len) != len){
+		return -1;
+	} else {
+		return 0;
+	}
 };
 
 int i2c_write(int addr, unsigned char *data, char len){
-  for (int ii = 1; ii < len; ii++){
-    wiringPiI2CWriteReg8(addr, data[ii-1], data[ii]);
+	if (write(addr, data, len) != len){
+		return -1;
+	} else {
+    return 0;
   }
-
-  return 0;
 };
+
+// Open the I2C Bus
+char *filename = (char*)"/dev/i2c-1";
 
 // Setup the MPU class
 struct i2c_device_t i2c_dev;
@@ -36,11 +38,17 @@ MPUXX50 *mpuXX50;
 
 // Main function
 int main(){
-  // Start the wiringPiI2C on 0x68
-  if ((fd = wiringPiI2CSetup(0x68)) < 0) {
-    std::cout << "wiringPiI2CSetup failed" << std::endl;
+  // Start I2C
+	if ((fd = open(filename, O_RDWR)) < 0){
+    std::cout << "Failed to open the i2c bus" << std::endl;
     return -1;
-  }
+	}
+
+  // Connect on 0x68
+	if (ioctl(fd, I2C_SLAVE, 0x68) < 0){
+    std::cout << "Failed to acquire bus access and/or talk to slave." << std::endl;
+		return -1;
+	}
 
   // Prepare I2C functions for read and write
   i2c_dev.i2c_write = (i2c_read_write_t) &i2c_write;
@@ -87,7 +95,7 @@ int main(){
     // Record the change in time
     t = clock() - t;
     dt = ((float)t) / CLOCKS_PER_SEC;
-    std::cout << std::setprecision(3) << dt << "\t";
+    std::cout << dt << "\t";
 
     // Print raw data
     // mpuXX50->readRawData();
@@ -99,18 +107,18 @@ int main(){
     // std::cout << std::setprecision(3) << mpuXX50->imu_raw.gz << std::endl;
 
     // Print calibrated data
-    mpuXX50->readCalData();
-    std::cout << std::setprecision(3) << mpuXX50->imu_cal.ax << ", ";
-    std::cout << std::setprecision(3) << mpuXX50->imu_cal.ay << ", ";
-    std::cout << std::setprecision(3) << mpuXX50->imu_cal.az << " | ";
-    std::cout << std::setprecision(3) << mpuXX50->imu_cal.gx << ", ";
-    std::cout << std::setprecision(3) << mpuXX50->imu_cal.gy << ", ";
-    std::cout << std::setprecision(3) << mpuXX50->imu_cal.gz << std::endl;
+    // mpuXX50->readCalData();
+    // std::cout << std::setprecision(3) << mpuXX50->imu_cal.ax << ", ";
+    // std::cout << std::setprecision(3) << mpuXX50->imu_cal.ay << ", ";
+    // std::cout << std::setprecision(3) << mpuXX50->imu_cal.az << " | ";
+    // std::cout << std::setprecision(3) << mpuXX50->imu_cal.gx << ", ";
+    // std::cout << std::setprecision(3) << mpuXX50->imu_cal.gy << ", ";
+    // std::cout << std::setprecision(3) << mpuXX50->imu_cal.gz << std::endl;
 
     // Print complementary filter attitude
-    // mpuXX50->compFilter(dt, 0.98);
-    // std::cout << std::setprecision(1) << mpuXX50->attitude.roll << ", ";
-    // std::cout << std::setprecision(1) << mpuXX50->attitude.pitch << ", ";
-    // std::cout << std::setprecision(1) << mpuXX50->attitude.yaw << std::endl;
+    mpuXX50->compFilter(dt, 0.98);
+    std::cout << mpuXX50->attitude.roll  << ", ";
+    std::cout << mpuXX50->attitude.pitch << ", ";
+    std::cout << mpuXX50->attitude.yaw << std::endl;
   }
 }
