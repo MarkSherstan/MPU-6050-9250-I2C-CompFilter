@@ -122,8 +122,29 @@ Double click on the `index.html` file located in `Visualizer/p5js/main` and the 
 
 **Ensure to hold the IMU device still until an object appears on the screen. This is the program performing a calibration for gyroscope offset.**
 
+### C Library
+A generic C library was written that can be used on a variety of hardware. Refer to the Arduino or Raspberry Pi example in the `c_library` directory to get an idea of how to use the library.
+
+For the Arduino example ensure to add the library to your Arduino IDE or put the `mpuXX50.h` and `mpuXX50.cpp` in the same folder as your `*.ino`.
+
+For the Raspberry Pi you may need to run the following commands before using the `Makefile`.
+
+```
+sudo apt-get install libi2c-dev
+sudo apt-get install i2c-tools
+sudo apt-get update
+
+  sudo i2cdetect -y 0
+  //or
+  sudo i2cdetect -y 1
+```
+
+Upon setting up the class with the I2C address of the sensor and defining the read and write functions the library has the capability to.
+* Perform WHO_AM_I sensor self check
+* Set the resolution of the accelerometer and gyroscope
+* Perform, set, and return gyroscope calibration values
+* Return raw sensor values, calibrated sensor values, and complementary fused values yielding sensor attitude - roll, pitch, and yaw (yaw will drift over time)
+
 ## Future Ideas
-* RPi C++ Version
 * Add quaternion angle representation
-* Stat analysis for mag calibration (9DOF)
-* Detailed accelerometer and gyroscope calibration(s)
+* Create wiki
