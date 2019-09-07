@@ -4,13 +4,15 @@
 #include <linux/i2c-dev.h>
 #include <iostream>
 #include <iomanip>
-#include <time.h>
+#include <chrono>
+#include <thread>
 #include "mpuXX50.h"
 
-// Some variable definitions
+// Variable definitions
+int sampleRate = 4000; // Microseconds (~250 Hz)
+int time2Delay;
 int fd;
 float dt;
-clock_t t;
 
 // I2C read and write functions
 int i2c_read(int addr, unsigned char *data, char len){
@@ -29,6 +31,24 @@ int i2c_write(int addr, unsigned char *data, char len){
   }
 };
 
+// Time stabilization function
+float timeSync(auto t1){
+	// Find duration to sleep thread
+	auto t2 = std::chrono::high_resolution_clock::now();
+	time2Delay = std::chrono::duration<float, std::micro>(t2-t1).count();
+
+	// Sleep thread
+	std::this_thread::sleep_for(std::chrono::microseconds(sampleRate-time2Delay));
+
+	// Calculate dt
+	auto t3 = std::chrono::high_resolution_clock::now();
+	dt = (std::chrono::duration<float, std::micro>(t3-t1).count()) * 1E-6;
+	std::cout << "\t" << 1/dt << std::endl;
+
+	// Return dt and begin main loop again
+	return dt;
+}
+
 // Open the I2C Bus
 char *filename = (char*)"/dev/i2c-1";
 
@@ -38,7 +58,7 @@ MPUXX50 *mpuXX50;
 
 // Main function
 int main(){
-  // Start I2C
+	// Start I2C
 	if ((fd = open(filename, O_RDWR)) < 0){
     std::cout << "Failed to open the i2c bus" << std::endl;
     return -1;
@@ -78,7 +98,6 @@ int main(){
 
   // Display calibration values to user
   gyro_cal = mpuXX50->getGyroCalibration();
-
   std::cout << "---------------------------------------" << std::endl;
   std::cout << "Gyroscope bias values:" << std::endl;
   std::cout << "\t X: " << mpuXX50->gyro_cal.x << std::endl;
@@ -87,15 +106,10 @@ int main(){
   std::cout << "---------------------------------------" << std::endl;
   sleep(2);
 
-  // Start a timer
-  t = clock();
-
   // Run this forever
   while(true) {
-    // Record the change in time
-    t = clock() - t;
-    dt = ((float)t) / CLOCKS_PER_SEC;
-    std::cout << dt << "\t";
+		// Record loop time stamp
+		auto loopTimer = std::chrono::high_resolution_clock::now();
 
     // Print raw data
     // mpuXX50->readRawData();
@@ -104,7 +118,7 @@ int main(){
     // std::cout << std::setprecision(3) << mpuXX50->imu_raw.az << " | ";
     // std::cout << std::setprecision(3) << mpuXX50->imu_raw.gx << ", ";
     // std::cout << std::setprecision(3) << mpuXX50->imu_raw.gy << ", ";
-    // std::cout << std::setprecision(3) << mpuXX50->imu_raw.gz << std::endl;
+    // std::cout << std::setprecision(3) << mpuXX50->imu_raw.gz;
 
     // Print calibrated data
     // mpuXX50->readCalData();
@@ -113,12 +127,15 @@ int main(){
     // std::cout << std::setprecision(3) << mpuXX50->imu_cal.az << " | ";
     // std::cout << std::setprecision(3) << mpuXX50->imu_cal.gx << ", ";
     // std::cout << std::setprecision(3) << mpuXX50->imu_cal.gy << ", ";
-    // std::cout << std::setprecision(3) << mpuXX50->imu_cal.gz << std::endl;
+    // std::cout << std::setprecision(3) << mpuXX50->imu_cal.gz;
 
     // Print complementary filter attitude
     mpuXX50->compFilter(dt, 0.98);
-    std::cout << mpuXX50->attitude.roll  << ", ";
-    std::cout << mpuXX50->attitude.pitch << ", ";
-    std::cout << mpuXX50->attitude.yaw << std::endl;
+    std::cout << std::setprecision(3) << mpuXX50->attitude.roll  << ", ";
+    std::cout << std::setprecision(3) << mpuXX50->attitude.pitch << ", ";
+    std::cout << std::setprecision(3) << mpuXX50->attitude.yaw;
+
+		// Stabilize the data rate
+		dt = timeSync(loopTimer);
   }
 }
