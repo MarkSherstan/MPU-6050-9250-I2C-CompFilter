@@ -127,7 +127,7 @@ A generic C library was written that can be used on a variety of hardware. Refer
 
 For the Arduino example ensure to add the library to your Arduino IDE or put the `mpuXX50.h` and `mpuXX50.cpp` in the same folder as your `*.ino`.
 
-For the Raspberry Pi you may need to run the following commands:
+For the Raspberry Pi you may need to run the following commands before using the `Makefile`.
 
 ```
 sudo apt-get install libi2c-dev
