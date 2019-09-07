@@ -56,7 +56,6 @@ void read_mpu_6050_data() {
   Wire.requestFrom(0x68, 14);
 
   // Read data --> Temperature falls between acc and gyro registers
-  while(Wire.available() < 14);
   acc_x = Wire.read() << 8 | Wire.read();
   acc_y = Wire.read() << 8 | Wire.read();
   acc_z = Wire.read() << 8 | Wire.read();

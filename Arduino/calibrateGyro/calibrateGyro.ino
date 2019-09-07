@@ -70,7 +70,6 @@ void read_mpu_6050_data(){
   Wire.requestFrom(0x68,6);
 
   // Read data
-  while(Wire.available() < 6);
   gyro_x = Wire.read()<<8 | Wire.read();
   gyro_y = Wire.read()<<8 | Wire.read();
   gyro_z = Wire.read()<<8 | Wire.read();
