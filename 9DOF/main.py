@@ -86,7 +86,11 @@ class MPU:
 
 	def setUpIMU(self):
 		# Check to see if there is a good connection with the MPU 9250
-		whoAmI = self.bus.read_byte_data(self.MPU9250_ADDRESS, self.WHO_AM_I_MPU9250)
+		try:
+			whoAmI = self.bus.read_byte_data(self.MPU9250_ADDRESS, self.WHO_AM_I_MPU9250)
+		except:
+			print('whoAmI IMU read failed')
+			return
 
 		if (whoAmI == 0x71):
 			# Connection is good! Activate/reset the IMU
@@ -116,7 +120,11 @@ class MPU:
 		time.sleep(0.05)
 
 		# Check to see if there is a good connection with the mag
-		whoAmI = self.bus.read_byte_data(self.MPU9250_ADDRESS, self.EXT_SENS_DATA_00)
+		try:
+			whoAmI = self.bus.read_byte_data(self.MPU9250_ADDRESS, self.EXT_SENS_DATA_00)
+		except:
+			print('whoAmI MAG read failed')
+			return
 
 		if (whoAmI == 0x48):
 			# Connection is good! Begin the true initialization
@@ -144,9 +152,11 @@ class MPU:
 			time.sleep(0.05)
 
 			# Read the x, y, and z axis calibration values
-			rawData = []
-			for ii in range(3):
-				rawData.append(self.bus.read_byte_data(self.MPU9250_ADDRESS, self.EXT_SENS_DATA_00 + ii))
+			try:
+				rawData = self.bus.read_i2c_block_data(self.MPU9250_ADDRESS, self.EXT_SENS_DATA_00, 3)
+			except:
+				print('Reading MAG x y z calibration values failed')
+				return
 
 			# Convert values to something more usable
 			self.magXcal =  float(rawData[0] - 128)/256.0 + 1.0;
@@ -190,9 +200,10 @@ class MPU:
 
 	def readRawIMU(self):
 		# Read 14 raw values [High Low] as temperature falls between the accelerometer and gyro registries
-		rawData = []
-		for ii in range(14):
-			rawData.append(self.bus.read_byte_data(self.MPU9250_ADDRESS, self.ACCEL_XOUT_H + ii))
+		try:
+			rawData = self.bus.read_i2c_block_data(self.MPU9250_ADDRESS, self.ACCEL_XOUT_H, 14)
+		except:
+			print('Read raw IMU data failed')
 
 		# Convert the raw values to something a little more useful (middle value is temperature)
 		self.ax = self.eightBit2sixteenBit(rawData[1], rawData[0])
@@ -211,9 +222,10 @@ class MPU:
 		time.sleep(0.02)
 
 		# Read 7 values [Low High] and one more byte (overflow check)
-		rawData = []
-		for ii in range(7):
-			rawData.append(self.bus.read_byte_data(self.MPU9250_ADDRESS, self.EXT_SENS_DATA_00 + ii))
+		try:
+			rawData = self.bus.read_i2c_block_data(self.MPU9250_ADDRESS, self.EXT_SENS_DATA_00, 7)
+		except:
+			print('Read raw MAG data failed')
 
 		# If overflow check passes convert the raw values to something a little more useful
 		if not (rawData[6] & 0x08):
@@ -571,7 +583,10 @@ def main():
 				deltat = ((now - lastUpdate))
 				lastUpdate = now
 
-				# Run the sensor fusion (must be aligned to NED)
+				# Run the sensor fusion (must be aligned to NED and righthand rule).
+				# For my sensor IMU x axis is aligned with mag y axis
+				# IMU y axis is aligned with mag x axis and both need to be inversed
+				# IMU and mag z axis aligned however gyro z axis needs to be inversed
 				mpu.madgwickFilter(mpu.ax, -mpu.ay, mpu.az, \
 					math.radians(mpu.gx), -math.radians(mpu.gy), -math.radians(mpu.gz), \
 					mpu.my, -mpu.mx, mpu.mz, deltat)
