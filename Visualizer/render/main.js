@@ -15,14 +15,13 @@ var ax, ay, az;
 var gx, gy, gz;
 var gyroXcal, gyroYcal, gyroZcal;
 var gyroRoll, gyroPitch, gyroYaw;
-var roll, pitch, yaw;
 var accPitch, accRoll;
 var dtTimer;
 var dt;
 var calibrationCounter = 0;
-roll = pitch = yaw = 0;
 gyroXcal = gyroYcal = gyroZcal = 0;
 gyroRoll = gyroPitch = gyroYaw = 0;
+var rotation = { roll: 0, pitch: 0, yaw: 0 }
 
 // Customize these values
 var portName = '/dev/cu.usbmodem14101';
@@ -32,7 +31,7 @@ var accScaleFactor = 8192.0;
 var calibrationPts = 100;
 
 // Messages
-console.log('Calibration to begin. Hold still!\n')
+console.log('Calibration to begin, hold still...')
 
 // Configure serial port
 const port = new SerialPort({ path: serialPortName, baudRate: serialBaud })
@@ -45,21 +44,11 @@ var io = socket(server);
 app.use(express.static('public'));
 
 // Read serial data
-// parser.on('data', function(data) {
-//     console.log(data)
-// });
-
 parser.on('data', validateMsg);
 
-// Simulate sending data
-setInterval(sendRotation, 100);
-var rotation = { roll: 1, pitch: 1, yaw: 1 }
-
+// Send data
 function sendRotation() {
     io.sockets.emit('rotation', rotation)
-    rotation.roll += 1
-    rotation.pitch += 1
-    rotation.yaw += 1
 }
 
 function validateMsg(data) {
@@ -79,7 +68,7 @@ function validateMsg(data) {
             gyroYcal += gy;
             gyroZcal += gz;
 
-            // Incrament counter
+            // Increment counter
             calibrationCounter += 1;
 
         } else if (calibrationCounter == calibrationPts) {
@@ -89,13 +78,13 @@ function validateMsg(data) {
             gyroZcal /= calibrationPts;
 
             // Display message
-            console.log("Calibration complete");
-            console.log("\tX axis offset: " + String(round(gyroXcal)));
-            console.log("\tY axis offset: " + String(round(gyroYcal)));
-            console.log("\tZ axis offset: " + String(round(gyroZcal)) + "\n");
+            console.log("Calibration complete!");
+            console.log("\tX axis offset: ", gyroXcal);
+            console.log("\tY axis offset: ", gyroYcal);
+            console.log("\tZ axis offset: ", gyroZcal);
 
             // Start a timer
-            dtTimer = millis();
+            dtTimer = Date.now()
 
             // Increment counter once more to show the calibration is complete
             calibrationCounter += 1;
@@ -104,8 +93,11 @@ function validateMsg(data) {
             // Turn values into something with a physical representation
             processValues();
 
+            // Send values
+            sendRotation()
+
             // Print values to console
-            print("R: " + round(roll) + " P: " + round(pitch) + " Y: " + round(yaw));
+            console.log("R: ", rotation.roll, " P: ", rotation.pitch, " Y: ", rotation.yaw);
         }
     } else {
         console.log("Fail");
@@ -129,12 +121,12 @@ function processValues() {
     az /= accScaleFactor;
 
     // Get delta time and record time for the next call
-    dt = (millis() - dtTimer) * 0.001;
-    dtTimer = millis();
+    dt = (Date.now() - dtTimer) * 0.001;
+    dtTimer = Date.now();
 
     // Acceleration vector angle
-    accPitch = degrees(atan2(ay, az));
-    accRoll = degrees(atan2(ax, az));
+    accPitch = Math.atan2(ay, az) * (180 / Math.PI);
+    accRoll = Math.atan2(ax, az) * (180 / Math.PI);
 
     // Gyro integration angle
     gyroRoll -= gy * dt;
@@ -142,11 +134,10 @@ function processValues() {
     gyroYaw += gz * dt;
 
     // Get attitude of filter using a comp filter and gyroYaw
-    roll = tau * (roll - gy * dt) + (1 - tau) * (accRoll);
-    pitch = tau * (pitch + gx * dt) + (1 - tau) * (accPitch);
-    yaw = gyroYaw;
+    rotation.roll = tau * (rotation.roll - gy * dt) + (1 - tau) * (accRoll);
+    rotation.pitch = tau * (rotation.pitch + gx * dt) + (1 - tau) * (accPitch);
+    rotation.yaw = gyroYaw;
 }
-
 
 function bytes2num(byteA, byteB) {
     // Remove byteA sign and & it and then bit shift. Finally combine with byteB
