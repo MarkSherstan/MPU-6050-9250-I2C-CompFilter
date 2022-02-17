@@ -3,6 +3,7 @@ var app = express();
 
 setInterval(sendRotation, 500);
 
+var rotation = { roll: 1, pitch: 1, yaw: 1 }
 
 var server = app.listen(3000);
 app.use(express.static('public'));
@@ -19,5 +20,8 @@ function newConnection(socket) {
 }
 
 function sendRotation() {
-    io.sockets.emit('rotation', 1)
+    io.sockets.emit('rotation', rotation)
+    rotation.roll += 1
+    rotation.pitch += 1
+    rotation.yaw += 1
 }
