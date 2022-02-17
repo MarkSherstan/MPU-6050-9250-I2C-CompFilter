@@ -5,7 +5,7 @@ var socket = require('socket.io');
 var express = require('express');
 
 // Constants
-const serialPortName = '/dev/cu.usbserial-1410';
+const serialPortName = 'COM4';
 const serialBaud = 9600;
 const numberOfBytes = 14;
 let serverPort = 3000;
@@ -24,11 +24,10 @@ gyroRoll = gyroPitch = gyroYaw = 0;
 var rotation = { roll: 0, pitch: 0, yaw: 0 }
 
 // Customize these values
-var portName = '/dev/cu.usbmodem14101';
 var tau = 0.98;
 var gyroScaleFactor = 65.5;
 var accScaleFactor = 8192.0;
-var calibrationPts = 100;
+var calibrationPts = 250;
 
 // Messages
 console.log('Calibration to begin, hold still...')
@@ -141,13 +140,12 @@ function processValues() {
 
 function bytes2num(byteA, byteB) {
     // Remove byteA sign and & it and then bit shift. Finally combine with byteB
-    var temp = ((byteA & 0x7F) << 8) | byteB;
-
-    // Sign the value
-    if (byteA & 0x80) {
-        temp = temp - 32767;
+    var sign = byteB & (1 << 7);
+    var x = (((byteB & 0xFF) << 8) | (byteA & 0xFF));
+    
+    if (sign) {
+       return 0xFFFF0000 | x;  // fill in most significant bits with 1's
+    } else {
+        return x
     }
-
-    // Return the number value
-    return temp;
 }
