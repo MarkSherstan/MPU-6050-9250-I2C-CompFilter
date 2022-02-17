@@ -2,10 +2,13 @@
     "name": "visualizer",
     "version": "1.0.0",
     "description": "Visualize IMU data in virtual 3D space",
-    "main": "index.js",
+    "main": "main.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "author": "Mark Sherstan",
-    "license": "GPL-3.0"
+    "license": "GPL-3.0",
+    "dependencies": {
+        "express": "^4.17.3"
+    }
 }
