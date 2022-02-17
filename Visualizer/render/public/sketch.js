@@ -12,15 +12,20 @@ function setup() {
 
     // Connect to socket 
     socket = io.connect('http://localhost:3000')
+    socket.on('rotation', update);
 }
+
+
+function update(data) {
+    print(data)
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // Draw
 ////////////////////////////////////////////////////////////////////////////////
 
 function draw() {
-    print('Hello World');
-
     // Draw a fresh background and rotate the frame 90 degrees
     background(150);
     rotateX(PI / 2);
