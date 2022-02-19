@@ -16,7 +16,7 @@ class MPU:
 		self.magXcal = 0; self.magXbias = 0; self.magXscale = 0
 		self.magYcal = 0; self.magYbias = 0; self.magYscale = 0
 		self.magZcal = 0; self.magZbias = 0; self.magZscale = 0
-  
+
 		self.gyroRoll = 0
 		self.gyroPitch = 0
 		self.gyroYaw = 0
@@ -573,11 +573,18 @@ def main():
 
 	# Run until stopped
 	try:
+		# # Comp filter with tilt compensation
+		# while(True):
+		# 	mpu.compFilter()
+   		# 	time.sleep(1/250)
+     
+		# Madwick filter 
 		while(True):
 			# Get new values
 			mpu.processValues()
 
-			for ii in range(10):
+			# Run the algorithm as much as possible to limit drift https://github.com/kriswiner/MPU9250/issues/175 and https://github.com/MarkSherstan/MPU-6050-9250-I2C-CompFilter/issues/12
+			for _ in range(10):
 				# Integration timer
 				now = time.perf_counter()
 				deltat = ((now - lastUpdate))
