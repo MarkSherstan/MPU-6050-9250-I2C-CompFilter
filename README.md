@@ -30,7 +30,7 @@ Connect the sensor to the microcontroller as outlined below.
 | Leonardo      | 2	            | 3             |
 | Due           | 20	          | 21            |
 
-Upload the `main.ino` sketch and observe the values in the serial port or serial plotter. The `calibrateGyro.ino` sketch can be used to retrieve the offset values which can be directly placed into the `main.ino` sketch to eliminate the need for calibration every time the microcontroller is started up. Note that this is at at the cost of performance as the sensors drift over time and between uses.
+Upload the `main.ino` sketch and observe the values in the serial port or serial plotter. The `calibrateGyro.ino` sketch can be used to retrieve the offset values which can be directly placed into the `main.ino` sketch to eliminate the need for calibration every time the microcontroller is started up. Note that this is at the cost of performance as the sensors drift over time and between uses.
 
 ### MATLAB
 Connect an Arduino using the same wiring as outlined above. Run `MATLAB\I2C\main.m` and observe the values in the command line. MATLAB is extremely slow when using an Arduino/I2C connection.
@@ -89,6 +89,8 @@ mpu.setMagCalibration(bias, scale)
 
 To verify the results of the calibration refer to the two articles located [here](https://github.com/kriswiner/MPU6050/wiki/Simple-and-Effective-Magnetometer-Calibration) and [here](https://appelsiini.net/2018/calibrate-magnetometer/). Place the values from the calibration into `data.txt` and `magCalVisualizer.py` and `magCalSlider.py` as described in the program guide during calibration. The `magCalVisualizer.py` and `magCalSlider.py` script will provide all the required plots to aid in verifying the results as well as interactive sliders to optimize values.
 
+Note that the magnetometer can either be read as a slave or in direct mode. Both methods exist with slave being the default mode. 
+
 ### Node.js and p5.js Visualizer
 Connect an IMU device as outlined in the Arduino section. Upload the sketch located in `Visualizer/arduinoSketch`. This sketch simply transmits the raw byte data from the sensor over a serial connection.
 
@@ -117,7 +119,7 @@ Once all the values are customized start the serial port server by navigating to
 node main.js
 ```
 
-In your defult broweser enter `localhost:3000` and the visualizer should be running. 
+In your default browser enter `localhost:3000` and the visualizer should be running. 
 
 **Ensure to hold the IMU device still until an object appears on the screen. This is the program performing a calibration for gyroscope offset.**
 
@@ -146,4 +148,4 @@ Upon setting up the class with the I2C address of the sensor and defining the re
 
 ## Future Ideas
 * Add quaternion angle representation
-* Create wiki
+* Kalman filter (custom lib)
