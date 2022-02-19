@@ -110,7 +110,7 @@ class MPU:
             # Bad connection or something went wrong
             print("IMU WHO_AM_I was: " + hex(whoAmI) + ". Should have been " + hex(0x71))
 
-    def setUpMAG(self):
+    def setUpMagSlave(self):
         # Initialize connection with mag for a WHO_AM_I test
         self.bus.write_byte_data(self.MPU9250_ADDRESS, self.USER_CTRL, 0x20)                              # Enable I2C Master mode
         self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_MST_CTRL, 0x0D)                           # I2C configuration multi-master I2C 400KHz
@@ -188,6 +188,46 @@ class MPU:
             # Bad connection or something went wrong
             print("MAG WHO_AM_I was: " + hex(whoAmI) + ". Should have been " + hex(0x48))
 
+    def setUpMagDirect(self):
+    	# Check to see if there is a good connection with the mag
+        try:
+            whoAmI = self.bus.read_byte_data(self.AK8963_ADDRESS, self.WHO_AM_I_AK8963)
+        except:
+            print('whoAmI MAG read failed')
+            return
+
+        if (whoAmI == 0x48):
+            # Connection is good! Begin the true initialization
+            self.bus.write_byte_data(self.AK8963_ADDRESS, self.AK8963_CNTL, 0x00);                      # Power down magnetometer
+            time.sleep(0.05)
+            self.bus.write_byte_data(self.AK8963_ADDRESS, self.AK8963_CNTL, 0x0F);                      # Enter fuze mode
+            time.sleep(0.05)
+
+            # Read the x, y, and z axis calibration values
+            try:
+                rawData = self.bus.read_i2c_block_data(self.AK8963_ADDRESS, self.AK8963_ASAX, 3)
+            except:
+                print('Reading MAG x y z calibration values failed')
+                return
+
+            # Convert values to something more usable
+            self.magXcal =  float(rawData[0] - 128)/256.0 + 1.0
+            self.magYcal =  float(rawData[1] - 128)/256.0 + 1.0
+            self.magZcal =  float(rawData[2] - 128)/256.0 + 1.0
+
+            self.bus.write_byte_data(self.AK8963_ADDRESS, self.AK8963_CNTL, 0x00);                      # Power down magnetometer
+            
+            # Configure the settings for the mag
+            self.bus.write_byte_data(self.AK8963_ADDRESS, self.AK8963_CNTL, self.magHex);               # Set magnetometer for 14 or 16 bit continous 100 Hz sample rates
+            time.sleep(0.05)
+
+            # Display results to user
+            print("MAG set up:")
+            print("\tMagnetometer: " + hex(self.magHex) + " " + str(round(self.magScaleFactor,3)) + "\n")
+        else:
+            # Bad connection or something went wrong
+            print("MAG WHO_AM_I was: " + hex(whoAmI) + ". Should have been " + hex(0x48))
+
     def eightBit2sixteenBit(self, l, h):
         # Shift the low and high byte into a 16 bit number
         val = (h << 8) + l
@@ -214,7 +254,7 @@ class MPU:
         self.gy = self.eightBit2sixteenBit(rawData[11], rawData[10])
         self.gz = self.eightBit2sixteenBit(rawData[13], rawData[12])
 
-    def readRawMag(self):
+    def readRawMagSlave(self):
         # Prepare to request values
         self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_ADDR, self.AK8963_ADDRESS | 0x80)    # Set the I2C slave address of AK8963 and set for read.
         self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_REG, self.AK8963_XOUT_L)             # I2C slave 0 register address from where to begin data transfer
@@ -233,6 +273,18 @@ class MPU:
             self.my = self.eightBit2sixteenBit(rawData[2], rawData[3])
             self.mz = self.eightBit2sixteenBit(rawData[4], rawData[5])
 
+    def readRawMagDirect(self):
+        # Read 7 values [Low High] and one more byte (overflow check)
+        try:
+            rawData = self.bus.read_i2c_block_data(self.AK8963_ADDRESS, self.AK8963_XOUT_L, 7)
+            # If overflow check passes convert the raw values to something a little more useful
+            if not (rawData[6] & 0x08):
+                self.mx = self.eightBit2sixteenBit(rawData[0], rawData[1])
+                self.my = self.eightBit2sixteenBit(rawData[2], rawData[3])
+                self.mz = self.eightBit2sixteenBit(rawData[4], rawData[5])	
+        except:
+            print('Read raw MAG data failed')
+    
     def calibrateGyro(self, N):
         # Display message
         print("Calibrating gyro with " + str(N) + " points. Do not move!")
@@ -269,7 +321,7 @@ class MPU:
         # Take N readings of mag data
         for ii in range(N):
             # Read fresh values and assign to magTemp
-            self.readRawMag()
+            self.readRawMagSlave()
             magTemp = [self.mx, self.my, self.mz]
 
             # Adjust the max and min points based off of current reading
@@ -361,7 +413,7 @@ class MPU:
     def processValues(self):
         # Update the raw data
         self.readRawIMU()
-        self.readRawMag()
+        self.readRawMagSlave()
 
         # Subtract the offset calibration values for the gyro
         self.gx -= self.gyroXcal
@@ -557,7 +609,7 @@ def main():
 
     # Set up the IMU and mag sensors
     mpu.setUpIMU()
-    mpu.setUpMAG()
+    mpu.setUpMagSlave()
 
     # Calibrate the mag or provide values that have been verified with the visualizer
     # mpu.calibrateMagGuide()
