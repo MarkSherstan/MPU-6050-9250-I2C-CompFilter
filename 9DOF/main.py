@@ -5,18 +5,18 @@ import time
 class MPU:
 	def __init__(self, gyro, acc, mag, tau):
 		# Class / object / constructor setup
-		self.ax = None; self.ay = None; self.az = None;
-		self.gx = None; self.gy = None; self.gz = None;
-		self.mx = None; self.my = None; self.mz = None;
+		self.ax = None; self.ay = None; self.az = None
+		self.gx = None; self.gy = None; self.gz = None
+		self.mx = None; self.my = None; self.mz = None
 
 		self.gyroXcal = 0
 		self.gyroYcal = 0
 		self.gyroZcal = 0
 
-		self.magXcal = 0; self.magXbias = 0; self.magXscale = 0;
-		self.magYcal = 0; self.magYbias = 0; self.magYscale = 0;
-		self.magZcal = 0; self.magZbias = 0; self.magZscale = 0;
-
+		self.magXcal = 0; self.magXbias = 0; self.magXscale = 0
+		self.magYcal = 0; self.magYbias = 0; self.magYscale = 0
+		self.magZcal = 0; self.magZbias = 0; self.magZscale = 0
+  
 		self.gyroRoll = 0
 		self.gyroPitch = 0
 		self.gyroYaw = 0
@@ -112,11 +112,11 @@ class MPU:
 
 	def setUpMAG(self):
 		# Initialize connection with mag for a WHO_AM_I test
-		self.bus.write_byte_data(self.MPU9250_ADDRESS, self.USER_CTRL, 0x20);                              # Enable I2C Master mode
-		self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_MST_CTRL, 0x0D);                           # I2C configuration multi-master I2C 400KHz
-		self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_ADDR, self.AK8963_ADDRESS | 0x80);    # Set the I2C slave address of AK8963 and set for read.
-		self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_REG, self.WHO_AM_I_AK8963);           # I2C slave 0 register address from where to begin data transfer
-		self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_CTRL, 0x81);                          # Enable I2C and transfer 1 byte
+		self.bus.write_byte_data(self.MPU9250_ADDRESS, self.USER_CTRL, 0x20)                              # Enable I2C Master mode
+		self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_MST_CTRL, 0x0D)                           # I2C configuration multi-master I2C 400KHz
+		self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_ADDR, self.AK8963_ADDRESS | 0x80)    # Set the I2C slave address of AK8963 and set for read.
+		self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_REG, self.WHO_AM_I_AK8963)           # I2C slave 0 register address from where to begin data transfer
+		self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_CTRL, 0x81)                          # Enable I2C and transfer 1 byte
 		time.sleep(0.05)
 
 		# Check to see if there is a good connection with the mag
@@ -128,27 +128,27 @@ class MPU:
 
 		if (whoAmI == 0x48):
 			# Connection is good! Begin the true initialization
-			self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_ADDR, self.AK8963_ADDRESS);     # Set the I2C slave address of AK8963 and set for write.
-			self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_REG, self.AK8963_CNTL2);        # I2C slave 0 register address from where to begin data transfer
-			self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_DO, 0x01);                      # Reset AK8963
-			self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_CTRL, 0x81);                    # Enable I2C and write 1 byte
+			self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_ADDR, self.AK8963_ADDRESS)     	# Set the I2C slave address of AK8963 and set for write.
+			self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_REG, self.AK8963_CNTL2)        	# I2C slave 0 register address from where to begin data transfer
+			self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_DO, 0x01)                      	# Reset AK8963
+			self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_CTRL, 0x81)                    	# Enable I2C and write 1 byte
 			time.sleep(0.05)
 
-			self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_ADDR, self.AK8963_ADDRESS);     # Set the I2C slave address of AK8963 and set for write.
-			self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_REG, self.AK8963_CNTL);         # I2C slave 0 register address from where to begin data transfer
-			self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_DO, 0x00);                      # Power down magnetometer
-			self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_CTRL, 0x81);                    # Enable I2C and transfer 1 byte
+			self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_ADDR, self.AK8963_ADDRESS)     	# Set the I2C slave address of AK8963 and set for write.
+			self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_REG, self.AK8963_CNTL)         	# I2C slave 0 register address from where to begin data transfer
+			self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_DO, 0x00)                      	# Power down magnetometer
+			self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_CTRL, 0x81)                    	# Enable I2C and transfer 1 byte
 			time.sleep(0.05)
 
-			self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_ADDR, self.AK8963_ADDRESS);     # Set the I2C slave address of AK8963 and set for write.
-			self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_REG, self.AK8963_CNTL);         # I2C slave 0 register address from where to begin data transfer
-			self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_DO, 0x0F);                      # Enter fuze mode
-			self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_CTRL, 0x81);                    # Enable I2C and write 1 byte
+			self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_ADDR, self.AK8963_ADDRESS)     	# Set the I2C slave address of AK8963 and set for write.
+			self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_REG, self.AK8963_CNTL)         	# I2C slave 0 register address from where to begin data transfer
+			self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_DO, 0x0F)                      	# Enter fuze mode
+			self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_CTRL, 0x81)                  		# Enable I2C and write 1 byte
 			time.sleep(0.05)
 
-			self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_ADDR, self.AK8963_ADDRESS | 0x80);   # Set the I2C slave address of AK8963 and set for read.
-			self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_REG, self.AK8963_ASAX);              # I2C slave 0 register address from where to begin data transfer
-			self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_CTRL, 0x83);                         # Enable I2C and read 3 bytes
+			self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_ADDR, self.AK8963_ADDRESS | 0x80)   # Set the I2C slave address of AK8963 and set for read.
+			self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_REG, self.AK8963_ASAX)              # I2C slave 0 register address from where to begin data transfer
+			self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_CTRL, 0x83)                         # Enable I2C and read 3 bytes
 			time.sleep(0.05)
 
 			# Read the x, y, and z axis calibration values
@@ -164,21 +164,21 @@ class MPU:
 			self.magZcal =  float(rawData[2] - 128)/256.0 + 1.0;
 
 			# Flush the sysem
-			self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_ADDR, self.AK8963_ADDRESS);     # Set the I2C slave address of AK8963 and set for write.
-			self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_REG, self.AK8963_CNTL);         # I2C slave 0 register address from where to begin data transfer
-			self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_DO, 0x00);                      # Power down magnetometer
-			self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_CTRL, 0x81);                    # Enable I2C and write 1 byte
+			self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_ADDR, self.AK8963_ADDRESS)     		# Set the I2C slave address of AK8963 and set for write.
+			self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_REG, self.AK8963_CNTL)         		# I2C slave 0 register address from where to begin data transfer
+			self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_DO, 0x00)                      		# Power down magnetometer
+			self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_CTRL, 0x81)                    		# Enable I2C and write 1 byte
 
 			# Configure the settings for the mag
-			self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_ADDR, self.AK8963_ADDRESS);     # Set the I2C slave address of AK8963 and set for write.
-			self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_REG, self.AK8963_CNTL);         # I2C slave 0 register address from where to begin data transfer
-			self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_DO, self.magHex);               # Set magnetometer for 14 or 16 bit continous 100 Hz sample rates
-			self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_CTRL, 0x81);                    # Enable I2C and transfer 1 byte
+			self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_ADDR, self.AK8963_ADDRESS)    			# Set the I2C slave address of AK8963 and set for write.
+			self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_REG, self.AK8963_CNTL)         		# I2C slave 0 register address from where to begin data transfer
+			self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_DO, self.magHex)               		# Set magnetometer for 14 or 16 bit continous 100 Hz sample rates
+			self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_CTRL, 0x81)                    		# Enable I2C and transfer 1 byte
 			time.sleep(0.05)
 
-			self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_ADDR, self.AK8963_ADDRESS | 0x80);    # Set the I2C slave address of AK8963 and set for read.
-			self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_REG, self.AK8963_CNTL);               # I2C slave 0 register address from where to begin data transfer
-			self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_CTRL, 0x81);                          # Enable I2C and transfer 1 byte
+			self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_ADDR, self.AK8963_ADDRESS | 0x80)	 	# Set the I2C slave address of AK8963 and set for read.
+			self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_REG, self.AK8963_CNTL)	            	# I2C slave 0 register address from where to begin data transfer
+			self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_CTRL, 0x81)	                       	# Enable I2C and transfer 1 byte
 			time.sleep(0.05)
 
 			# Display results to user
@@ -216,9 +216,9 @@ class MPU:
 
 	def readRawMag(self):
 		# Prepare to request values
-		self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_ADDR, self.AK8963_ADDRESS | 0x80);    # Set the I2C slave address of AK8963 and set for read.
-		self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_REG, self.AK8963_XOUT_L);             # I2C slave 0 register address from where to begin data transfer
-		self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_CTRL, 0x87);                          # Enable I2C and read 7 bytes
+		self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_ADDR, self.AK8963_ADDRESS | 0x80)    # Set the I2C slave address of AK8963 and set for read.
+		self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_REG, self.AK8963_XOUT_L)             # I2C slave 0 register address from where to begin data transfer
+		self.bus.write_byte_data(self.MPU9250_ADDRESS, self.I2C_SLV0_CTRL, 0x87)                          # Enable I2C and read 7 bytes
 		time.sleep(0.02)
 
 		# Read 7 values [Low High] and one more byte (overflow check)
@@ -449,83 +449,83 @@ class MPU:
 		# print(math.sqrt(Mx1 * Mx1 + My1 * My1 + Mz1 * Mz1))
 
 	def madgwickFilter(self, ax, ay, az, gx, gy, gz, mx, my, mz, deltat):
-	  # Quaternion values
-	  q1 = self.q[0]
-	  q2 = self.q[1]
-	  q3 = self.q[2]
-	  q4 = self.q[3]
+		# Quaternion values
+		q1 = self.q[0]
+		q2 = self.q[1]
+		q3 = self.q[2]
+		q4 = self.q[3]
 
-	  # Auxiliary variables
-	  q1x2 = 2 * q1
-	  q2x2 = 2 * q2
-	  q3x2 = 2 * q3
-	  q4x2 = 2 * q4
-	  q1q3x2 = 2 * q1 * q3
-	  q3q4x2 = 2 * q3 * q4
-	  q1q1 = q1 * q1
-	  q1q2 = q1 * q2
-	  q1q3 = q1 * q3
-	  q1q4 = q1 * q4
-	  q2q2 = q2 * q2
-	  q2q3 = q2 * q3
-	  q2q4 = q2 * q4
-	  q3q3 = q3 * q3
-	  q3q4 = q3 * q4
-	  q4q4 = q4 * q4
+		# Auxiliary variables
+		q1x2 = 2 * q1
+		q2x2 = 2 * q2
+		q3x2 = 2 * q3
+		q4x2 = 2 * q4
+		q1q3x2 = 2 * q1 * q3
+		q3q4x2 = 2 * q3 * q4
+		q1q1 = q1 * q1
+		q1q2 = q1 * q2
+		q1q3 = q1 * q3
+		q1q4 = q1 * q4
+		q2q2 = q2 * q2
+		q2q3 = q2 * q3
+		q2q4 = q2 * q4
+		q3q3 = q3 * q3
+		q3q4 = q3 * q4
+		q4q4 = q4 * q4
 
-	  # Normalize accelerometer measurement
-	  norm = math.sqrt(ax * ax + ay * ay + az * az)
-	  if norm is 0: return
-	  ax /= norm
-	  ay /= norm
-	  az /= norm
+		# Normalize accelerometer measurement
+		norm = math.sqrt(ax * ax + ay * ay + az * az)
+		if norm is 0: return
+		ax /= norm
+		ay /= norm
+		az /= norm
 
-	  # Normalize magnetometer measurement
-	  norm = math.sqrt(mx * mx + my * my + mz * mz)
-	  if norm is 0: return
-	  mx /= norm
-	  my /= norm
-	  mz /= norm
+		# Normalize magnetometer measurement
+		norm = math.sqrt(mx * mx + my * my + mz * mz)
+		if norm is 0: return
+		mx /= norm
+		my /= norm
+		mz /= norm
 
-	  # Reference direction of Earth's magnetic field
-	  hx = mx * q1q1 - (2*q1*my) * q4 + (2*q1*mz) * q3 + mx * q2q2 + q2x2 * my * q3 + q2x2 * mz * q4 - mx * q3q3 - mx * q4q4
-	  hy = (2*q1*mx) * q4 + my * q1q1 - (2*q1*mz) * q2 + (2*q2*mx) * q3 - my * q2q2 + my * q3q3 + q3x2 * mz * q4 - my * q4q4
-	  bx_2 = math.sqrt(hx * hx + hy * hy)
-	  bz_2 = -(2*q1*mx) * q3 + (2*q1*my) * q2 + mz * q1q1 + (2*q2*mx) * q4 - mz * q2q2 + q3x2 * my * q4 - mz * q3q3 + mz * q4q4
-	  bx_4 = 2 * bx_2
-	  bz_4 = 2 * bz_2
+		# Reference direction of Earth's magnetic field
+		hx = mx * q1q1 - (2*q1*my) * q4 + (2*q1*mz) * q3 + mx * q2q2 + q2x2 * my * q3 + q2x2 * mz * q4 - mx * q3q3 - mx * q4q4
+		hy = (2*q1*mx) * q4 + my * q1q1 - (2*q1*mz) * q2 + (2*q2*mx) * q3 - my * q2q2 + my * q3q3 + q3x2 * mz * q4 - my * q4q4
+		bx_2 = math.sqrt(hx * hx + hy * hy)
+		bz_2 = -(2*q1*mx) * q3 + (2*q1*my) * q2 + mz * q1q1 + (2*q2*mx) * q4 - mz * q2q2 + q3x2 * my * q4 - mz * q3q3 + mz * q4q4
+		bx_4 = 2 * bx_2
+		bz_4 = 2 * bz_2
 
-	  # Gradient decent algorithm corrective step
-	  s1 = -q3x2 * (2 * q2q4 - q1q3x2 - ax) + q2x2 * (2 * q1q2 + q3q4x2 - ay) - bz_2 * q3 * (bx_2 * (0.5 - q3q3 - q4q4) + bz_2 * (q2q4 - q1q3) - mx) + (-bx_2 * q4 + bz_2 * q2) * (bx_2 * (q2q3 - q1q4) + bz_2 * (q1q2 + q3q4) - my) + bx_2 * q3 * (bx_2 * (q1q3 + q2q4) + bz_2 * (0.5 - q2q2 - q3q3) - mz)
-	  s2 = q4x2 * (2 * q2q4 - q1q3x2 - ax) + q1x2 * (2 * q1q2 + q3q4x2 - ay) - 4 * q2 * (1 - 2 * q2q2 - 2 * q3q3 - az) + bz_2 * q4 * (bx_2 * (0.5 - q3q3 - q4q4) + bz_2 * (q2q4 - q1q3) - mx) + (bx_2 * q3 + bz_2 * q1) * (bx_2 * (q2q3 - q1q4) + bz_2 * (q1q2 + q3q4) - my) + (bx_2 * q4 - bz_4 * q2) * (bx_2 * (q1q3 + q2q4) + bz_2 * (0.5 - q2q2 - q3q3) - mz)
-	  s3 = -q1x2 * (2 * q2q4 - q1q3x2 - ax) + q4x2 * (2 * q1q2 + q3q4x2 - ay) - 4 * q3 * (1 - 2 * q2q2 - 2 * q3q3 - az) + (-bx_4 * q3 - bz_2 * q1) * (bx_2 * (0.5 - q3q3 - q4q4) + bz_2 * (q2q4 - q1q3) - mx) + (bx_2 * q2 + bz_2 * q4) * (bx_2 * (q2q3 - q1q4) + bz_2 * (q1q2 + q3q4) - my) + (bx_2 * q1 - bz_4 * q3) * (bx_2 * (q1q3 + q2q4) + bz_2 * (0.5 - q2q2 - q3q3) - mz)
-	  s4 = q2x2 * (2 * q2q4 - q1q3x2 - ax) + q3x2 * (2 * q1q2 + q3q4x2 - ay) + (-bx_4 * q4 + bz_2 * q2) * (bx_2 * (0.5 - q3q3 - q4q4) + bz_2 * (q2q4 - q1q3) - mx) + (-bx_2 * q1 + bz_2 * q3) * (bx_2 * (q2q3 - q1q4) + bz_2 * (q1q2 + q3q4) - my) + bx_2 * q2 * (bx_2 * (q1q3 + q2q4) + bz_2 * (0.5 - q2q2 - q3q3) - mz)
+		# Gradient decent algorithm corrective step
+		s1 = -q3x2 * (2 * q2q4 - q1q3x2 - ax) + q2x2 * (2 * q1q2 + q3q4x2 - ay) - bz_2 * q3 * (bx_2 * (0.5 - q3q3 - q4q4) + bz_2 * (q2q4 - q1q3) - mx) + (-bx_2 * q4 + bz_2 * q2) * (bx_2 * (q2q3 - q1q4) + bz_2 * (q1q2 + q3q4) - my) + bx_2 * q3 * (bx_2 * (q1q3 + q2q4) + bz_2 * (0.5 - q2q2 - q3q3) - mz)
+		s2 = q4x2 * (2 * q2q4 - q1q3x2 - ax) + q1x2 * (2 * q1q2 + q3q4x2 - ay) - 4 * q2 * (1 - 2 * q2q2 - 2 * q3q3 - az) + bz_2 * q4 * (bx_2 * (0.5 - q3q3 - q4q4) + bz_2 * (q2q4 - q1q3) - mx) + (bx_2 * q3 + bz_2 * q1) * (bx_2 * (q2q3 - q1q4) + bz_2 * (q1q2 + q3q4) - my) + (bx_2 * q4 - bz_4 * q2) * (bx_2 * (q1q3 + q2q4) + bz_2 * (0.5 - q2q2 - q3q3) - mz)
+		s3 = -q1x2 * (2 * q2q4 - q1q3x2 - ax) + q4x2 * (2 * q1q2 + q3q4x2 - ay) - 4 * q3 * (1 - 2 * q2q2 - 2 * q3q3 - az) + (-bx_4 * q3 - bz_2 * q1) * (bx_2 * (0.5 - q3q3 - q4q4) + bz_2 * (q2q4 - q1q3) - mx) + (bx_2 * q2 + bz_2 * q4) * (bx_2 * (q2q3 - q1q4) + bz_2 * (q1q2 + q3q4) - my) + (bx_2 * q1 - bz_4 * q3) * (bx_2 * (q1q3 + q2q4) + bz_2 * (0.5 - q2q2 - q3q3) - mz)
+		s4 = q2x2 * (2 * q2q4 - q1q3x2 - ax) + q3x2 * (2 * q1q2 + q3q4x2 - ay) + (-bx_4 * q4 + bz_2 * q2) * (bx_2 * (0.5 - q3q3 - q4q4) + bz_2 * (q2q4 - q1q3) - mx) + (-bx_2 * q1 + bz_2 * q3) * (bx_2 * (q2q3 - q1q4) + bz_2 * (q1q2 + q3q4) - my) + bx_2 * q2 * (bx_2 * (q1q3 + q2q4) + bz_2 * (0.5 - q2q2 - q3q3) - mz)
 
-	  # Normalize step magnitude
-	  norm = math.sqrt(s1 * s1 + s2 * s2 + s3 * s3 + s4 * s4)
-	  s1 /= norm
-	  s2 /= norm
-	  s3 /= norm
-	  s4 /= norm
+		# Normalize step magnitude
+		norm = math.sqrt(s1 * s1 + s2 * s2 + s3 * s3 + s4 * s4)
+		s1 /= norm
+		s2 /= norm
+		s3 /= norm
+		s4 /= norm
 
-	  # Compute rate of change of quaternion
-	  qDot1 = 0.5 * (-q2 * gx - q3 * gy - q4 * gz) - self.beta * s1
-	  qDot2 = 0.5 * (q1 * gx + q3 * gz - q4 * gy) - self.beta * s2
-	  qDot3 = 0.5 * (q1 * gy - q2 * gz + q4 * gx) - self.beta * s3
-	  qDot4 = 0.5 * (q1 * gz + q2 * gy - q3 * gx) - self.beta * s4
+		# Compute rate of change of quaternion
+		qDot1 = 0.5 * (-q2 * gx - q3 * gy - q4 * gz) - self.beta * s1
+		qDot2 = 0.5 * (q1 * gx + q3 * gz - q4 * gy) - self.beta * s2
+		qDot3 = 0.5 * (q1 * gy - q2 * gz + q4 * gx) - self.beta * s3
+		qDot4 = 0.5 * (q1 * gz + q2 * gy - q3 * gx) - self.beta * s4
 
-	  # Integrate to yield quaternion
-	  q1 += qDot1 * deltat
-	  q2 += qDot2 * deltat
-	  q3 += qDot3 * deltat
-	  q4 += qDot4 * deltat
+		# Integrate to yield quaternion
+		q1 += qDot1 * deltat
+		q2 += qDot2 * deltat
+		q3 += qDot3 * deltat
+		q4 += qDot4 * deltat
 
-	  # Normalize quaternion
-	  norm = math.sqrt(q1 * q1 + q2 * q2 + q3 * q3 + q4 * q4)
-	  self.q[0] = q1 / norm
-	  self.q[1] = q2 / norm
-	  self.q[2] = q3 / norm
-	  self.q[3] = q4 / norm
+		# Normalize quaternion
+		norm = math.sqrt(q1 * q1 + q2 * q2 + q3 * q3 + q4 * q4)
+		self.q[0] = q1 / norm
+		self.q[1] = q2 / norm
+		self.q[2] = q3 / norm
+		self.q[3] = q4 / norm
 
 	def attitudeEuler(self):
 		# Get the data from the matrix
