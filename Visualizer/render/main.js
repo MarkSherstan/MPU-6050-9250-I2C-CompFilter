@@ -4,11 +4,13 @@ const { ByteLengthParser } = require('@serialport/parser-byte-length')
 var socket = require('socket.io');
 var express = require('express');
 
-// Constants
+// Customize these values
 const serialPortName = 'COM4';
 const serialBaud = 9600;
-const numberOfBytes = 14;
-let serverPort = 3000;
+var tau = 0.98;
+var gyroScaleFactor = 65.5;
+var accScaleFactor = 8192.0;
+var calibrationPts = 250;
 
 // Variables
 var ax, ay, az;
@@ -22,12 +24,8 @@ var calibrationCounter = 0;
 gyroXcal = gyroYcal = gyroZcal = 0;
 gyroRoll = gyroPitch = gyroYaw = 0;
 var rotation = { roll: 0, pitch: 0, yaw: 0 }
-
-// Customize these values
-var tau = 0.98;
-var gyroScaleFactor = 65.5;
-var accScaleFactor = 8192.0;
-var calibrationPts = 250;
+const numberOfBytes = 14;
+let serverPort = 3000;
 
 // Messages
 console.log('Calibration to begin, hold still...')
