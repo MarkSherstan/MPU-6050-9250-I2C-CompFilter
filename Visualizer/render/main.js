@@ -7,19 +7,18 @@ var express = require('express');
 // Customize these values
 const serialPortName = 'COM4';
 const serialBaud = 9600;
-var tau = 0.98;
-var gyroScaleFactor = 65.5;
-var accScaleFactor = 8192.0;
-var calibrationPts = 250;
+const tau = 0.98;
+const gyroScaleFactor = 65.5;
+const accScaleFactor = 8192.0;
+const calibrationPts = 250;
 
-// Variables
+// Variables (clean this up with structs)
 var ax, ay, az;
 var gx, gy, gz;
 var gyroXcal, gyroYcal, gyroZcal;
 var gyroRoll, gyroPitch, gyroYaw;
-var accPitch, accRoll;
-var dtTimer;
-var dt;
+var accRoll, accPitch;
+var dt, dtTimer;
 var calibrationCounter = 0;
 gyroXcal = gyroYcal = gyroZcal = 0;
 gyroRoll = gyroPitch = gyroYaw = 0;
@@ -28,7 +27,7 @@ const numberOfBytes = 14;
 let serverPort = 3000;
 
 // Messages
-console.log('Calibration to begin, hold still...')
+console.log('Calibration begin, hold still...')
 
 // Configure serial port
 const port = new SerialPort({ path: serialPortName, baudRate: serialBaud })
@@ -43,7 +42,7 @@ app.use(express.static('public'));
 // Read serial data
 parser.on('data', validateMsg);
 
-// Send data
+// Send socket data
 function sendRotation() {
     io.sockets.emit('rotation', rotation)
 }
