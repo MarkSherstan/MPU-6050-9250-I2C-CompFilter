@@ -89,36 +89,35 @@ mpu.setMagCalibration(bias, scale)
 
 To verify the results of the calibration refer to the two articles located [here](https://github.com/kriswiner/MPU6050/wiki/Simple-and-Effective-Magnetometer-Calibration) and [here](https://appelsiini.net/2018/calibrate-magnetometer/). Place the values from the calibration into `data.txt` and `magCalVisualizer.py` and `magCalSlider.py` as described in the program guide during calibration. The `magCalVisualizer.py` and `magCalSlider.py` script will provide all the required plots to aid in verifying the results as well as interactive sliders to optimize values.
 
-### JavaScript (p5.js) Visualizer
+### Node.js and p5.js Visualizer
 Connect an IMU device as outlined in the Arduino section. Upload the sketch located in `Visualizer/arduinoSketch`. This sketch simply transmits the raw byte data from the sensor over a serial connection.
 
-Next, perform the following commands to add the necessary server which makes a bridge between the microcontroller and web application.  
+Next, install the required packages by performing these steps:
 
 ```
-cd MPU-6050-9250-I2C-CompFilter/
-git submodule add https://github.com/vanevery/p5.serialport.git Visualizer/p5js/server
-cd Visualizer/p5js/server/
+cd MPU-6050-9250-I2C-CompFilter/render
 npm install
 ```
 
-Edit the file `sketch.js` file located in `Visualizer/p5js/main` to set the desired properties and correct serial port.
+Edit the file `main.js` file located in `Visualizer/render` to set the correct serial port and any other parameters of interest. 
 
 ```
 // Customize these values
-var portName = '/dev/cu.usbmodem14101';
+const serialPortName = 'COM4';
+const serialBaud = 9600;
 var tau = 0.98;
 var gyroScaleFactor = 65.5;
 var accScaleFactor = 8192.0;
-var calibrationPts = 100;
+var calibrationPts = 250;
 ```
 
-Once all the values are customized start the serial port server by navigating to `Visualizer/p5js/server/` and entering:
+Once all the values are customized start the serial port server by navigating to `Visualizer/render` and entering:
 
 ```
-node startserver.js
+node main.js
 ```
 
-Double click on the `index.html` file located in `Visualizer/p5js/main` and the program will begin in your default browser. Alternatively you can enter the file path in a browser as such `file:///Users/MarkSherstan/Documents/GitHub/MPU-6050-9250-I2C-CompFilter/Visualizer/p5js/main/index.html`
+In your defult broweser enter `localhost:3000` and the visualizer should be running. 
 
 **Ensure to hold the IMU device still until an object appears on the screen. This is the program performing a calibration for gyroscope offset.**
 
