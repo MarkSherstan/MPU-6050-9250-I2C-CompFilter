@@ -25,10 +25,10 @@ Connect the sensor to the microcontroller as outlined below.
 
 | Board         | SDA Pin       | SCL Pin       |
 | ------------- | ------------- | ------------- |
-| Uno	          | A4            | A5            |
-| Mega2560	    | 20	          | 21            |
+| Uno	      | A4            | A5            |
+| Mega2560	 | 20	       | 21            |
 | Leonardo      | 2	            | 3             |
-| Due           | 20	          | 21            |
+| Due           | 20	       | 21            |
 
 Upload the `main.ino` sketch and observe the values in the serial port or serial plotter. The `calibrateGyro.ino` sketch can be used to retrieve the offset values which can be directly placed into the `main.ino` sketch to eliminate the need for calibration every time the microcontroller is started up. Note that this is at the cost of performance as the sensors drift over time and between uses.
 
@@ -135,9 +135,9 @@ sudo apt-get install libi2c-dev
 sudo apt-get install i2c-tools
 sudo apt-get update
 
-  sudo i2cdetect -y 0
-  //or
-  sudo i2cdetect -y 1
+sudo i2cdetect -y 0
+//or
+sudo i2cdetect -y 1
 ```
 
 Upon setting up the class with the I2C address of the sensor and defining the read and write functions the library has the capability to.
