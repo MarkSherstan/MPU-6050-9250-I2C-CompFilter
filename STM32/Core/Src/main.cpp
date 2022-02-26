@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "MPUXX50.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -40,10 +41,12 @@
 
 /* Private variables ---------------------------------------------------------*/
 I2C_HandleTypeDef hi2c1;
-
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
+//static const uint8_t TMP102_ADDR = 0x68 << 1;
+//
+
 
 /* USER CODE END PV */
 
@@ -59,6 +62,7 @@ static void MX_I2C1_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+
 /* USER CODE END 0 */
 
 /**
@@ -68,6 +72,7 @@ static void MX_I2C1_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
+	MPUXX50 imu(AD0_LOW, AFS_4G, GFS_500DPS);
 
   /* USER CODE END 1 */
 
