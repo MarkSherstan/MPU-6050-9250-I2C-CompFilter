@@ -18,6 +18,8 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include <stdio.h>
+#include <string.h>
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -31,6 +33,14 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define LED_PORT GPIOA
+#define LED_PIN  GPIO_PIN_5
+
+#define BUTTON_PORT GPIOC
+#define BUTTON_PIN  GPIO_PIN_13
+
+uint8_t buf[100];
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -100,6 +110,21 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
+       uint8_t isButton = HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13);
+
+       if (!isButton) {
+              HAL_GPIO_WritePin(GPIOA, LED_PIN, 1);
+              sprintf((char*)buf, "ON\r\n");
+              HAL_UART_Transmit(&huart2, buf, strlen((char*)buf), HAL_MAX_DELAY);
+       } else {
+              HAL_GPIO_WritePin(GPIOA, LED_PIN, 0);
+              sprintf((char*)buf, "OFF\r\n");
+              HAL_UART_Transmit(&huart2, buf, strlen((char*)buf), HAL_MAX_DELAY);
+       }
+
+
+//       HAL_Delay(500);
+
 
     /* USER CODE BEGIN 3 */
   }
