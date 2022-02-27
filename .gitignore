@@ -1,68 +1,72 @@
 .DS_Store
 /Visualizer/render/node_modules
 
-# Prerequisites
-*.d
+*.o 
 
-# Object files
-*.o
-*.ko
-*.obj
-*.elf
 
-# Linker output
-*.ilk
-*.map
-*.exp
 
-# Precompiled Headers
-*.gch
-*.pch
+# # Prerequisites
+# *.d
 
-# Libraries
-*.lib
-*.a
-*.la
-*.lo
+# # Object files
+# *.o
+# *.ko
+# *.obj
+# *.elf
 
-# Shared objects (inc. Windows DLLs)
-*.dll
-*.so
-*.so.*
-*.dylib
+# # Linker output
+# *.ilk
+# *.map
+# *.exp
 
-# Executables
-*.exe
-*.out
-*.app
-*.i*86
-*.x86_64
-*.hex
+# # Precompiled Headers
+# *.gch
+# *.pch
 
-# Debug files
-*.dSYM/
-*.su
-*.idb
-*.pdb
+# # Libraries
+# *.lib
+# *.a
+# *.la
+# *.lo
 
-# Kernel Module Compile Results
-*.mod*
-*.cmd
-.tmp_versions/
-modules.order
-Module.symvers
-Mkfile.old
-dkms.conf
+# # Shared objects (inc. Windows DLLs)
+# *.dll
+# *.so
+# *.so.*
+# *.dylib
 
-# cscope with Vim
-cscope.*
+# # Executables
+# *.exe
+# *.out
+# *.app
+# *.i*86
+# *.x86_64
+# *.hex
 
-#ctags with Vim
-tags
-types_c.taghl
+# # Debug files
+# *.dSYM/
+# *.su
+# *.idb
+# *.pdb
 
-#CtrlP
-ctrlp.root
+# # Kernel Module Compile Results
+# *.mod*
+# *.cmd
+# .tmp_versions/
+# modules.order
+# Module.symvers
+# Mkfile.old
+# dkms.conf
 
-#html
-*.html
+# # cscope with Vim
+# cscope.*
+
+# #ctags with Vim
+# tags
+# types_c.taghl
+
+# #CtrlP
+# ctrlp.root
+
+# #html
+# *.html
