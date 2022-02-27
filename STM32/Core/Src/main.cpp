@@ -113,18 +113,16 @@ int main(void)
        uint8_t isButton = HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13);
 
        if (!isButton) {
-              HAL_GPIO_WritePin(GPIOA, LED_PIN, 1);
+              HAL_GPIO_WritePin(GPIOA, LED_PIN, (GPIO_PinState)1);
               sprintf((char*)buf, "ON\r\n");
               HAL_UART_Transmit(&huart2, buf, strlen((char*)buf), HAL_MAX_DELAY);
        } else {
-              HAL_GPIO_WritePin(GPIOA, LED_PIN, 0);
+              HAL_GPIO_WritePin(GPIOA, LED_PIN, (GPIO_PinState)0);
               sprintf((char*)buf, "OFF\r\n");
               HAL_UART_Transmit(&huart2, buf, strlen((char*)buf), HAL_MAX_DELAY);
        }
 
-
-//       HAL_Delay(500);
-
+       HAL_Delay(500);
 
     /* USER CODE BEGIN 3 */
   }
