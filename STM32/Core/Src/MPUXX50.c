@@ -7,7 +7,7 @@
 
 #include "MPUXX50.h"
 
-void init(uint8_t addr, uint8_t aScale, uint8_t gScale)
+void IMU_init(uint8_t addr, uint8_t aScale, uint8_t gScale)
 {
-
+	MX_I2C1_Init();
 }

@@ -64,5 +64,6 @@
 // } attitude;
 
 // Functions
+void init(uint8_t addr, uint8_t aScale, uint8_t gScale);
 
 #endif /* MPUXX50_H_ */
