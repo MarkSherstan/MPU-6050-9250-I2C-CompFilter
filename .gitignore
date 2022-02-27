@@ -2,7 +2,8 @@
 /Visualizer/render/node_modules
 
 *.o 
-
+*.su
+*.d
 
 
 # # Prerequisites
