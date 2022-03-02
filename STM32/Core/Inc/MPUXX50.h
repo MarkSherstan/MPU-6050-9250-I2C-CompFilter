@@ -14,8 +14,8 @@
 #include "I2C.h"
 
 // IMU configuration
-#define AD0_LOW 	 0x68 << 1
-#define AD0_HIGH 	 0x69 << 1
+#define AD0_LOW 	 0x68
+#define AD0_HIGH 	 0x69
 #define GYRO_CONFIG  0x1B
 #define ACCEL_CONFIG 0x1C
 #define PWR_MGMT_1   0x6B
@@ -75,7 +75,7 @@ uint8_t buf[14];
 // Functions
 void IMU_init(uint8_t addr, uint8_t aScale, uint8_t gScale);
 void IMU_begin(void);
-void calibrateGyro(uint16_t numCalPoints);
+void IMU_calibrateGyro(uint16_t numCalPoints);
 void readRawData();
 void setGyroFullScaleRange(uint8_t gScale);
 void setAccFullScaleRange(uint8_t aScale);

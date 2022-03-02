@@ -93,6 +93,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
   IMU_init(AD0_LOW, AFS_4G, GFS_500DPS);
   IMU_begin();
+  IMU_calibrateGyro(2000);
 
   /* USER CODE END 2 */
 
