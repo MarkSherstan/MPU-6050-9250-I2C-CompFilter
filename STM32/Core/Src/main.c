@@ -22,6 +22,8 @@
 #include "gpio.h"
 #include "MPUXX50.h"
 
+//#include "I2C.h"
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
@@ -90,6 +92,7 @@ int main(void)
 
   /* USER CODE BEGIN 2 */
   IMU_init(AD0_LOW, AFS_4G, GFS_500DPS);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */

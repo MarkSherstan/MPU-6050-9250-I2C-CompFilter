@@ -10,6 +10,7 @@
 
 // Libs
 #include <stdint.h>
+#include <stdbool.h>
 #include "I2C.h"
 
 // IMU configuration
@@ -48,22 +49,36 @@
 #define GFS_2000DPS 3
 
 // Structures
-// struct
-// {
-// 	float ax, ay, az, gx, gy, gz;
-// };
+ struct Sensor
+ {
+ 	float ax, ay, az, gx, gy, gz;
+ } sensorRaw, sensorProcessed;
 
-// struct
-// {
-// 	float x, y, z;
-// } gyroCal;
+ struct GyroCal
+ {
+ 	float x, y, z;
+ } gyroCal;
 
-// struct
-// {
-// 	float r, p, y;
-// } attitude;
+ struct Attitude
+ {
+ 	float r, p, y;
+ } attitude;
+
+// Variables
+HAL_StatusTypeDef ret;
+uint8_t _addr, _aScale, _gScale;
+float aRes, gRes;
 
 // Functions
-void init(uint8_t addr, uint8_t aScale, uint8_t gScale);
+void IMU_init(uint8_t addr, uint8_t aScale, uint8_t gScale);
+void calibrateGyro(uint16_t numCalPoints);
+void readRawData();
+void setGyroFullScaleRange(uint8_t gScale);
+void setAccFullScaleRange(uint8_t aScale);
+void begin(void);
+void calcAttitude(float tau);
+void readProcessedData(void);
+bool write2bytes(uint8_t byte0, uint8_t byte1);
+void startTimer(void);
 
 #endif /* MPUXX50_H_ */
