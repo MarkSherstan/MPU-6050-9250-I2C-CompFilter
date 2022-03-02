@@ -92,6 +92,7 @@ int main(void)
 
   /* USER CODE BEGIN 2 */
   IMU_init(AD0_LOW, AFS_4G, GFS_500DPS);
+  IMU_begin();
 
   /* USER CODE END 2 */
 

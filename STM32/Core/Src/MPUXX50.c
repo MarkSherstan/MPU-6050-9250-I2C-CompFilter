@@ -23,25 +23,23 @@ void IMU_init(uint8_t addr, uint8_t aScale, uint8_t gScale)
 }
 
 /// @brief Check for connection, reset IMU, and set full range scale.
-void begin(void)
+void IMU_begin(void)
 {
-    write2bytes(PWR_MGMT_1, 0x00);
-    setAccFullScaleRange(_aScale);
-    setGyroFullScaleRange(_gScale);
+	// Find who the IMU is
+	buf[0] = WHO_AM_I;
+    ret = HAL_I2C_Master_Transmit(&hi2c1, _addr, buf, 1, HAL_MAX_DELAY);
 
-//    // Find who the IMU is
-//    Wire.beginTransmission(_addr);
-//    Wire.write(WHO_AM_I);
-//    Wire.endTransmission();
-//    Wire.requestFrom(_addr, 1);
-//
-//    // Check
-//    if (Wire.read() == 0x98)
-//    {
-//        write2bytes(PWR_MGMT_1, 0x00);
-//        setAccFullScaleRange(_aScale);
-//        setGyroFullScaleRange(_gScale);
-//    }
+    if ( ret == HAL_OK ) {
+    	ret = HAL_I2C_Master_Receive(&hi2c1, _addr, buf, 1, HAL_MAX_DELAY);
+    	if ( ret == HAL_OK ) {
+    	    if (buf[0] == WHO_AM_I_ANS)
+    	    {
+    	        write2bytes(PWR_MGMT_1, 0x00);
+    	        setAccFullScaleRange(_aScale);
+    	        setGyroFullScaleRange(_gScale);
+    	    }
+    	}
+    }
 }
 
 /// @brief Set the accelerometer full scale range.
@@ -107,7 +105,9 @@ void setGyroFullScaleRange(uint8_t gScale)
 /// @param byte1 The command to be written.
 bool write2bytes(uint8_t byte0, uint8_t byte1)
 {
-	uint8_t buf[] = {byte0, byte1};
+	buf[0] = byte0;
+	buf[1] = byte1;
+
     ret = HAL_I2C_Master_Transmit(&hi2c1, _addr, buf, 2, HAL_MAX_DELAY);
 
     if ( ret != HAL_OK ) {

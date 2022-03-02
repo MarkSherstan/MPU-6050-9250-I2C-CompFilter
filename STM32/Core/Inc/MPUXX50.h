@@ -16,10 +16,11 @@
 // IMU configuration
 #define AD0_LOW 	 0x68 << 1
 #define AD0_HIGH 	 0x69 << 1
-#define WHO_AM_I 	 0x75
 #define GYRO_CONFIG  0x1B
 #define ACCEL_CONFIG 0x1C
 #define PWR_MGMT_1   0x6B
+#define WHO_AM_I 	 0x75
+#define WHO_AM_I_ANS 0x98
 
 // Accelerometer, temperature, and gyroscope data out registries
 #define ACCEL_XOUT_H 0x3B
@@ -68,14 +69,17 @@
 HAL_StatusTypeDef ret;
 uint8_t _addr, _aScale, _gScale;
 float aRes, gRes;
+uint8_t buf[14];
+
 
 // Functions
 void IMU_init(uint8_t addr, uint8_t aScale, uint8_t gScale);
+void IMU_begin(void);
 void calibrateGyro(uint16_t numCalPoints);
 void readRawData();
 void setGyroFullScaleRange(uint8_t gScale);
 void setAccFullScaleRange(uint8_t aScale);
-void begin(void);
+
 void calcAttitude(float tau);
 void readProcessedData(void);
 bool write2bytes(uint8_t byte0, uint8_t byte1);
