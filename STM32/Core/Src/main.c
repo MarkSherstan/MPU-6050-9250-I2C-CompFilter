@@ -18,11 +18,10 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "i2c.h"
+#include "tim.h"
 #include "usart.h"
 #include "gpio.h"
-#include "MPUXX50.h"
-
-//#include "I2C.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -89,7 +88,8 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART2_UART_Init();
-
+  MX_I2C1_Init();
+  MX_TIM11_Init();
   /* USER CODE BEGIN 2 */
   IMU_init(AD0_LOW, AFS_4G, GFS_500DPS);
   IMU_begin();

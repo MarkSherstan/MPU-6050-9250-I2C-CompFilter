@@ -161,28 +161,28 @@ void IMU_calibrateGyro(uint16_t numCalPoints)
     gyroCal.z /= (float)numCalPoints;
 }
 
-///// @brief Calculate the real world sensor values
-//void readProcessedData(void)
-//{
-//    // Get raw values from the IMU
-//    readRawData();
-//
-//    // Convert accelerometer values to g's
-//    sensorProcessed.ax = sensorRaw.ax / aRes;
-//    sensorProcessed.ay = sensorRaw.ay / aRes;
-//    sensorProcessed.az = sensorRaw.az / aRes;
-//
-//    // Compensate for gyro offset
-//    sensorProcessed.gx = sensorRaw.gx - gyroCal.x;
-//    sensorProcessed.gy = sensorRaw.gy - gyroCal.y;
-//    sensorProcessed.gz = sensorRaw.gz - gyroCal.z;
-//
-//    // Convert gyro values to deg/s
-//    sensorProcessed.gx /= gRes;
-//    sensorProcessed.gy /= gRes;
-//    sensorProcessed.gz /= gRes;
-//}
-//
+/// @brief Calculate the real world sensor values
+void readProcessedData(void)
+{
+    // Get raw values from the IMU
+    readRawData();
+
+    // Convert accelerometer values to g's
+    sensorProcessed.ax = sensorRaw.ax / aRes;
+    sensorProcessed.ay = sensorRaw.ay / aRes;
+    sensorProcessed.az = sensorRaw.az / aRes;
+
+    // Compensate for gyro offset
+    sensorProcessed.gx = sensorRaw.gx - gyroCal.x;
+    sensorProcessed.gy = sensorRaw.gy - gyroCal.y;
+    sensorProcessed.gz = sensorRaw.gz - gyroCal.z;
+
+    // Convert gyro values to deg/s
+    sensorProcessed.gx /= gRes;
+    sensorProcessed.gy /= gRes;
+    sensorProcessed.gz /= gRes;
+}
+
 ///// @brief Calculate the attitude of the sensor in degrees using a complementary filter
 ///// @param tau Time constant relating to the weighting of gyroscope vs accelerometer.
 //void calcAttitude(float tau)
