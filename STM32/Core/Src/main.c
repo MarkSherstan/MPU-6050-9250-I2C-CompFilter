@@ -92,10 +92,40 @@ int main(void)
   MX_USART2_UART_Init();
   MX_I2C1_Init();
   MX_TIM11_Init();
+
+
+  sprintf((char*)serialBuf, "%d,%d,%d\r\n", 0, 0, 1);
+  HAL_UART_Transmit(&huart2, serialBuf, strlen((char*)serialBuf), HAL_MAX_DELAY);
+
+
+
   /* USER CODE BEGIN 2 */
-//  IMU_init(AD0_LOW, AFS_4G, GFS_500DPS);
-//  IMU_begin();
-//  IMU_calibrateGyro(2000);
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 1);
+
+  IMU_init(AD0_LOW, AFS_4G, GFS_500DPS);
+
+  sprintf((char*)serialBuf, "%d,%d,%d\r\n", 0, 0, 2);
+  HAL_UART_Transmit(&huart2, serialBuf, strlen((char*)serialBuf), HAL_MAX_DELAY);
+
+
+  IMU_begin();
+
+
+  sprintf((char*)serialBuf, "%d,%d,%d\r\n", 0, 0, 3);
+  HAL_UART_Transmit(&huart2, serialBuf, strlen((char*)serialBuf), HAL_MAX_DELAY);
+
+  readRawData();
+
+  sprintf((char*)serialBuf, "%d,%d,%d\r\n", 0, 0, 4);
+   HAL_UART_Transmit(&huart2, serialBuf, strlen((char*)serialBuf), HAL_MAX_DELAY);
+
+  IMU_calibrateGyro(10);
+
+  sprintf((char*)serialBuf, "%d,%d,%d\r\n", 0, 0, 5);
+  HAL_UART_Transmit(&huart2, serialBuf, strlen((char*)serialBuf), HAL_MAX_DELAY);
+
+
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
 
   /* USER CODE END 2 */
 
