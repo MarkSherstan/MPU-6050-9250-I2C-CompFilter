@@ -11,7 +11,13 @@
 // Libs
 #include <stdint.h>
 #include <stdbool.h>
+#include <math.h>
 #include "I2C.h"
+
+#define PI 3.141592654
+
+#define dt 	0.004
+#define tau	0.98
 
 // IMU configuration
 #define AD0_LOW 	 0x68
@@ -80,9 +86,8 @@ void readRawData();
 void setGyroFullScaleRange(uint8_t gScale);
 void setAccFullScaleRange(uint8_t aScale);
 
-void calcAttitude(float tau);
+void IMU_calcAttitude(void);
 void readProcessedData(void);
 bool write2bytes(uint8_t byte0, uint8_t byte1);
-void startTimer(void);
 
 #endif /* MPUXX50_H_ */

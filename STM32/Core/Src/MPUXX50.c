@@ -183,28 +183,18 @@ void readProcessedData(void)
     sensorProcessed.gz /= gRes;
 }
 
-///// @brief Calculate the attitude of the sensor in degrees using a complementary filter
-///// @param tau Time constant relating to the weighting of gyroscope vs accelerometer.
-//void calcAttitude(float tau)
-//{
-//    // Find dt
-//    float dt = (micros() - timer) / 1e-6;
-//    timer = micros();
-//
-//    // Read calibrated data
-//    readProcessedData();
-//
-//    // Complementary filter
-//    float accelPitch = atan2(sensorProcessed.ay, sensorProcessed.az) * (180 / M_PI);
-//    float accelRoll = atan2(sensorProcessed.ax, sensorProcessed.az) * (180 / M_PI);
-//
-//    attitude.r = tau * (attitude.r - sensorProcessed.gy * dt) + (1 - tau) * accelRoll;
-//    attitude.p = tau * (attitude.p + sensorProcessed.gx * dt) + (1 - tau) * accelPitch;
-//    attitude.y += sensorProcessed.gz * dt;
-//}
-//
-///// @brief Starts a timer to be used for the complementary filter
-//void startTimer(void)
-//{
-//    timer = micros();
-//}
+/// @brief Calculate the attitude of the sensor in degrees using a complementary filter
+/// @param tau Time constant relating to the weighting of gyroscope vs accelerometer.
+void IMU_calcAttitude(void)
+{
+    // Read calibrated data
+    readProcessedData();
+
+    // Complementary filter
+    float accelPitch = atan2(sensorProcessed.ay, sensorProcessed.az) * (180 / PI);
+    float accelRoll = atan2(sensorProcessed.ax, sensorProcessed.az) * (180 / PI);
+
+    attitude.r = tau * (attitude.r - sensorProcessed.gy * dt) + (1 - tau) * accelRoll;
+    attitude.p = tau * (attitude.p + sensorProcessed.gx * dt) + (1 - tau) * accelPitch;
+    attitude.y += sensorProcessed.gz * dt;
+}

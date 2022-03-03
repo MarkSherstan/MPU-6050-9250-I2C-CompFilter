@@ -17,15 +17,17 @@
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
+#include <string.h>
+#include <stdio.h>
 #include "main.h"
-#include "i2c.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
+#include "MPUXX50.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+uint8_t serialBuf [25];
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -91,9 +93,9 @@ int main(void)
   MX_I2C1_Init();
   MX_TIM11_Init();
   /* USER CODE BEGIN 2 */
-  IMU_init(AD0_LOW, AFS_4G, GFS_500DPS);
-  IMU_begin();
-  IMU_calibrateGyro(2000);
+//  IMU_init(AD0_LOW, AFS_4G, GFS_500DPS);
+//  IMU_begin();
+//  IMU_calibrateGyro(2000);
 
   /* USER CODE END 2 */
 
@@ -153,6 +155,25 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+
+// Callback: timer has rolled over
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+  // Check which version of the timer triggered this callback and toggle LED
+  if (htim == &htim11 )
+  {
+	  IMU_calcAttitude();
+
+	  int16_t R = attitude.r * 10;
+	  int16_t P = attitude.r * 10;
+	  int16_t Y = attitude.r * 10;
+
+      sprintf((char*)serialBuf, "%d,%d,%d\r\n", R, P, Y);
+      HAL_UART_Transmit(&huart2, serialBuf, strlen((char*)serialBuf), HAL_MAX_DELAY);
+
+//    HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+  }
+}
 
 /* USER CODE END 4 */
 
