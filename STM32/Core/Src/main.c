@@ -28,6 +28,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 uint8_t serialBuf [25];
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -92,40 +93,15 @@ int main(void)
   MX_USART2_UART_Init();
   MX_I2C1_Init();
   MX_TIM11_Init();
-
-
-  sprintf((char*)serialBuf, "%d,%d,%d\r\n", 0, 0, 1);
-  HAL_UART_Transmit(&huart2, serialBuf, strlen((char*)serialBuf), HAL_MAX_DELAY);
-
+  HAL_TIM_Base_Start_IT(&htim11);
 
 
   /* USER CODE BEGIN 2 */
-  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 1);
-
   IMU_init(AD0_LOW, AFS_4G, GFS_500DPS);
-
-  sprintf((char*)serialBuf, "%d,%d,%d\r\n", 0, 0, 2);
-  HAL_UART_Transmit(&huart2, serialBuf, strlen((char*)serialBuf), HAL_MAX_DELAY);
-
-
   IMU_begin();
+//  IMU_calibrateGyro(500);
 
 
-  sprintf((char*)serialBuf, "%d,%d,%d\r\n", 0, 0, 3);
-  HAL_UART_Transmit(&huart2, serialBuf, strlen((char*)serialBuf), HAL_MAX_DELAY);
-
-  readRawData();
-
-  sprintf((char*)serialBuf, "%d,%d,%d\r\n", 0, 0, 4);
-   HAL_UART_Transmit(&huart2, serialBuf, strlen((char*)serialBuf), HAL_MAX_DELAY);
-
-  IMU_calibrateGyro(10);
-
-  sprintf((char*)serialBuf, "%d,%d,%d\r\n", 0, 0, 5);
-  HAL_UART_Transmit(&huart2, serialBuf, strlen((char*)serialBuf), HAL_MAX_DELAY);
-
-
-  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
 
   /* USER CODE END 2 */
 
@@ -134,6 +110,11 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
+
+	        sprintf((char*)serialBuf, "%d,%d,%d\r\n", 0, 1, 0);
+	        HAL_UART_Transmit(&huart2, serialBuf, strlen((char*)serialBuf), HAL_MAX_DELAY);
+
+	  HAL_Delay(500);
 
     /* USER CODE BEGIN 3 */
   }
@@ -192,14 +173,18 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   // Check which version of the timer triggered this callback and toggle LED
   if (htim == &htim11 )
   {
-	  IMU_calcAttitude();
 
-	  int16_t R = attitude.r * 10;
-	  int16_t P = attitude.r * 10;
-	  int16_t Y = attitude.r * 10;
+	  HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+//	  HAL_Delay(500);
 
-      sprintf((char*)serialBuf, "%d,%d,%d\r\n", R, P, Y);
-      HAL_UART_Transmit(&huart2, serialBuf, strlen((char*)serialBuf), HAL_MAX_DELAY);
+//	  IMU_calcAttitude();
+//
+//	  int16_t R = attitude.r * 10;
+//	  int16_t P = attitude.r * 10;
+//	  int16_t Y = attitude.r * 10;
+//
+//      sprintf((char*)serialBuf, "%d,%d,%d\r\n", R, P, Y);
+//      HAL_UART_Transmit(&huart2, serialBuf, strlen((char*)serialBuf), HAL_MAX_DELAY);
 
 //    HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
   }
