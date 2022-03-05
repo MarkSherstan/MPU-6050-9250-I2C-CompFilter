@@ -17,29 +17,38 @@ void IMU_init(uint8_t addr, uint8_t aScale, uint8_t gScale)
 	_addr = addr << 1;
 	_aScale = aScale;
 	_gScale = gScale;
-
-	// Start up I2C
-	MX_I2C1_Init();
 }
 
 /// @brief Check for connection, reset IMU, and set full range scale.
-void IMU_begin(void)
+uint8_t IMU_begin(void)
 {
 	// Find who the IMU is
 	buf[0] = WHO_AM_I;
     ret = HAL_I2C_Master_Transmit(&hi2c1, _addr, buf, 1, HAL_MAX_DELAY);
+    ret = HAL_I2C_Master_Receive(&hi2c1, _addr, buf, 1, HAL_MAX_DELAY);
+    
+    // uint8_t check;
+    // ret = HAL_I2C_Mem_Read(&hi2c1, _addr, WHO_AM_I, 1, &check, 1, HAL_MAX_DELAY);
 
-    if ( ret == HAL_OK ) {
-    	ret = HAL_I2C_Master_Receive(&hi2c1, _addr, buf, 1, HAL_MAX_DELAY);
-    	if ( ret == HAL_OK ) {
-    	    if (buf[0] == WHO_AM_I_ANS)
-    	    {
-    	        write2bytes(PWR_MGMT_1, 0x00);
-    	        setAccFullScaleRange(_aScale);
-    	        setGyroFullScaleRange(_gScale);
-    	    }
-    	}
-    }
+    return buf[0];
+    // if ( ret == HAL_OK ) {
+    //     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 1);
+    // } else {
+    //     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
+    // }
+
+
+    // if ( ret == HAL_OK ) {
+    // 	ret = HAL_I2C_Master_Receive(&hi2c1, _addr, buf, 1, HAL_MAX_DELAY);
+    // 	if ( ret == HAL_OK ) {
+    // 	    if (buf[0] == WHO_AM_I_ANS)
+    // 	    {
+    // 	        write2bytes(PWR_MGMT_1, 0x00);
+    // 	        setAccFullScaleRange(_aScale);
+    // 	        setGyroFullScaleRange(_gScale);
+    // 	    }
+    // 	}
+    // }
 }
 
 /// @brief Set the accelerometer full scale range.

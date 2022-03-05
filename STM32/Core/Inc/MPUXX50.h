@@ -80,7 +80,7 @@ uint8_t buf[14];
 
 // Functions
 void IMU_init(uint8_t addr, uint8_t aScale, uint8_t gScale);
-void IMU_begin(void);
+uint8_t IMU_begin();
 void IMU_calibrateGyro(uint16_t numCalPoints);
 void readRawData();
 void setGyroFullScaleRange(uint8_t gScale);

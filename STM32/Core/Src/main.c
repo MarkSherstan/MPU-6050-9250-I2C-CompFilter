@@ -95,10 +95,16 @@ int main(void)
   MX_TIM11_Init();
   HAL_TIM_Base_Start_IT(&htim11);
 
-
   /* USER CODE BEGIN 2 */
   IMU_init(AD0_LOW, AFS_4G, GFS_500DPS);
-  IMU_begin();
+  uint8_t AAA = IMU_begin();
+
+
+
+// sprintf((char*)serialBuf, "%d,%d,%d\r\n", 0, AAA, 0);
+// HAL_UART_Transmit(&huart2, serialBuf, strlen((char*)serialBuf), HAL_MAX_DELAY);
+// HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
+
 //  IMU_calibrateGyro(500);
 
 
@@ -111,10 +117,10 @@ int main(void)
   {
     /* USER CODE END WHILE */
 
-	        sprintf((char*)serialBuf, "%d,%d,%d\r\n", 0, 1, 0);
-	        HAL_UART_Transmit(&huart2, serialBuf, strlen((char*)serialBuf), HAL_MAX_DELAY);
+    // sprintf((char*)serialBuf, "%d,%d,%d\r\n", 0, 1, 0);
+    // HAL_UART_Transmit(&huart2, serialBuf, strlen((char*)serialBuf), HAL_MAX_DELAY);
 
-	  HAL_Delay(500);
+    // HAL_Delay(500);
 
     /* USER CODE BEGIN 3 */
   }
@@ -174,7 +180,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   if (htim == &htim11 )
   {
 
-	  HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+//	HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
 //	  HAL_Delay(500);
 
 //	  IMU_calcAttitude();
@@ -223,4 +229,3 @@ void assert_failed(uint8_t *file, uint32_t line)
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
-
