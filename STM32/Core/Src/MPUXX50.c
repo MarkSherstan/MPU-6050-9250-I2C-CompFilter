@@ -119,24 +119,18 @@ void setGyroFullScaleRange(uint8_t gScale)
 void readRawData()
 {
     // Subroutine for reading the raw data
-	buf[0] = ACCEL_XOUT_H;
-	ret = HAL_I2C_Master_Transmit(&hi2c1, _addr, buf, 1, HAL_MAX_DELAY);
+    HAL_I2C_Mem_Read(&hi2c1, _addr, ACCEL_XOUT_H, 1, &buf, 14, HAL_MAX_DELAY);
+    
+    // Bit shift the data
+    sensorRaw.ax = buf[0] << 8 | buf[1];
+    sensorRaw.ay = buf[2] << 8 | buf[3];
+    sensorRaw.az = buf[4] << 8 | buf[5];
 
-    if ( ret == HAL_OK ) {
-    	ret = HAL_I2C_Master_Receive(&hi2c1, _addr, buf, 14, HAL_MAX_DELAY);
-    	if ( ret == HAL_OK ) {
-    	    // Read raw data
-    	    sensorRaw.ax = buf[0] << 8 | buf[1];
-    	    sensorRaw.ay = buf[2] << 8 | buf[3];
-    	    sensorRaw.az = buf[4] << 8 | buf[5];
+    // temperature = buf[6] << 8 | buf[7];
 
-    	    // temperature = buf[6] << 8 | buf[7];
-
-    	    sensorRaw.gx = buf[8]  << 8 | buf[9];
-    	    sensorRaw.gy = buf[10] << 8 | buf[11];
-    	    sensorRaw.gz = buf[12] << 8 | buf[13];
-    	}
-    }
+    sensorRaw.gx = buf[8]  << 8 | buf[9];
+    sensorRaw.gy = buf[10] << 8 | buf[11];
+    sensorRaw.gz = buf[12] << 8 | buf[13];
 }
 
 /// @brief Find offsets for each axis of gyroscope.
@@ -147,9 +141,9 @@ void IMU_calibrateGyro(uint16_t numCalPoints)
     for (uint16_t ii = 0; ii < numCalPoints; ii++)
     {
         readRawData();
-        gyroCal.x += sensorRaw.gx;
-        gyroCal.y += sensorRaw.gy;
-        gyroCal.z += sensorRaw.gz;
+        // gyroCal.x += sensorRaw.gx;
+        // gyroCal.y += sensorRaw.gy;
+        // gyroCal.z += sensorRaw.gz;
         HAL_Delay(3);
     }
 
