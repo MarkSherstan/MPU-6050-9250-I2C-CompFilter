@@ -97,8 +97,7 @@ int main(void)
 
   /* USER CODE BEGIN 2 */
   IMU_init(AD0_LOW, AFS_4G, GFS_500DPS);
-  uint8_t AAA = IMU_begin();
-
+  IMU_begin();
 
 
 // sprintf((char*)serialBuf, "%d,%d,%d\r\n", 0, AAA, 0);

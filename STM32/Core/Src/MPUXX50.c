@@ -20,62 +20,59 @@ void IMU_init(uint8_t addr, uint8_t aScale, uint8_t gScale)
 }
 
 /// @brief Check for connection, reset IMU, and set full range scale.
-uint8_t IMU_begin(void)
+void IMU_begin(void)
 {
-	// Find who the IMU is
-	buf[0] = WHO_AM_I;
-    ret = HAL_I2C_Master_Transmit(&hi2c1, _addr, buf, 1, HAL_MAX_DELAY);
-    ret = HAL_I2C_Master_Receive(&hi2c1, _addr, buf, 1, HAL_MAX_DELAY);
-    
-    // uint8_t check;
-    // ret = HAL_I2C_Mem_Read(&hi2c1, _addr, WHO_AM_I, 1, &check, 1, HAL_MAX_DELAY);
+    uint8_t check;
+    uint8_t data;
 
-    return buf[0];
-    // if ( ret == HAL_OK ) {
-    //     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 1);
-    // } else {
-    //     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
-    // }
+    ret = HAL_I2C_Mem_Read(&hi2c1, _addr, WHO_AM_I, 1, &check, 1, HAL_MAX_DELAY);
 
+    if (buf[0] == WHO_AM_I_ANS)
+    {
+        // Startup / reset the sensor
+        data = 0x00;
+        HAL_I2C_Mem_Write(&hi2c1, _addr, PWR_MGMT_1, 1, &data, 1, HAL_MAX_DELAY);
 
-    // if ( ret == HAL_OK ) {
-    // 	ret = HAL_I2C_Master_Receive(&hi2c1, _addr, buf, 1, HAL_MAX_DELAY);
-    // 	if ( ret == HAL_OK ) {
-    // 	    if (buf[0] == WHO_AM_I_ANS)
-    // 	    {
-    // 	        write2bytes(PWR_MGMT_1, 0x00);
-    // 	        setAccFullScaleRange(_aScale);
-    // 	        setGyroFullScaleRange(_gScale);
-    // 	    }
-    // 	}
-    // }
+        // Set the full scale ranges
+        setAccFullScaleRange(_aScale);
+        setGyroFullScaleRange(_gScale);
+    }
 }
 
 /// @brief Set the accelerometer full scale range.
 /// @param aScale Set 0 for ±2g, 1 for ±4g, 2 for ±8g, and 3 for ±16g.
 void setAccFullScaleRange(uint8_t aScale)
 {
+    // Variable init
+    uint8_t select;
+
+    // Set the value
     switch (aScale)
     {
     case AFS_2G:
         aRes = 16384.0;
-        write2bytes(ACCEL_CONFIG, 0x00);
+        select = 0x00;
+        HAL_I2C_Mem_Write(&hi2c1, _addr, ACCEL_CONFIG, 1, &select, 1, HAL_MAX_DELAY);
         break;
     case AFS_4G:
         aRes = 8192.0;
-        write2bytes(ACCEL_CONFIG, 0x08);
+        select = 0x08;
+        HAL_I2C_Mem_Write(&hi2c1, _addr, ACCEL_CONFIG, 1, &select, 1, HAL_MAX_DELAY);
         break;
     case AFS_8G:
         aRes = 4096.0;
-        write2bytes(ACCEL_CONFIG, 0x10);
+        select = 0x10;
+        HAL_I2C_Mem_Write(&hi2c1, _addr, ACCEL_CONFIG, 1, &select, 1, HAL_MAX_DELAY);
         break;
     case AFS_16G:
         aRes = 2048.0;
-        write2bytes(ACCEL_CONFIG, 0x18);
+        select = 0x18;
+        HAL_I2C_Mem_Write(&hi2c1, _addr, ACCEL_CONFIG, 1, &select, 1, HAL_MAX_DELAY);
         break;
     default:
         aRes = 8192.0;
-        write2bytes(ACCEL_CONFIG, 0x08);
+        select = 0x08;
+        HAL_I2C_Mem_Write(&hi2c1, _addr, ACCEL_CONFIG, 1, &select, 1, HAL_MAX_DELAY);
         break;
     }
 }
@@ -84,45 +81,37 @@ void setAccFullScaleRange(uint8_t aScale)
 /// @param gScale Set 0 for ±250°/s, 1 for ±500°/s, 2 for ±1000°/s, and 3 for ±2000°/s.
 void setGyroFullScaleRange(uint8_t gScale)
 {
+    // Variable init
+    uint8_t select;
+
+    // Set the value
     switch (gScale)
     {
     case GFS_250DPS:
         gRes = 131.0;
-        write2bytes(GYRO_CONFIG, 0x00);
+        select = 0x00;
+        HAL_I2C_Mem_Write(&hi2c1, _addr, GYRO_CONFIG, 1, &select, 1, HAL_MAX_DELAY);
         break;
     case GFS_500DPS:
         gRes = 65.5;
-        write2bytes(GYRO_CONFIG, 0x08);
+        select = 0x00;
+        HAL_I2C_Mem_Write(&hi2c1, _addr, GYRO_CONFIG, 1, &select, 1, HAL_MAX_DELAY);
         break;
     case GFS_1000DPS:
         gRes = 32.8;
-        write2bytes(GYRO_CONFIG, 0x10);
+        select = 0x00;
+        HAL_I2C_Mem_Write(&hi2c1, _addr, GYRO_CONFIG, 1, &select, 1, HAL_MAX_DELAY);
         break;
     case GFS_2000DPS:
         gRes = 16.4;
-        write2bytes(GYRO_CONFIG, 0x18);
+        select = 0x00;
+        HAL_I2C_Mem_Write(&hi2c1, _addr, GYRO_CONFIG, 1, &select, 1, HAL_MAX_DELAY);
         break;
     default:
         gRes = 65.5;
-        write2bytes(GYRO_CONFIG, 0x08);
+        select = 0x00;
+        HAL_I2C_Mem_Write(&hi2c1, _addr, GYRO_CONFIG, 1, &select, 1, HAL_MAX_DELAY);
         break;
-    }
-}
-
-/// @brief Write bytes to specific registers on the IMU.
-/// @param byte0 The main register to be written.
-/// @param byte1 The command to be written.
-bool write2bytes(uint8_t byte0, uint8_t byte1)
-{
-	buf[0] = byte0;
-	buf[1] = byte1;
-
-    ret = HAL_I2C_Master_Transmit(&hi2c1, _addr, buf, 2, HAL_MAX_DELAY);
-
-    if ( ret != HAL_OK ) {
-    	return false;
-    } else {
-    	return true;
     }
 }
 

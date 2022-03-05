@@ -80,14 +80,13 @@ uint8_t buf[14];
 
 // Functions
 void IMU_init(uint8_t addr, uint8_t aScale, uint8_t gScale);
-uint8_t IMU_begin();
+void IMU_begin(void);
 void IMU_calibrateGyro(uint16_t numCalPoints);
-void readRawData();
+void readRawData(void);
 void setGyroFullScaleRange(uint8_t gScale);
 void setAccFullScaleRange(uint8_t aScale);
 
 void IMU_calcAttitude(void);
 void readProcessedData(void);
-bool write2bytes(uint8_t byte0, uint8_t byte1);
 
 #endif /* MPUXX50_H_ */
