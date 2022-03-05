@@ -27,16 +27,24 @@ void IMU_begin(void)
 
     ret = HAL_I2C_Mem_Read(&hi2c1, _addr, WHO_AM_I, 1, &check, 1, HAL_MAX_DELAY);
 
-    if (buf[0] == WHO_AM_I_ANS)
-    {
-        // Startup / reset the sensor
-        data = 0x00;
-        HAL_I2C_Mem_Write(&hi2c1, _addr, PWR_MGMT_1, 1, &data, 1, HAL_MAX_DELAY);
+    // Startup / reset the sensor
+    data = 0x00;
+    HAL_I2C_Mem_Write(&hi2c1, _addr, PWR_MGMT_1, 1, &data, 1, HAL_MAX_DELAY);
 
-        // Set the full scale ranges
-        setAccFullScaleRange(_aScale);
-        setGyroFullScaleRange(_gScale);
-    }
+    // Set the full scale ranges
+    setAccFullScaleRange(_aScale);
+    setGyroFullScaleRange(_gScale);
+
+//    if (check == WHO_AM_I_ANS)
+//    {
+//        // Startup / reset the sensor
+//        data = 0x00;
+//        HAL_I2C_Mem_Write(&hi2c1, _addr, PWR_MGMT_1, 1, &data, 1, HAL_MAX_DELAY);
+//
+//        // Set the full scale ranges
+//        setAccFullScaleRange(_aScale);
+//        setGyroFullScaleRange(_gScale);
+//    }
 }
 
 /// @brief Set the accelerometer full scale range.
@@ -119,7 +127,7 @@ void setGyroFullScaleRange(uint8_t gScale)
 void readRawData()
 {
     // Subroutine for reading the raw data
-    HAL_I2C_Mem_Read(&hi2c1, _addr, ACCEL_XOUT_H, 1, &buf, 14, HAL_MAX_DELAY);
+    HAL_I2C_Mem_Read(&hi2c1, _addr, ACCEL_XOUT_H, 1, buf, 14, HAL_MAX_DELAY);
     
     // Bit shift the data
     sensorRaw.ax = buf[0] << 8 | buf[1];
