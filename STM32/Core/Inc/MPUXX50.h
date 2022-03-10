@@ -62,27 +62,30 @@
 #define GFS_2000DPS 3
 
 // Structures
- struct Sensor
- {
- 	float ax, ay, az, gx, gy, gz;
- } sensorRaw, sensorProcessed;
+struct SensorRaw
+{
+	int16_t ax, ay, az, gx, gy, gz;
+} sensorRaw;
 
- struct GyroCal
- {
- 	float x, y, z;
- } gyroCal;
+struct SensorProcessed
+{
+	float ax, ay, az, gx, gy, gz;
+} sensorProcessed;
 
- struct Attitude
- {
- 	float r, p, y;
- } attitude;
+struct GyroCal
+{
+	float x, y, z;
+} gyroCal;
+
+struct Attitude
+{
+	float r, p, y;
+} attitude;
 
 // Variables
 HAL_StatusTypeDef ret;
 uint8_t _addr, _aScale, _gScale;
 float aRes, gRes;
-uint8_t buf[14];
-
 
 // Functions
 void IMU_init(uint8_t addr, uint8_t aScale, uint8_t gScale);

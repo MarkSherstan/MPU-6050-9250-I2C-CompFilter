@@ -30,9 +30,6 @@ void IMU_begin(void)
 
     if ( (check == WHO_AM_I_6050_ANS) || (check == WHO_AM_I_9250_ANS) )
     {
-        // Light to show success
-        HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 1);
-
         // Startup / reset the sensor
         select = 0x00;
         HAL_I2C_Mem_Write(&hi2c1, _addr, PWR_MGMT_1, 1, &select, 1, I2C_TIMOUT_MS);
@@ -40,6 +37,15 @@ void IMU_begin(void)
         // Set the full scale ranges
         setAccFullScaleRange(_aScale);
         setGyroFullScaleRange(_gScale);
+
+        // Light to show success
+        HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 1);
+        HAL_Delay(200);
+        HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
+        HAL_Delay(200);
+        HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 1);
+        HAL_Delay(200);
+        HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
     }
 }
 
@@ -122,6 +128,8 @@ void setGyroFullScaleRange(uint8_t gScale)
 /// @brief Read raw data from IMU
 void readRawData()
 {
+    uint8_t buf[14];
+
     // Subroutine for reading the raw data
     HAL_I2C_Mem_Read(&hi2c1, _addr, ACCEL_XOUT_H, 1, buf, 14, I2C_TIMOUT_MS);
     
@@ -148,13 +156,13 @@ void IMU_calibrateGyro(uint16_t numCalPoints)
         // gyroCal.x += sensorRaw.gx;
         // gyroCal.y += sensorRaw.gy;
         // gyroCal.z += sensorRaw.gz;
-        HAL_Delay(3);
+        // HAL_Delay(3);
     }
 
     // Average the saved data points to find the gyroscope offset
-    gyroCal.x /= (float)numCalPoints;
-    gyroCal.y /= (float)numCalPoints;
-    gyroCal.z /= (float)numCalPoints;
+    // gyroCal.x /= (float)numCalPoints;
+    // gyroCal.y /= (float)numCalPoints;
+    // gyroCal.z /= (float)numCalPoints;
 }
 
 /// @brief Calculate the real world sensor values

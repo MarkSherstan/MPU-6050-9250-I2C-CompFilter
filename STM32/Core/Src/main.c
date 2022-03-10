@@ -100,7 +100,11 @@ int main(void)
 //   sprintf((char*)serialBuf, "%d,%d,%d\r\n", 0, 1, 0);
 // HAL_UART_Transmit(&huart2, serialBuf, strlen((char*)serialBuf), HAL_MAX_DELAY);
 
-//   IMU_calibrateGyro(500);
+
+  IMU_calibrateGyro(500);
+
+  
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 1);
 
 // sprintf((char*)serialBuf, "%d,%d,%d\r\n", 0, 2, 0);
 // HAL_UART_Transmit(&huart2, serialBuf, strlen((char*)serialBuf), HAL_MAX_DELAY);
