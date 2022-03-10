@@ -25,8 +25,14 @@
 #define GYRO_CONFIG  0x1B
 #define ACCEL_CONFIG 0x1C
 #define PWR_MGMT_1   0x6B
-#define WHO_AM_I 	 0x75
-#define WHO_AM_I_ANS 0x98
+
+#define WHO_AM_I 	 				0x75
+#define WHO_AM_I_6050_ANS 0x68
+#define WHO_AM_I_9250_ANS 0x71
+
+// #define SMPL_R8_DIV	0x19
+
+#define I2C_TIMOUT_MS 1000
 
 // Accelerometer, temperature, and gyroscope data out registries
 #define ACCEL_XOUT_H 0x3B

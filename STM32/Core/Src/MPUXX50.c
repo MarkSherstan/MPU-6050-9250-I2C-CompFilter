@@ -23,28 +23,24 @@ void IMU_init(uint8_t addr, uint8_t aScale, uint8_t gScale)
 void IMU_begin(void)
 {
     uint8_t check;
-    uint8_t data;
+    uint8_t select;
 
-    ret = HAL_I2C_Mem_Read(&hi2c1, _addr, WHO_AM_I, 1, &check, 1, HAL_MAX_DELAY);
+    // Confirm device
+    HAL_I2C_Mem_Read(&hi2c1, _addr, WHO_AM_I, 1, &check, 1, I2C_TIMOUT_MS);
 
-    // Startup / reset the sensor
-    data = 0x00;
-    HAL_I2C_Mem_Write(&hi2c1, _addr, PWR_MGMT_1, 1, &data, 1, HAL_MAX_DELAY);
+    if ( (check == WHO_AM_I_6050_ANS) || (check == WHO_AM_I_9250_ANS) )
+    {
+        // Light to show success
+        HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 1);
 
-    // Set the full scale ranges
-    setAccFullScaleRange(_aScale);
-    setGyroFullScaleRange(_gScale);
+        // Startup / reset the sensor
+        select = 0x00;
+        HAL_I2C_Mem_Write(&hi2c1, _addr, PWR_MGMT_1, 1, &select, 1, I2C_TIMOUT_MS);
 
-//    if (check == WHO_AM_I_ANS)
-//    {
-//        // Startup / reset the sensor
-//        data = 0x00;
-//        HAL_I2C_Mem_Write(&hi2c1, _addr, PWR_MGMT_1, 1, &data, 1, HAL_MAX_DELAY);
-//
-//        // Set the full scale ranges
-//        setAccFullScaleRange(_aScale);
-//        setGyroFullScaleRange(_gScale);
-//    }
+        // Set the full scale ranges
+        setAccFullScaleRange(_aScale);
+        setGyroFullScaleRange(_gScale);
+    }
 }
 
 /// @brief Set the accelerometer full scale range.
@@ -60,27 +56,27 @@ void setAccFullScaleRange(uint8_t aScale)
     case AFS_2G:
         aRes = 16384.0;
         select = 0x00;
-        HAL_I2C_Mem_Write(&hi2c1, _addr, ACCEL_CONFIG, 1, &select, 1, HAL_MAX_DELAY);
+        HAL_I2C_Mem_Write(&hi2c1, _addr, ACCEL_CONFIG, 1, &select, 1, I2C_TIMOUT_MS);
         break;
     case AFS_4G:
         aRes = 8192.0;
         select = 0x08;
-        HAL_I2C_Mem_Write(&hi2c1, _addr, ACCEL_CONFIG, 1, &select, 1, HAL_MAX_DELAY);
+        HAL_I2C_Mem_Write(&hi2c1, _addr, ACCEL_CONFIG, 1, &select, 1, I2C_TIMOUT_MS);
         break;
     case AFS_8G:
         aRes = 4096.0;
         select = 0x10;
-        HAL_I2C_Mem_Write(&hi2c1, _addr, ACCEL_CONFIG, 1, &select, 1, HAL_MAX_DELAY);
+        HAL_I2C_Mem_Write(&hi2c1, _addr, ACCEL_CONFIG, 1, &select, 1, I2C_TIMOUT_MS);
         break;
     case AFS_16G:
         aRes = 2048.0;
         select = 0x18;
-        HAL_I2C_Mem_Write(&hi2c1, _addr, ACCEL_CONFIG, 1, &select, 1, HAL_MAX_DELAY);
+        HAL_I2C_Mem_Write(&hi2c1, _addr, ACCEL_CONFIG, 1, &select, 1, I2C_TIMOUT_MS);
         break;
     default:
         aRes = 8192.0;
         select = 0x08;
-        HAL_I2C_Mem_Write(&hi2c1, _addr, ACCEL_CONFIG, 1, &select, 1, HAL_MAX_DELAY);
+        HAL_I2C_Mem_Write(&hi2c1, _addr, ACCEL_CONFIG, 1, &select, 1, I2C_TIMOUT_MS);
         break;
     }
 }
@@ -98,27 +94,27 @@ void setGyroFullScaleRange(uint8_t gScale)
     case GFS_250DPS:
         gRes = 131.0;
         select = 0x00;
-        HAL_I2C_Mem_Write(&hi2c1, _addr, GYRO_CONFIG, 1, &select, 1, HAL_MAX_DELAY);
+        HAL_I2C_Mem_Write(&hi2c1, _addr, GYRO_CONFIG, 1, &select, 1, I2C_TIMOUT_MS);
         break;
     case GFS_500DPS:
         gRes = 65.5;
         select = 0x00;
-        HAL_I2C_Mem_Write(&hi2c1, _addr, GYRO_CONFIG, 1, &select, 1, HAL_MAX_DELAY);
+        HAL_I2C_Mem_Write(&hi2c1, _addr, GYRO_CONFIG, 1, &select, 1, I2C_TIMOUT_MS);
         break;
     case GFS_1000DPS:
         gRes = 32.8;
         select = 0x00;
-        HAL_I2C_Mem_Write(&hi2c1, _addr, GYRO_CONFIG, 1, &select, 1, HAL_MAX_DELAY);
+        HAL_I2C_Mem_Write(&hi2c1, _addr, GYRO_CONFIG, 1, &select, 1, I2C_TIMOUT_MS);
         break;
     case GFS_2000DPS:
         gRes = 16.4;
         select = 0x00;
-        HAL_I2C_Mem_Write(&hi2c1, _addr, GYRO_CONFIG, 1, &select, 1, HAL_MAX_DELAY);
+        HAL_I2C_Mem_Write(&hi2c1, _addr, GYRO_CONFIG, 1, &select, 1, I2C_TIMOUT_MS);
         break;
     default:
         gRes = 65.5;
         select = 0x00;
-        HAL_I2C_Mem_Write(&hi2c1, _addr, GYRO_CONFIG, 1, &select, 1, HAL_MAX_DELAY);
+        HAL_I2C_Mem_Write(&hi2c1, _addr, GYRO_CONFIG, 1, &select, 1, I2C_TIMOUT_MS);
         break;
     }
 }
@@ -127,7 +123,7 @@ void setGyroFullScaleRange(uint8_t gScale)
 void readRawData()
 {
     // Subroutine for reading the raw data
-    HAL_I2C_Mem_Read(&hi2c1, _addr, ACCEL_XOUT_H, 1, buf, 14, HAL_MAX_DELAY);
+    HAL_I2C_Mem_Read(&hi2c1, _addr, ACCEL_XOUT_H, 1, buf, 14, I2C_TIMOUT_MS);
     
     // Bit shift the data
     sensorRaw.ax = buf[0] << 8 | buf[1];
