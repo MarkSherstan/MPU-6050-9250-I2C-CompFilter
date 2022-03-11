@@ -61,7 +61,7 @@ main-build: STM32-C.elf secondary-outputs
 
 # Tool invocations
 STM32-C.elf: $(OBJS) $(USER_OBJS) /Users/MarkSherstan/Documents/GitHub/MPU-6050-9250-I2C-CompFilter/STM32/STM32F401RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "STM32-C.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/Users/MarkSherstan/Documents/GitHub/MPU-6050-9250-I2C-CompFilter/STM32/STM32F401RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="STM32-C.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+	arm-none-eabi-gcc -o "STM32-C.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/Users/MarkSherstan/Documents/GitHub/MPU-6050-9250-I2C-CompFilter/STM32/STM32F401RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="STM32-C.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -u _printf_float -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

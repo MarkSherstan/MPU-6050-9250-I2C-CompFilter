@@ -149,20 +149,25 @@ void readRawData()
 /// @param numCalPoints Number of data points to average.
 void IMU_calibrateGyro(uint16_t numCalPoints)
 {
+	// Init
+	int32_t x;
+	int32_t y;
+	int32_t z;
+
     // Save specified number of points
     for (uint16_t ii = 0; ii < numCalPoints; ii++)
     {
         readRawData();
-        gyroCal.x += sensorRaw.gx;
-        gyroCal.y += sensorRaw.gy;
-        gyroCal.z += sensorRaw.gz;
+        x += sensorRaw.gx;
+        y += sensorRaw.gy;
+        z += sensorRaw.gz;
         HAL_Delay(3);
     }
 
     // Average the saved data points to find the gyroscope offset
-    gyroCal.x /= (float)numCalPoints;
-    gyroCal.y /= (float)numCalPoints;
-    gyroCal.z /= (float)numCalPoints;
+    gyroCal.x = (float)x / (float)numCalPoints;
+    gyroCal.y = (float)y / (float)numCalPoints;
+    gyroCal.z = (float)z / (float)numCalPoints;
 }
 
 /// @brief Calculate the real world sensor values
