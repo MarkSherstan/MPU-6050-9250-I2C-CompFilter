@@ -99,33 +99,24 @@ int main(void)
   /* USER CODE BEGIN 2 */
   IMU_init(AD0_LOW, AFS_4G, GFS_500DPS);
   IMU_begin();
-  IMU_calibrateGyro(500);
+  IMU_calibrateGyro(2000);
 
   HAL_TIM_Base_Start_IT(&htim11);
   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 1);
 
-
-  // sprintf((char*)serialBuf, "%0.2f,%0.2f,%0.2f\r\n\n\n", gyroCal.x, gyroCal.y, gyroCal.z);
-  // HAL_UART_Transmit(&huart2, serialBuf, strlen((char*)serialBuf), HAL_MAX_DELAY);
-
-
+  HAL_PWR_EnableSleepOnExit();
+  HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);
   /* USER CODE END 2 */
 
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
-  while (1)
-  {
-    /* USER CODE END WHILE */
-	  	  	  	  	  	  	  // PUT TO SLEEP HERE???????????
-	  // IMU_calcAttitude();
-	  // sprintf((char*)serialBuf, "%0.1f,%0.1f,%0.1f\r\n", attitude.r, attitude.p, attitude.y);
-	  // HAL_UART_Transmit(&huart2, serialBuf, strlen((char*)serialBuf), HAL_MAX_DELAY);
-
-	  // HAL_Delay(100);
-
-    /* USER CODE BEGIN 3 */
-  }
-  /* USER CODE END 3 */
+//  /* Infinite loop */
+//  /* USER CODE BEGIN WHILE */
+//  while (1)
+//  {
+//    /* USER CODE END WHILE */
+//	  __WFI();
+//    /* USER CODE BEGIN 3 */
+//  }
+//  /* USER CODE END 3 */
 }
 
 /**
@@ -180,9 +171,13 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   // Check if timer has triggered and update attitude
   if (htim == &htim11 )
   {
-	  IMU_calcAttitude();
+	HAL_ResumeTick();
+
+	IMU_calcAttitude();
     sprintf((char*)serialBuf, "%.1f,%.1f,%.1f\r\n", attitude.r, attitude.p, attitude.y);
     HAL_UART_Transmit(&huart2, serialBuf, strlen((char*)serialBuf), HAL_MAX_DELAY);
+
+    HAL_SuspendTick();
   }
 }
 
