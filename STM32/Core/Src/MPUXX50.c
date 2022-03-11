@@ -28,7 +28,7 @@ void IMU_begin(void)
     // Confirm device
     HAL_I2C_Mem_Read(&hi2c1, _addr, WHO_AM_I, 1, &check, 1, I2C_TIMOUT_MS);
 
-    if ( (check == WHO_AM_I_6050_ANS) || (check == WHO_AM_I_9250_ANS) )
+    if (check == WHO_AM_I_9250_ANS) // || (check == WHO_AM_I_6050_ANS)
     {
         // Startup / reset the sensor
         select = 0x00;
@@ -153,16 +153,16 @@ void IMU_calibrateGyro(uint16_t numCalPoints)
     for (uint16_t ii = 0; ii < numCalPoints; ii++)
     {
         readRawData();
-        // gyroCal.x += sensorRaw.gx;
-        // gyroCal.y += sensorRaw.gy;
-        // gyroCal.z += sensorRaw.gz;
-        // HAL_Delay(3);
+        gyroCal.x += sensorRaw.gx;
+        gyroCal.y += sensorRaw.gy;
+        gyroCal.z += sensorRaw.gz;
+        HAL_Delay(3);
     }
 
     // Average the saved data points to find the gyroscope offset
-    // gyroCal.x /= (float)numCalPoints;
-    // gyroCal.y /= (float)numCalPoints;
-    // gyroCal.z /= (float)numCalPoints;
+    gyroCal.x /= (float)numCalPoints;
+    gyroCal.y /= (float)numCalPoints;
+    gyroCal.z /= (float)numCalPoints;
 }
 
 /// @brief Calculate the real world sensor values

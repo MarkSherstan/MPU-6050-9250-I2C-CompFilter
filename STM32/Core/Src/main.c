@@ -22,10 +22,11 @@
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
-#include "MPUXX50.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "MPUXX50.h"
+
 uint8_t serialBuf [25];
 
 /* USER CODE END Includes */
@@ -91,27 +92,12 @@ int main(void)
   MX_GPIO_Init();
   MX_USART2_UART_Init();
   MX_I2C1_Init();
-  // MX_TIM11_Init();
+  MX_TIM11_Init();
 
   /* USER CODE BEGIN 2 */
   IMU_init(AD0_LOW, AFS_4G, GFS_500DPS);
   IMU_begin();
-
-//   sprintf((char*)serialBuf, "%d,%d,%d\r\n", 0, 1, 0);
-// HAL_UART_Transmit(&huart2, serialBuf, strlen((char*)serialBuf), HAL_MAX_DELAY);
-
-
-  IMU_calibrateGyro(500);
-
-  
-  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 1);
-
-// sprintf((char*)serialBuf, "%d,%d,%d\r\n", 0, 2, 0);
-// HAL_UART_Transmit(&huart2, serialBuf, strlen((char*)serialBuf), HAL_MAX_DELAY);
-
-// HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 1);
-
-
+  IMU_calibrateGyro(2000);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -227,3 +213,4 @@ void assert_failed(uint8_t *file, uint32_t line)
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
+
