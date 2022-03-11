@@ -95,7 +95,6 @@ int main(void)
   MX_USART2_UART_Init();
   MX_I2C1_Init();
   MX_TIM11_Init();
-
   /* USER CODE BEGIN 2 */
   IMU_init(AD0_LOW, AFS_4G, GFS_500DPS);
   IMU_begin();
@@ -108,15 +107,15 @@ int main(void)
   HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);
   /* USER CODE END 2 */
 
-//  /* Infinite loop */
-//  /* USER CODE BEGIN WHILE */
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
 //  while (1)
 //  {
-//    /* USER CODE END WHILE */
-//	  __WFI();
-//    /* USER CODE BEGIN 3 */
+    /* USER CODE END WHILE */
+
+    /* USER CODE BEGIN 3 */
 //  }
-//  /* USER CODE END 3 */
+  /* USER CODE END 3 */
 }
 
 /**
