@@ -14,7 +14,7 @@
 #include <math.h>
 #include "I2C.h"
 
-#define PI 3.141592654
+#define RAD2DEG 57.2957795131
 
 #define dt 	0.004
 #define tau	0.98
@@ -83,7 +83,6 @@ struct Attitude
 } attitude;
 
 // Variables
-HAL_StatusTypeDef ret;
 uint8_t _addr, _aScale, _gScale;
 float aRes, gRes;
 

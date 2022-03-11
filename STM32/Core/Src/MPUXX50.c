@@ -126,7 +126,7 @@ void setGyroFullScaleRange(uint8_t gScale)
 }
 
 /// @brief Read raw data from IMU
-void readRawData()
+void readRawData(void)
 {
     uint8_t buf[14];
 
@@ -140,7 +140,7 @@ void readRawData()
 
     // temperature = buf[6] << 8 | buf[7];
 
-    sensorRaw.gx = buf[8]  << 8 | buf[9];
+    sensorRaw.gx = buf[8] << 8 | buf[9];
     sensorRaw.gy = buf[10] << 8 | buf[11];
     sensorRaw.gz = buf[12] << 8 | buf[13];
 }
@@ -150,9 +150,9 @@ void readRawData()
 void IMU_calibrateGyro(uint16_t numCalPoints)
 {
 	// Init
-	int32_t x;
-	int32_t y;
-	int32_t z;
+	int32_t x = 0;
+	int32_t y = 0;
+	int32_t z = 0;
 
     // Save specified number of points
     for (uint16_t ii = 0; ii < numCalPoints; ii++)
@@ -196,12 +196,12 @@ void readProcessedData(void)
 /// @param tau Time constant relating to the weighting of gyroscope vs accelerometer.
 void IMU_calcAttitude(void)
 {
-    // Read calibrated data
+    // Read processed data
     readProcessedData();
 
     // Complementary filter
-    float accelPitch = atan2(sensorProcessed.ay, sensorProcessed.az) * (180 / PI);
-    float accelRoll = atan2(sensorProcessed.ax, sensorProcessed.az) * (180 / PI);
+    float accelPitch = atan2(sensorProcessed.ay, sensorProcessed.az) * RAD2DEG;
+    float accelRoll = atan2(sensorProcessed.ax, sensorProcessed.az) * RAD2DEG;
 
     attitude.r = tau * (attitude.r - sensorProcessed.gy * dt) + (1 - tau) * accelRoll;
     attitude.p = tau * (attitude.p + sensorProcessed.gx * dt) + (1 - tau) * accelPitch;

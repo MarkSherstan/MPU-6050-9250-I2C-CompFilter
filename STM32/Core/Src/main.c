@@ -99,11 +99,14 @@ int main(void)
   /* USER CODE BEGIN 2 */
   IMU_init(AD0_LOW, AFS_4G, GFS_500DPS);
   IMU_begin();
-  IMU_calibrateGyro(2000);
+  IMU_calibrateGyro(500);
 
   HAL_TIM_Base_Start_IT(&htim11);
   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 1);
 
+
+  // sprintf((char*)serialBuf, "%0.2f,%0.2f,%0.2f\r\n\n\n", gyroCal.x, gyroCal.y, gyroCal.z);
+  // HAL_UART_Transmit(&huart2, serialBuf, strlen((char*)serialBuf), HAL_MAX_DELAY);
 
 
   /* USER CODE END 2 */
@@ -114,6 +117,12 @@ int main(void)
   {
     /* USER CODE END WHILE */
 	  	  	  	  	  	  	  // PUT TO SLEEP HERE???????????
+	  // IMU_calcAttitude();
+	  // sprintf((char*)serialBuf, "%0.1f,%0.1f,%0.1f\r\n", attitude.r, attitude.p, attitude.y);
+	  // HAL_UART_Transmit(&huart2, serialBuf, strlen((char*)serialBuf), HAL_MAX_DELAY);
+
+	  // HAL_Delay(100);
+
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
@@ -172,8 +181,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   if (htim == &htim11 )
   {
 	  IMU_calcAttitude();
-      sprintf((char*)serialBuf, "%.1f,%.1f,%.1f\r\n", attitude.r, attitude.p, attitude.y);
-      HAL_UART_Transmit(&huart2, serialBuf, strlen((char*)serialBuf), HAL_MAX_DELAY);
+    sprintf((char*)serialBuf, "%.1f,%.1f,%.1f\r\n", attitude.r, attitude.p, attitude.y);
+    HAL_UART_Transmit(&huart2, serialBuf, strlen((char*)serialBuf), HAL_MAX_DELAY);
   }
 }
 
