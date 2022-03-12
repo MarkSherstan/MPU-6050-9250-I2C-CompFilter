@@ -13,7 +13,7 @@
 /// @param gScale Set gyroscope full scale range: 0 for ±250°/s, 1 for ±500°/s, 2 for ±1000°/s, and 3 for ±2000°/s.
 /// @param tau Set tau value for the complementary filter (typically 0.98)
 /// @param dt Set sampling rate in seconds determined by the timer interrupt 
-void MPU_begin(uint8_t addr, uint8_t aScale, uint8_t gScale, float tau, float dt)
+uint8_t MPU_begin(uint8_t addr, uint8_t aScale, uint8_t gScale, float tau, float dt)
 {
     // Save values
     _addr = addr << 1;
@@ -37,6 +37,10 @@ void MPU_begin(uint8_t addr, uint8_t aScale, uint8_t gScale, float tau, float dt
         // Set the full scale ranges
         setAccFullScaleRange(aScale);
         setGyroFullScaleRange(gScale);
+
+        return 1;
+    } else {
+        return 0;
     }
 }
 

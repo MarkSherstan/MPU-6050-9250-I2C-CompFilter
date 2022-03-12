@@ -10,43 +10,27 @@
 
 // Libs
 #include <stdint.h>
-#include <stdbool.h>
 #include <math.h>
 #include "I2C.h"
 
 // Constants
 #define RAD2DEG 57.2957795131
 
-// IMU configuration
-#define AD0_LOW 	 	 			0x68
-#define AD0_HIGH 	 	 			0x69
-#define GYRO_CONFIG  			0x1B
-#define ACCEL_CONFIG 			0x1C
-#define PWR_MGMT_1   			0x6B
-#define WHO_AM_I 	 				0x75
-#define WHO_AM_I_6050_ANS 0x68
-#define WHO_AM_I_9250_ANS 0x71
+// IMU configuration and data out registry
+#define AD0_LOW 	 	 	0x68
+#define AD0_HIGH 	 	 	0x69
+#define GYRO_CONFIG  		0x1B
+#define ACCEL_CONFIG 		0x1C
+#define PWR_MGMT_1   		0x6B
+#define WHO_AM_I 	 	    0x75
+#define WHO_AM_I_6050_ANS   0x68
+#define WHO_AM_I_9250_ANS   0x71
 #define I2C_TIMOUT_MS 		1000
-
-// Accelerometer, temperature, and gyroscope data out registries
-#define ACCEL_XOUT_H 0x3B
-#define ACCEL_XOUT_L 0x3C
-#define ACCEL_YOUT_H 0x3D
-#define ACCEL_YOUT_L 0x3E
-#define ACCEL_ZOUT_H 0x3F
-#define ACCEL_ZOUT_L 0x40
-#define TEMP_OUT_H 	 0x41
-#define TEMP_OUT_L   0x42
-#define GYRO_XOUT_H  0x43
-#define GYRO_XOUT_L  0x44
-#define GYRO_YOUT_H  0x45
-#define GYRO_YOUT_L  0x46
-#define GYRO_ZOUT_H  0x47
-#define GYRO_ZOUT_L  0x48
+#define ACCEL_XOUT_H        0x3B
 
 // Full scale ranges
-enum accelerometerFullScaleRange{AFS_2G, AFS_4G, AFS_8G, AFS_16G};
 enum gyroscopeFullScaleRange{GFS_250DPS, GFS_500DPS, GFS_1000DPS, GFS_2000DPS};
+enum accelerometerFullScaleRange{AFS_2G, AFS_4G, AFS_8G, AFS_16G};
 
 // Structures
 struct SensorRaw
@@ -75,7 +59,7 @@ float _dt, _tau;
 float aRes, gRes;
 
 // Functions
-void MPU_begin(uint8_t addr, uint8_t aScale, uint8_t gScale, float tau, float dt);
+uint8_t MPU_begin(uint8_t addr, uint8_t aScale, uint8_t gScale, float tau, float dt);
 void MPU_calibrateGyro(uint16_t numCalPoints);
 void MPU_calcAttitude(void);
 
