@@ -38,11 +38,14 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define TRUE 1
+#define TRUE  1
 #define FLASE 0
 
-#define TAU 0.98
 #define SAMPLE_RATE_S 0.004
+#define TAU 0.98
+
+#define LED_PIN   GPIO_PIN_5
+#define LED_PORT  GPIOA
 
 uint8_t serialBuf [25];
 
@@ -103,20 +106,25 @@ int main(void)
   MX_TIM11_Init();
 
   /* USER CODE BEGIN 2 */
+
+  // Check if IMU configured propely and block if it didnt
   if (MPU_begin(AD0_LOW, AFS_4G, GFS_500DPS, TAU, SAMPLE_RATE_S) == TRUE)
   {
-    // Turn on built in LED
-    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 1);
+    HAL_GPIO_WritePin(LED_PORT, LED_PIN, 1);
   } else {
     while(1);
   }
 
+  // Calibrate the IMU 
+  sprintf((char*)serialBuf, "CALIBRATING...\r\n");
+  HAL_UART_Transmit(&huart2, serialBuf, strlen((char*)serialBuf), HAL_MAX_DELAY);
   MPU_calibrateGyro(2000);
+
+  // Start timer and put procssor into an effcient low power mode
   HAL_TIM_Base_Start_IT(&htim11);
-
-
   HAL_PWR_EnableSleepOnExit();
   HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */

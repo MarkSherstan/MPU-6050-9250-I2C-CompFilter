@@ -130,7 +130,7 @@ The following was tested with a NUCLEO-F401RE dev board. Using a similar configu
 * Configure the pins (Example uses `USART2`, `I2C1`, and `TIM11`). The serial port runs with default settings at a baud rate of 115200, the I2C port runs in standard mode at 100 kHz, the timer is set to interrupt at 250 Hz (adjust prescaler and counter based on hardware and clock speeds).
 * Select: Project Manager -> Code Generator -> Check `Generate peripheral initialization as a pair of '.c/.h' files per peripheral`
 * Have the IDE generate the hardware specific code
-* FINISH THIS!!! -> Talk about built in LED 
+* FINISH THIS!!! -> Talk about built in LED. Pointer for I2C stuff and create master struct ->?
 
 ### C Library
 A generic C library was written that can be used on a variety of hardware. Refer to the Arduino or Raspberry Pi example in the `c_library` directory to get an idea of how to use the library.
