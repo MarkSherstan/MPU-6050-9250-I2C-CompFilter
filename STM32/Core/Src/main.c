@@ -29,8 +29,6 @@
 #include "stdio.h"
 #include "MPUXX50.h"
 
-uint8_t serialBuf [25];
-
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -40,6 +38,11 @@ uint8_t serialBuf [25];
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define TAU 0.98
+#define SAMPLE_RATE_S 0.004
+
+uint8_t serialBuf [25];
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -95,12 +98,14 @@ int main(void)
   MX_USART2_UART_Init();
   MX_I2C1_Init();
   MX_TIM11_Init();
+
   /* USER CODE BEGIN 2 */
-  IMU_init(AD0_LOW, AFS_4G, GFS_500DPS);
-  IMU_begin();
-  IMU_calibrateGyro(2000);
+  MPU_begin(AD0_LOW, AFS_4G, GFS_500DPS, TAU, SAMPLE_RATE_S);
+  MPU_calibrateGyro(2000);
 
   HAL_TIM_Base_Start_IT(&htim11);
+
+  // Turn on built in LED
   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 1);
 
   HAL_PWR_EnableSleepOnExit();
@@ -172,11 +177,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   {
 	HAL_ResumeTick();
 
-	IMU_calcAttitude();
-    sprintf((char*)serialBuf, "%.1f,%.1f,%.1f\r\n", attitude.r, attitude.p, attitude.y);
-    HAL_UART_Transmit(&huart2, serialBuf, strlen((char*)serialBuf), HAL_MAX_DELAY);
-
-    HAL_SuspendTick();
+	MPU_calcAttitude();
+  sprintf((char*)serialBuf, "%.1f,%.1f,%.1f\r\n", attitude.r, attitude.p, attitude.y);
+  HAL_UART_Transmit(&huart2, serialBuf, strlen((char*)serialBuf), HAL_MAX_DELAY);
+  
+  HAL_SuspendTick();
   }
 }
 

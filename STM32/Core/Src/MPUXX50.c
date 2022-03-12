@@ -7,45 +7,36 @@
 
 #include "MPUXX50.h"
 
-/// @brief Set the IMU address and full scale ranges.
+/// @brief Set the IMU address, check for connection, reset IMU, and set full range scale.
 /// @param addr Hex address based on AD0 pin - 0x68 low or 0x69 high.
 /// @param aScale Set accelerometer full scale range: 0 for ±2g, 1 for ±4g, 2 for ±8g, and 3 for ±16g.
 /// @param gScale Set gyroscope full scale range: 0 for ±250°/s, 1 for ±500°/s, 2 for ±1000°/s, and 3 for ±2000°/s.
-void IMU_init(uint8_t addr, uint8_t aScale, uint8_t gScale)
+/// @param tau Set tau value for the complementary filter (typically 0.98)
+/// @param dt Set sampling rate in seconds determined by the timer interrupt 
+void MPU_begin(uint8_t addr, uint8_t aScale, uint8_t gScale, float tau, float dt)
 {
-	// Save values
-	_addr = addr << 1;
-	_aScale = aScale;
-	_gScale = gScale;
-}
+    // Save values
+    _addr = addr << 1;
+    _tau = tau;
+    _dt = dt;
 
-/// @brief Check for connection, reset IMU, and set full range scale.
-void IMU_begin(void)
-{
+    // Initialize variables
     uint8_t check;
     uint8_t select;
 
     // Confirm device
     HAL_I2C_Mem_Read(&hi2c1, _addr, WHO_AM_I, 1, &check, 1, I2C_TIMOUT_MS);
 
-    if (check == WHO_AM_I_9250_ANS) // || (check == WHO_AM_I_6050_ANS)
+    // TODO: If 9250 fails could it trigger the 6050 check???
+    if ((check == WHO_AM_I_9250_ANS) || (check == WHO_AM_I_6050_ANS))
     {
         // Startup / reset the sensor
         select = 0x00;
         HAL_I2C_Mem_Write(&hi2c1, _addr, PWR_MGMT_1, 1, &select, 1, I2C_TIMOUT_MS);
 
         // Set the full scale ranges
-        setAccFullScaleRange(_aScale);
-        setGyroFullScaleRange(_gScale);
-
-        // Light to show success
-        HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 1);
-        HAL_Delay(200);
-        HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
-        HAL_Delay(200);
-        HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 1);
-        HAL_Delay(200);
-        HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
+        setAccFullScaleRange(aScale);
+        setGyroFullScaleRange(gScale);
     }
 }
 
@@ -132,7 +123,7 @@ void readRawData(void)
 
     // Subroutine for reading the raw data
     HAL_I2C_Mem_Read(&hi2c1, _addr, ACCEL_XOUT_H, 1, buf, 14, I2C_TIMOUT_MS);
-    
+
     // Bit shift the data
     sensorRaw.ax = buf[0] << 8 | buf[1];
     sensorRaw.ay = buf[2] << 8 | buf[3];
@@ -147,12 +138,12 @@ void readRawData(void)
 
 /// @brief Find offsets for each axis of gyroscope.
 /// @param numCalPoints Number of data points to average.
-void IMU_calibrateGyro(uint16_t numCalPoints)
+void MPU_calibrateGyro(uint16_t numCalPoints)
 {
-	// Init
-	int32_t x = 0;
-	int32_t y = 0;
-	int32_t z = 0;
+    // Init
+    int32_t x = 0;
+    int32_t y = 0;
+    int32_t z = 0;
 
     // Save specified number of points
     for (uint16_t ii = 0; ii < numCalPoints; ii++)
@@ -194,7 +185,7 @@ void readProcessedData(void)
 
 /// @brief Calculate the attitude of the sensor in degrees using a complementary filter
 /// @param tau Time constant relating to the weighting of gyroscope vs accelerometer.
-void IMU_calcAttitude(void)
+void MPU_calcAttitude(void)
 {
     // Read processed data
     readProcessedData();
@@ -203,7 +194,7 @@ void IMU_calcAttitude(void)
     float accelPitch = atan2(sensorProcessed.ay, sensorProcessed.az) * RAD2DEG;
     float accelRoll = atan2(sensorProcessed.ax, sensorProcessed.az) * RAD2DEG;
 
-    attitude.r = tau * (attitude.r - sensorProcessed.gy * dt) + (1 - tau) * accelRoll;
-    attitude.p = tau * (attitude.p + sensorProcessed.gx * dt) + (1 - tau) * accelPitch;
-    attitude.y += sensorProcessed.gz * dt;
+    attitude.r = _tau * (attitude.r - sensorProcessed.gy * _dt) + (1 - _tau) * accelRoll;
+    attitude.p = _tau * (attitude.p + sensorProcessed.gx * _dt) + (1 - _tau) * accelPitch;
+    attitude.y += sensorProcessed.gz * _dt;
 }
