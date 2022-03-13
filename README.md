@@ -159,5 +159,5 @@ Upon setting up the class with the I2C address of the sensor and defining the re
 ## Future Ideas
 * Add quaternion angle representation
 * Kalman filter (custom lib)
-* Fix "C lib" to "Cpp"
-* Fix WillemD61 issue 
+* C Library
+* General clean up
