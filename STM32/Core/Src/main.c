@@ -1,20 +1,20 @@
 /* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
-  * @file           : main.c
-  * @brief          : Main program body
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2022 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * @file           : main.c
+ * @brief          : Main program body
+ ******************************************************************************
+ * @attention
+ *
+ * Copyright (c) 2022 STMicroelectronics.
+ * All rights reserved.
+ *
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ *
+ ******************************************************************************
+ */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
@@ -47,7 +47,7 @@
 #define LED_PIN   GPIO_PIN_5
 #define LED_PORT  GPIOA
 
-uint8_t serialBuf [25];
+uint8_t serialBuf[25];
 
 /* USER CODE END PD */
 
@@ -74,9 +74,9 @@ void SystemClock_Config(void);
 /* USER CODE END 0 */
 
 /**
-  * @brief  The application entry point.
-  * @retval int
-  */
+ * @brief  The application entry point.
+ * @retval int
+ */
 int main(void)
 {
   /* USER CODE BEGIN 1 */
@@ -111,14 +111,21 @@ int main(void)
   if (MPU_begin(&hi2c1, AD0_LOW, AFS_4G, GFS_500DPS, TAU, SAMPLE_RATE_S) == TRUE)
   {
     HAL_GPIO_WritePin(LED_PORT, LED_PIN, 1);
-  } else {
-    // TODO: Flash LED and add note
-    while(1);
+  }
+  else
+  {
+    sprintf((char *)serialBuf, "ERROR!\r\n");
+    HAL_UART_Transmit(&huart2, serialBuf, strlen((char *)serialBuf), HAL_MAX_DELAY);
+    while (1)
+    {
+      HAL_GPIO_TogglePin(LED_PORT, LED_PIN);
+      HAL_Delay(500);
+    }
   }
 
-  // Calibrate the IMU 
-  sprintf((char*)serialBuf, "CALIBRATING...\r\n");
-  HAL_UART_Transmit(&huart2, serialBuf, strlen((char*)serialBuf), HAL_MAX_DELAY);
+  // Calibrate the IMU
+  sprintf((char *)serialBuf, "CALIBRATING...\r\n");
+  HAL_UART_Transmit(&huart2, serialBuf, strlen((char *)serialBuf), HAL_MAX_DELAY);
   MPU_calibrateGyro(&hi2c1, 2000);
 
   // Start timer and put processor into an efficient low power mode
@@ -130,31 +137,31 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-//  while (1)
-//  {
-    /* USER CODE END WHILE */
+  //  while (1)
+  //  {
+  /* USER CODE END WHILE */
 
-    /* USER CODE BEGIN 3 */
-//  }
+  /* USER CODE BEGIN 3 */
+  //  }
   /* USER CODE END 3 */
 }
 
 /**
-  * @brief System Clock Configuration
-  * @retval None
-  */
+ * @brief System Clock Configuration
+ * @retval None
+ */
 void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
   /** Configure the main internal regulator output voltage
-  */
+   */
   __HAL_RCC_PWR_CLK_ENABLE();
   __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE2);
   /** Initializes the RCC Oscillators according to the specified parameters
-  * in the RCC_OscInitTypeDef structure.
-  */
+   * in the RCC_OscInitTypeDef structure.
+   */
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
@@ -169,9 +176,8 @@ void SystemClock_Config(void)
     Error_Handler();
   }
   /** Initializes the CPU, AHB and APB buses clocks
-  */
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
-                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+   */
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
@@ -189,24 +195,24 @@ void SystemClock_Config(void)
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   // Check if timer has triggered and update attitude
-  if (htim == &htim11 )
+  if (htim == &htim11)
   {
-	HAL_ResumeTick();
+    HAL_ResumeTick();
 
-	MPU_calcAttitude(&hi2c1);
-  sprintf((char*)serialBuf, "%.1f,%.1f,%.1f\r\n", attitude.r, attitude.p, attitude.y);
-  HAL_UART_Transmit(&huart2, serialBuf, strlen((char*)serialBuf), HAL_MAX_DELAY);
-  
-  HAL_SuspendTick();
+    MPU_calcAttitude(&hi2c1);
+    sprintf((char *)serialBuf, "%.1f,%.1f,%.1f\r\n", attitude.r, attitude.p, attitude.y);
+    HAL_UART_Transmit(&huart2, serialBuf, strlen((char *)serialBuf), HAL_MAX_DELAY);
+
+    HAL_SuspendTick();
   }
 }
 
 /* USER CODE END 4 */
 
 /**
-  * @brief  This function is executed in case of error occurrence.
-  * @retval None
-  */
+ * @brief  This function is executed in case of error occurrence.
+ * @retval None
+ */
 void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
@@ -218,14 +224,14 @@ void Error_Handler(void)
   /* USER CODE END Error_Handler_Debug */
 }
 
-#ifdef  USE_FULL_ASSERT
+#ifdef USE_FULL_ASSERT
 /**
-  * @brief  Reports the name of the source file and the source line number
-  *         where the assert_param error has occurred.
-  * @param  file: pointer to the source file name
-  * @param  line: assert_param error line source number
-  * @retval None
-  */
+ * @brief  Reports the name of the source file and the source line number
+ *         where the assert_param error has occurred.
+ * @param  file: pointer to the source file name
+ * @param  line: assert_param error line source number
+ * @retval None
+ */
 void assert_failed(uint8_t *file, uint32_t line)
 {
   /* USER CODE BEGIN 6 */
@@ -234,4 +240,3 @@ void assert_failed(uint8_t *file, uint32_t line)
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
-
