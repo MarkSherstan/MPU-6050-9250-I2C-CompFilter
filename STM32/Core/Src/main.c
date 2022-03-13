@@ -107,20 +107,21 @@ int main(void)
 
   /* USER CODE BEGIN 2 */
 
-  // Check if IMU configured propely and block if it didnt
-  if (MPU_begin(AD0_LOW, AFS_4G, GFS_500DPS, TAU, SAMPLE_RATE_S) == TRUE)
+  // Check if IMU configured properly and block if it didn't
+  if (MPU_begin(&hi2c1, AD0_LOW, AFS_4G, GFS_500DPS, TAU, SAMPLE_RATE_S) == TRUE)
   {
     HAL_GPIO_WritePin(LED_PORT, LED_PIN, 1);
   } else {
+    // TODO: Flash LED and add note
     while(1);
   }
 
   // Calibrate the IMU 
   sprintf((char*)serialBuf, "CALIBRATING...\r\n");
   HAL_UART_Transmit(&huart2, serialBuf, strlen((char*)serialBuf), HAL_MAX_DELAY);
-  MPU_calibrateGyro(2000);
+  MPU_calibrateGyro(&hi2c1, 2000);
 
-  // Start timer and put procssor into an effcient low power mode
+  // Start timer and put processor into an efficient low power mode
   HAL_TIM_Base_Start_IT(&htim11);
   HAL_PWR_EnableSleepOnExit();
   HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);
@@ -192,7 +193,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   {
 	HAL_ResumeTick();
 
-	MPU_calcAttitude();
+	MPU_calcAttitude(&hi2c1);
   sprintf((char*)serialBuf, "%.1f,%.1f,%.1f\r\n", attitude.r, attitude.p, attitude.y);
   HAL_UART_Transmit(&huart2, serialBuf, strlen((char*)serialBuf), HAL_MAX_DELAY);
   

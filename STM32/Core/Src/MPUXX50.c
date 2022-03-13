@@ -13,7 +13,7 @@
 /// @param gScale Set gyroscope full scale range: 0 for ±250°/s, 1 for ±500°/s, 2 for ±1000°/s, and 3 for ±2000°/s.
 /// @param tau Set tau value for the complementary filter (typically 0.98)
 /// @param dt Set sampling rate in seconds determined by the timer interrupt 
-uint8_t MPU_begin(uint8_t addr, uint8_t aScale, uint8_t gScale, float tau, float dt)
+uint8_t MPU_begin(I2C_HandleTypeDef *I2Cx, uint8_t addr, uint8_t aScale, uint8_t gScale, float tau, float dt)
 {
     // Save values
     _addr = addr << 1;
@@ -25,18 +25,18 @@ uint8_t MPU_begin(uint8_t addr, uint8_t aScale, uint8_t gScale, float tau, float
     uint8_t select;
 
     // Confirm device
-    HAL_I2C_Mem_Read(&hi2c1, _addr, WHO_AM_I, 1, &check, 1, I2C_TIMOUT_MS);
+    HAL_I2C_Mem_Read(I2Cx, _addr, WHO_AM_I, 1, &check, 1, I2C_TIMOUT_MS);
 
-    // TODO: If 9250 fails could it trigger the 6050 check???
+    // TODO: If 9250 or 6050 fails could it trigger the opposite check???
     if ((check == WHO_AM_I_9250_ANS) || (check == WHO_AM_I_6050_ANS))
     {
         // Startup / reset the sensor
         select = 0x00;
-        HAL_I2C_Mem_Write(&hi2c1, _addr, PWR_MGMT_1, 1, &select, 1, I2C_TIMOUT_MS);
+        HAL_I2C_Mem_Write(I2Cx, _addr, PWR_MGMT_1, 1, &select, 1, I2C_TIMOUT_MS);
 
         // Set the full scale ranges
-        setAccFullScaleRange(aScale);
-        setGyroFullScaleRange(gScale);
+        setAccFullScaleRange(I2Cx, aScale);
+        setGyroFullScaleRange(I2Cx, gScale);
 
         return 1;
     } else {
@@ -46,7 +46,7 @@ uint8_t MPU_begin(uint8_t addr, uint8_t aScale, uint8_t gScale, float tau, float
 
 /// @brief Set the accelerometer full scale range.
 /// @param aScale Set 0 for ±2g, 1 for ±4g, 2 for ±8g, and 3 for ±16g.
-void setAccFullScaleRange(uint8_t aScale)
+void setAccFullScaleRange(I2C_HandleTypeDef *I2Cx, uint8_t aScale)
 {
     // Variable init
     uint8_t select;
@@ -57,34 +57,34 @@ void setAccFullScaleRange(uint8_t aScale)
     case AFS_2G:
         aRes = 16384.0;
         select = 0x00;
-        HAL_I2C_Mem_Write(&hi2c1, _addr, ACCEL_CONFIG, 1, &select, 1, I2C_TIMOUT_MS);
+        HAL_I2C_Mem_Write(I2Cx, _addr, ACCEL_CONFIG, 1, &select, 1, I2C_TIMOUT_MS);
         break;
     case AFS_4G:
         aRes = 8192.0;
         select = 0x08;
-        HAL_I2C_Mem_Write(&hi2c1, _addr, ACCEL_CONFIG, 1, &select, 1, I2C_TIMOUT_MS);
+        HAL_I2C_Mem_Write(I2Cx, _addr, ACCEL_CONFIG, 1, &select, 1, I2C_TIMOUT_MS);
         break;
     case AFS_8G:
         aRes = 4096.0;
         select = 0x10;
-        HAL_I2C_Mem_Write(&hi2c1, _addr, ACCEL_CONFIG, 1, &select, 1, I2C_TIMOUT_MS);
+        HAL_I2C_Mem_Write(I2Cx, _addr, ACCEL_CONFIG, 1, &select, 1, I2C_TIMOUT_MS);
         break;
     case AFS_16G:
         aRes = 2048.0;
         select = 0x18;
-        HAL_I2C_Mem_Write(&hi2c1, _addr, ACCEL_CONFIG, 1, &select, 1, I2C_TIMOUT_MS);
+        HAL_I2C_Mem_Write(I2Cx, _addr, ACCEL_CONFIG, 1, &select, 1, I2C_TIMOUT_MS);
         break;
     default:
         aRes = 8192.0;
         select = 0x08;
-        HAL_I2C_Mem_Write(&hi2c1, _addr, ACCEL_CONFIG, 1, &select, 1, I2C_TIMOUT_MS);
+        HAL_I2C_Mem_Write(I2Cx, _addr, ACCEL_CONFIG, 1, &select, 1, I2C_TIMOUT_MS);
         break;
     }
 }
 
 /// @brief Set the gyroscope full scale range.
 /// @param gScale Set 0 for ±250°/s, 1 for ±500°/s, 2 for ±1000°/s, and 3 for ±2000°/s.
-void setGyroFullScaleRange(uint8_t gScale)
+void setGyroFullScaleRange(I2C_HandleTypeDef *I2Cx, uint8_t gScale)
 {
     // Variable init
     uint8_t select;
@@ -95,38 +95,38 @@ void setGyroFullScaleRange(uint8_t gScale)
     case GFS_250DPS:
         gRes = 131.0;
         select = 0x00;
-        HAL_I2C_Mem_Write(&hi2c1, _addr, GYRO_CONFIG, 1, &select, 1, I2C_TIMOUT_MS);
+        HAL_I2C_Mem_Write(I2Cx, _addr, GYRO_CONFIG, 1, &select, 1, I2C_TIMOUT_MS);
         break;
     case GFS_500DPS:
         gRes = 65.5;
         select = 0x00;
-        HAL_I2C_Mem_Write(&hi2c1, _addr, GYRO_CONFIG, 1, &select, 1, I2C_TIMOUT_MS);
+        HAL_I2C_Mem_Write(I2Cx, _addr, GYRO_CONFIG, 1, &select, 1, I2C_TIMOUT_MS);
         break;
     case GFS_1000DPS:
         gRes = 32.8;
         select = 0x00;
-        HAL_I2C_Mem_Write(&hi2c1, _addr, GYRO_CONFIG, 1, &select, 1, I2C_TIMOUT_MS);
+        HAL_I2C_Mem_Write(I2Cx, _addr, GYRO_CONFIG, 1, &select, 1, I2C_TIMOUT_MS);
         break;
     case GFS_2000DPS:
         gRes = 16.4;
         select = 0x00;
-        HAL_I2C_Mem_Write(&hi2c1, _addr, GYRO_CONFIG, 1, &select, 1, I2C_TIMOUT_MS);
+        HAL_I2C_Mem_Write(I2Cx, _addr, GYRO_CONFIG, 1, &select, 1, I2C_TIMOUT_MS);
         break;
     default:
         gRes = 65.5;
         select = 0x00;
-        HAL_I2C_Mem_Write(&hi2c1, _addr, GYRO_CONFIG, 1, &select, 1, I2C_TIMOUT_MS);
+        HAL_I2C_Mem_Write(I2Cx, _addr, GYRO_CONFIG, 1, &select, 1, I2C_TIMOUT_MS);
         break;
     }
 }
 
 /// @brief Read raw data from IMU
-void readRawData(void)
+void readRawData(I2C_HandleTypeDef *I2Cx)
 {
     uint8_t buf[14];
 
     // Subroutine for reading the raw data
-    HAL_I2C_Mem_Read(&hi2c1, _addr, ACCEL_XOUT_H, 1, buf, 14, I2C_TIMOUT_MS);
+    HAL_I2C_Mem_Read(I2Cx, _addr, ACCEL_XOUT_H, 1, buf, 14, I2C_TIMOUT_MS);
 
     // Bit shift the data
     sensorRaw.ax = buf[0] << 8 | buf[1];
@@ -142,7 +142,7 @@ void readRawData(void)
 
 /// @brief Find offsets for each axis of gyroscope.
 /// @param numCalPoints Number of data points to average.
-void MPU_calibrateGyro(uint16_t numCalPoints)
+void MPU_calibrateGyro(I2C_HandleTypeDef *I2Cx, uint16_t numCalPoints)
 {
     // Init
     int32_t x = 0;
@@ -152,7 +152,7 @@ void MPU_calibrateGyro(uint16_t numCalPoints)
     // Save specified number of points
     for (uint16_t ii = 0; ii < numCalPoints; ii++)
     {
-        readRawData();
+        readRawData(I2Cx);
         x += sensorRaw.gx;
         y += sensorRaw.gy;
         z += sensorRaw.gz;
@@ -166,10 +166,10 @@ void MPU_calibrateGyro(uint16_t numCalPoints)
 }
 
 /// @brief Calculate the real world sensor values
-void readProcessedData(void)
+void readProcessedData(I2C_HandleTypeDef *I2Cx)
 {
     // Get raw values from the IMU
-    readRawData();
+    readRawData(I2Cx);
 
     // Convert accelerometer values to g's
     sensorProcessed.ax = sensorRaw.ax / aRes;
@@ -189,10 +189,10 @@ void readProcessedData(void)
 
 /// @brief Calculate the attitude of the sensor in degrees using a complementary filter
 /// @param tau Time constant relating to the weighting of gyroscope vs accelerometer.
-void MPU_calcAttitude(void)
+void MPU_calcAttitude(I2C_HandleTypeDef *I2Cx)
 {
     // Read processed data
-    readProcessedData();
+    readProcessedData(I2Cx);
 
     // Complementary filter
     float accelPitch = atan2(sensorProcessed.ay, sensorProcessed.az) * RAD2DEG;

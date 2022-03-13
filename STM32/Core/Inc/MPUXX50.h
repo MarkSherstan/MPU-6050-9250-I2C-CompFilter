@@ -59,13 +59,13 @@ float _dt, _tau;
 float aRes, gRes;
 
 // Functions
-uint8_t MPU_begin(uint8_t addr, uint8_t aScale, uint8_t gScale, float tau, float dt);
-void MPU_calibrateGyro(uint16_t numCalPoints);
-void MPU_calcAttitude(void);
+uint8_t MPU_begin(I2C_HandleTypeDef *I2Cx, uint8_t addr, uint8_t aScale, uint8_t gScale, float tau, float dt);
+void MPU_calibrateGyro(I2C_HandleTypeDef *I2Cx, uint16_t numCalPoints);
+void MPU_calcAttitude(I2C_HandleTypeDef *I2Cx);
 
-void readRawData(void);
-void readProcessedData(void);
-void setGyroFullScaleRange(uint8_t gScale);
-void setAccFullScaleRange(uint8_t aScale);
+void readRawData(I2C_HandleTypeDef *I2Cx);
+void readProcessedData(I2C_HandleTypeDef *I2Cx);
+void setGyroFullScaleRange(I2C_HandleTypeDef *I2Cx, uint8_t gScale);
+void setAccFullScaleRange(I2C_HandleTypeDef *I2Cx, uint8_t aScale);
 
 #endif /* MPUXX50_H_ */
