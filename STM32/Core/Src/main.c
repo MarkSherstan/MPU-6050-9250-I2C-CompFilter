@@ -39,7 +39,7 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 #define TRUE  1
-#define FLASE 0
+#define FALSE 0
 
 #define SAMPLE_RATE_S 0.004
 #define TAU 0.98
