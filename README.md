@@ -130,10 +130,11 @@ The following was tested with a NUCLEO-F401RE dev board. Using a similar configu
 * Configure the pins (Example uses `USART2`, `I2C1`, and `TIM11`). The serial port runs with default settings at a baud rate of 115200, the I2C port runs in standard mode at 100 kHz, the timer is set to interrupt at 250 Hz (adjust prescaler and counter based on hardware and clock speeds). Configure a GPIO port with an indicator LED if desired. 
 * Select: Project Manager -> Code Generator -> Check `Generate peripheral initialization as a pair of '.c/.h' files per peripheral`.
 * Have the IDE generate the hardware specific code.
-* Use `MPU_begin(...)` to configure the IMU settings and ensure that there is a connection. The IMU should be calibrated with `MPU_calibrateGyro(...)`, and to retrieve attitude use `MPU_calcAttitude(...)`. See `main.c` for the full example implementation with additional notes. 
+* Use `MPU_begin(...)` to configure the IMU settings and ensure that there is a connection. The IMU should be calibrated with `MPU_calibrateGyro(...)`, and to retrieve attitude use `MPU_calcAttitude(...)`. See `main.c` for the full example implementation with additional notes.
+* Code could use a little tidy (e.g. remove global variables, make it simpler to initialize, etc...)
 
-### C Library
-A generic C library was written that can be used on a variety of hardware. Refer to the Arduino or Raspberry Pi example in the `c_library` directory to get an idea of how to use the library.
+### C++ Library
+A generic C++ library was written that can be used on a variety of hardware. Refer to the Arduino or Raspberry Pi example in the `CPP_library` directory to get an idea of how to use the library.
 
 For the Arduino example ensure to add the library to your Arduino IDE or put the `mpuXX50.h` and `mpuXX50.cpp` in the same folder as your `*.ino`.
 
