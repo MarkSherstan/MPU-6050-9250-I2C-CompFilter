@@ -10,7 +10,7 @@
 /// @brief Read a specific registry address
 /// @param SPIx Pointer to SPI structure config
 /// @param pReg Pointer containing address and value to write
-void MPU_WRITE(SPI_HandleTypeDef *SPIx, uint8_t *pReg)
+void MPU_REG_WRITE(SPI_HandleTypeDef *SPIx, uint8_t *pReg)
 {
 	MPU_CS(CS_SELECT);
 

@@ -8,6 +8,12 @@
 #ifndef INC_MPU9250_H_
 #define INC_MPU9250_H_
 
+// VDDIO (Jumper to VDD) -> 3V3
+// AD0/SDO ->
+// SCL/SCLK ->
+// SDA/SDI ->
+// CS -> CS
+// GND -> GND
 
 // Libraries
 #include <stdint.h>
@@ -20,11 +26,10 @@
 #define SPI_TIMOUT_MS	1000
 
 // Structures
-struct MPU_Config
+typedef struct MPU9250
 {
-	// TODO: Set this up as -> notation for practice
 	uint8_t CS_PORT, CS_PIN;
-} mpuConfig;
+} MPU9250_t;
 
 // Functions
 void MPU_CS(uint8_t state);
