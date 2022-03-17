@@ -38,5 +38,6 @@ void MPU_REG_READ(SPI_HandleTypeDef *SPIx, uint8_t *pReg, uint8_t *pRxData, uint
 /// @param state Set low to select, high to deselect
 void MPU_CS(uint8_t state)
 {
-	HAL_GPIO_WritePin(mpuConfig.CS_PORT, mpuConfig.CS_PIN, state);
+//	HAL_GPIO_WritePin(mpuConfig.CS_PORT, mpuConfig.CS_PIN, state);
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, state);
 }

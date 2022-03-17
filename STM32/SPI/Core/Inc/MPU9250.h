@@ -9,14 +9,11 @@
 #define INC_MPU9250_H_
 
 // VDDIO (Jumper to VDD) -> 3V3
-// AD0/SDO ->
+// AD0/SDO -> MISO PB4
 // SCL/SCLK -> PB3
-// SDA/SDI ->
-// CS -> CS (
+// SDA/SDI -> MOSI PB5
+// CS -> CS (PB6)
 // GND -> GND
-
-// MISO PB4
-// MOSI PB5
 
 
 // Libraries
@@ -30,10 +27,10 @@
 #define SPI_TIMOUT_MS	1000
 
 // Structures
-typedef struct MPU9250
-{
-	uint8_t CS_PORT, CS_PIN;
-} MPU9250_t;
+//typedef struct MPU9250
+//{
+//	uint8_t CS_PORT, CS_PIN;
+//} MPU9250_t;
 
 // Functions
 void MPU_CS(uint8_t state);

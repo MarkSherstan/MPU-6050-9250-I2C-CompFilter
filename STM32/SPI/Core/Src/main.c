@@ -35,6 +35,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+uint8_t serialBuf[25];
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -45,7 +46,10 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-MPU9250_t MPU9250;
+//MPU9250_t MPU9250;
+//MPU9250.CS_PORT = GPIOB;
+//MPU9250.CS_PIN = GPIO_PIN_6;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -91,6 +95,7 @@ int main(void)
   MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
 
+  
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -98,6 +103,12 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
+    HAL_Delay(1000);
+    uint8_t dataIn = 0x75;
+    uint8_t dataOut = 0x00;
+    MPU_REG_READ(&hspi1, &dataIn, &dataOut, 1);
+    sprintf((char *)serialBuf, "WHO_AM_I%u\r\n", dataOut);
+    HAL_UART_Transmit(&huart2, serialBuf, strlen((char *)serialBuf), HAL_MAX_DELAY);
 
     /* USER CODE BEGIN 3 */
   }
