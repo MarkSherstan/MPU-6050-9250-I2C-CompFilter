@@ -10,10 +10,14 @@
 
 // VDDIO (Jumper to VDD) -> 3V3
 // AD0/SDO ->
-// SCL/SCLK ->
+// SCL/SCLK -> PB3
 // SDA/SDI ->
-// CS -> CS
+// CS -> CS (
 // GND -> GND
+
+// MISO PB4
+// MOSI PB5
+
 
 // Libraries
 #include <stdint.h>
