@@ -13,24 +13,21 @@
 void MPU_REG_WRITE(SPI_HandleTypeDef *SPIx, uint8_t *pReg)
 {
 	MPU_CS(CS_SELECT);
-
 	HAL_SPI_Transmit(SPIx, pReg, 2, SPI_TIMOUT_MS);
-
 	MPU_CS(CS_DESELECT);
 }
 
 /// @brief Read a specific registry address
 /// @param SPIx Pointer to SPI structure config
-/// @param pReg Pointer of address to start reading at
+/// @param addr Address to start reading at
 /// @param pRxData Pointer to data buffer
 /// @param RxSize Size of data buffer
-void MPU_REG_READ(SPI_HandleTypeDef *SPIx, uint8_t *pReg, uint8_t *pRxData, uint16_t RxSize)
+void MPU_REG_READ(SPI_HandleTypeDef *SPIx, uint8_t addr, uint8_t *pRxData, uint16_t RxSize)
 {
 	MPU_CS(CS_SELECT);
-
-	HAL_SPI_Transmit(SPIx, pReg, 1, SPI_TIMOUT_MS);
+	uint8_t writeAddr = addr | READWRITE;
+	HAL_SPI_Transmit(SPIx, &writeAddr, 1, SPI_TIMOUT_MS);
 	HAL_SPI_Receive(SPIx, pRxData, RxSize, SPI_TIMOUT_MS);
-
 	MPU_CS(CS_DESELECT);
 }
 

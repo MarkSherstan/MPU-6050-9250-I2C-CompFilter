@@ -22,9 +22,13 @@
 #include "SPI.h"
 
 // Defines
+#define READWRITE 		0x80
 #define CS_SELECT   	0
 #define CS_DESELECT 	1
 #define SPI_TIMOUT_MS	1000
+
+#define WHO_AM_I 	 	    		0x75
+#define WHO_AM_I_9250_ANS   0x71
 
 // Structures
 //typedef struct MPU9250
