@@ -38,7 +38,7 @@
 
 // Functions
 void MPU_CS(uint8_t state);
-void MPU_REG_READ(SPI_HandleTypeDef *SPIx, uint8_t *pReg, uint8_t *pRxData, uint16_t RxSize);
+void MPU_REG_READ(SPI_HandleTypeDef *SPIx, uint8_t addr, uint8_t *pRxData, uint16_t RxSize);
 void MPU_REG_WRITE(SPI_HandleTypeDef *SPIx, uint8_t *pReg);
 
 

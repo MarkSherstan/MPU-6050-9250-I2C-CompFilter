@@ -103,13 +103,10 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-    HAL_Delay(1000);
-    uint8_t dataOut;
-    MPU_REG_READ(&hspi1, WHO_AM_I, &dataOut, 1);
-    uint8_t sol = dataOut;
-    // sprintf((char *)serialBuf, "WHO_AM_I%u\r\n", dataOut);
-    // HAL_UART_Transmit(&huart2, serialBuf, strlen((char *)serialBuf), HAL_MAX_DELAY);
-
+	    HAL_Delay(1000);
+	    uint8_t dataOut;
+	    MPU_REG_READ(&hspi1, WHO_AM_I, &dataOut, 1);
+	    uint8_t sol = dataOut;
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
