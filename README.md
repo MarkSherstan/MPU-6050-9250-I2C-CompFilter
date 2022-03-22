@@ -161,3 +161,4 @@ Upon setting up the class with the I2C address of the sensor and defining the re
 * Kalman filter (custom lib)
 * C Library
 * General clean up
+* Move STM32 examples to their own repo (just put the libs)
