@@ -46,10 +46,7 @@ uint8_t serialBuf[25];
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-//MPU9250_t MPU9250;
-//MPU9250.CS_PORT = GPIOB;
-//MPU9250.CS_PIN = GPIO_PIN_6;
-
+MPU9250_t MPU9250;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -70,7 +67,12 @@ void SystemClock_Config(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
+  MPU9250.CS_PORT = GPIOB;
+  MPU9250.CS_PIN = GPIO_PIN_6;
+  MPU9250.aScale = AFS_4G;
+  MPU9250.gScale = GFS_500DPS;
+  MPU9250.tau = 0.98;
+  MPU9250.dt = 0.004;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -106,7 +108,6 @@ int main(void)
 	    HAL_Delay(1000);
 	    uint8_t dataOut;
 	    MPU_REG_READ(&hspi1, WHO_AM_I, &dataOut, 1);
-	    uint8_t sol = dataOut;
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
