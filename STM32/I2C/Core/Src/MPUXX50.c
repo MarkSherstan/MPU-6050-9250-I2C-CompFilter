@@ -99,22 +99,22 @@ void setGyroFullScaleRange(I2C_HandleTypeDef *I2Cx, uint8_t gScale)
         break;
     case GFS_500DPS:
         gRes = 65.5;
-        select = 0x00;
+        select = 0x08;
         HAL_I2C_Mem_Write(I2Cx, _addr, GYRO_CONFIG, 1, &select, 1, I2C_TIMOUT_MS);
         break;
     case GFS_1000DPS:
         gRes = 32.8;
-        select = 0x00;
+        select = 0x10;
         HAL_I2C_Mem_Write(I2Cx, _addr, GYRO_CONFIG, 1, &select, 1, I2C_TIMOUT_MS);
         break;
     case GFS_2000DPS:
         gRes = 16.4;
-        select = 0x00;
+        select = 0x18;
         HAL_I2C_Mem_Write(I2Cx, _addr, GYRO_CONFIG, 1, &select, 1, I2C_TIMOUT_MS);
         break;
     default:
         gRes = 65.5;
-        select = 0x00;
+        select = 0x08;
         HAL_I2C_Mem_Write(I2Cx, _addr, GYRO_CONFIG, 1, &select, 1, I2C_TIMOUT_MS);
         break;
     }
