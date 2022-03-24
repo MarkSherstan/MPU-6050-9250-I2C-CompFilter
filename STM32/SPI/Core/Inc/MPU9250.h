@@ -26,6 +26,8 @@
 #define CS_DESELECT     1
 #define SPI_TIMOUT_MS   1000
 
+#define USER_CTRL           0x6A
+#define PWR_MGMT_1   		0x6B
 #define GYRO_CONFIG  		0x1B
 #define ACCEL_CONFIG 		0x1C
 
@@ -82,5 +84,6 @@ void MPU_REG_READ(SPI_HandleTypeDef *SPIx, uint8_t addr, uint8_t *pRxData, uint1
 void MPU_REG_WRITE(SPI_HandleTypeDef *SPIx, uint8_t *pAddr, uint8_t *pVal);
 uint8_t MPU_begin(SPI_HandleTypeDef *SPIx, MPU9250_t *mpuStruct);
 void setAccFullScaleRange(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250, uint8_t aScale);
+void setGyroFullScaleRange(SPI_HandleTypeDef *SPIx,  MPU9250_t *pMPU9250, uint8_t gScale);
 
 #endif /* INC_MPU9250_H_ */

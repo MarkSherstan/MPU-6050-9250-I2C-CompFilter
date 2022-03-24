@@ -13,20 +13,25 @@
 uint8_t MPU_begin(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250)
 {   
     // Initialize variables
-    uint8_t check;
-    uint8_t select;
+    uint8_t check, addr, val;
 
     // Confirm device
     MPU_REG_READ(SPIx, WHO_AM_I, &check, 1);
     if (check == WHO_AM_I_9250_ANS)
     {
         // Startup / reset the sensor
+        addr = PWR_MGMT_1;
+        val = 0x00;
+        MPU_REG_WRITE(SPIx, &addr, &val);
 
-        // I2C_IF_DIS    Start-Up Time for Register Read/Write” in Section 6.3
+        // Disable I2C (SPI only)
+        addr = USER_CTRL;
+        val = 0x10;
+        MPU_REG_WRITE(SPIx, &addr, &val);
         
         // Set the full scale ranges
         setAccFullScaleRange(SPIx, pMPU9250, pMPU9250->settings.aFullScaleRange);
-
+        setGyroFullScaleRange(SPIx, pMPU9250, pMPU9250->settings.gFullScaleRange);
         return 1;
     }
     else 
@@ -103,6 +108,47 @@ void setAccFullScaleRange(SPI_HandleTypeDef *SPIx,  MPU9250_t *pMPU9250, uint8_t
         break;
     default:
         pMPU9250->sensorData.aScaleFactor = 8192.0;
+        val = 0x08;
+        MPU_REG_WRITE(SPIx, &addr, &val);
+        break;
+    }
+}
+
+/// @brief Set the gyroscope full scale range
+/// @param SPIx Pointer to SPI structure config
+/// @param mpuStruct Pointer to master MPU9250 struct
+/// @param gScale Set 0 for ±250°/s, 1 for ±500°/s, 2 for ±1000°/s, and 3 for ±2000°/s
+void setGyroFullScaleRange(SPI_HandleTypeDef *SPIx,  MPU9250_t *pMPU9250, uint8_t gScale)
+{
+    // Variable init
+    uint8_t addr = GYRO_CONFIG;
+    uint8_t val;
+
+    // Set the value
+    switch (gScale)
+    {
+    case GFS_250DPS:
+        pMPU9250->sensorData.gScaleFactor = 131.0;
+        val = 0x00;
+        MPU_REG_WRITE(SPIx, &addr, &val);
+        break;
+    case GFS_500DPS:
+        pMPU9250->sensorData.gScaleFactor = 65.5;
+        val = 0x08;
+        MPU_REG_WRITE(SPIx, &addr, &val);
+        break;
+    case GFS_1000DPS:
+        pMPU9250->sensorData.gScaleFactor = 32.8;
+        val = 0x10;
+        MPU_REG_WRITE(SPIx, &addr, &val);
+        break;
+    case GFS_2000DPS:
+        pMPU9250->sensorData.gScaleFactor = 16.4;
+        val = 0x18;
+        MPU_REG_WRITE(SPIx, &addr, &val);
+        break;
+    default:
+        pMPU9250->sensorData.gScaleFactor = 65.5;
         val = 0x08;
         MPU_REG_WRITE(SPIx, &addr, &val);
         break;
