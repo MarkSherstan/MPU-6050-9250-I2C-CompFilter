@@ -37,9 +37,26 @@ enum accelerometerFullScaleRange{AFS_2G, AFS_4G, AFS_8G, AFS_16G};
 // Structures
 typedef struct MPU9250
 {
+	// Sensor data 
+	struct SensorData {
+		float aRes, gRes;
+		float ax, ay, az, gx, gy, gz;
+	} sensorData;
+
+	struct GyroCal
+	{
+		float x, y, z;
+	} gyroCal;
+
+	struct Attitude
+	{
+		float tau, dt;
+		float r, p, y;
+	} attitude;
+
+	// Variables
 	uint8_t CS_PORT, CS_PIN;
-	uint8_t aScale, gScale;
-	float tau, dt;
+    uint8_t aScale, gScale;
 } MPU9250_t;
 
 // Functions

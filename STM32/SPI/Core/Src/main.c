@@ -71,8 +71,8 @@ int main(void)
   MPU9250.CS_PIN = GPIO_PIN_6;
   MPU9250.aScale = AFS_4G;
   MPU9250.gScale = GFS_500DPS;
-  MPU9250.tau = 0.98;
-  MPU9250.dt = 0.004;
+  MPU9250.attitude.tau = 0.98;
+  MPU9250.attitude.dt = 0.004;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
