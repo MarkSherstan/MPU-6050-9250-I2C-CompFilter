@@ -7,15 +7,11 @@
 
 #include "MPU9250.h"
 
-/// @brief Check for connection, reset IMU, and set full range scale.
-/// @param 
-/// @param 
-uint8_t MPU_begin(SPI_HandleTypeDef *SPIx, MPU9250_t *mpuStruct)
-{
-    // Save values
-    uint8_t test1 = mpuStruct->settings.aFullScaleRange;
-    uint8_t test2 = mpuStruct->settings.gFullScaleRange;
-    
+/// @brief Check for connection, reset IMU, and set full range scale
+/// @param SPIx Pointer to SPI structure config
+/// @param pMPU9250 Pointer to master MPU9250 struct
+uint8_t MPU_begin(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250)
+{   
     // Initialize variables
     uint8_t check;
     uint8_t select;
@@ -24,6 +20,13 @@ uint8_t MPU_begin(SPI_HandleTypeDef *SPIx, MPU9250_t *mpuStruct)
     MPU_REG_READ(SPIx, WHO_AM_I, &check, 1);
     if (check == WHO_AM_I_9250_ANS)
     {
+        // Startup / reset the sensor
+
+        // I2C_IF_DIS    Start-Up Time for Register Read/Write” in Section 6.3
+        
+        // Set the full scale ranges
+        setAccFullScaleRange(SPIx, pMPU9250, pMPU9250->settings.aFullScaleRange);
+
         return 1;
     }
     else 
@@ -33,12 +36,13 @@ uint8_t MPU_begin(SPI_HandleTypeDef *SPIx, MPU9250_t *mpuStruct)
 }
 
 /// @brief Read a specific registry address
-/// @param SPIx Pointer to SPI structure config
-/// @param pReg Pointer containing address and value to write
-void MPU_REG_WRITE(SPI_HandleTypeDef *SPIx, uint8_t *pReg)
+/// @param pAddr Pointer to address to be written to
+/// @param pVal Pointer of value to write to given address
+void MPU_REG_WRITE(SPI_HandleTypeDef *SPIx, uint8_t *pAddr, uint8_t *pVal)
 {
 	MPU_CS(CS_SELECT);
-	HAL_SPI_Transmit(SPIx, pReg, 2, SPI_TIMOUT_MS);
+    HAL_SPI_Transmit(SPIx, pAddr, 1, SPI_TIMOUT_MS);
+    HAL_SPI_Transmit(SPIx, pVal, 1, SPI_TIMOUT_MS);
 	MPU_CS(CS_DESELECT);
 }
 
@@ -64,5 +68,43 @@ void MPU_CS(uint8_t state)
 	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, state);
 }
 
+/// @brief Set the accelerometer full scale range
+/// @param SPIx Pointer to SPI structure config
+/// @param mpuStruct Pointer to master MPU9250 struct
+/// @param aScale Set 0 for ±2g, 1 for ±4g, 2 for ±8g, and 3 for ±16g
+void setAccFullScaleRange(SPI_HandleTypeDef *SPIx,  MPU9250_t *pMPU9250, uint8_t aScale)
+{
+    // Variable init
+    uint8_t addr = ACCEL_CONFIG;
+    uint8_t val;
 
-// I2C_IF_DIS    Start-Up Time for Register Read/Write” in Section 6.3
+    // Set the value
+    switch (aScale)
+    {
+    case AFS_2G:
+        pMPU9250->sensorData.aScaleFactor = 16384.0;
+        val = 0x00;
+        MPU_REG_WRITE(SPIx, &addr, &val);
+        break;
+    case AFS_4G:
+        pMPU9250->sensorData.aScaleFactor = 8192.0;
+        val = 0x08;
+        MPU_REG_WRITE(SPIx, &addr, &val);
+        break;
+    case AFS_8G:
+        pMPU9250->sensorData.aScaleFactor = 4096.0;
+        val = 0x10;
+        MPU_REG_WRITE(SPIx, &addr, &val);
+        break;
+    case AFS_16G:
+        pMPU9250->sensorData.aScaleFactor = 2048.0;
+        val = 0x18;
+        MPU_REG_WRITE(SPIx, &addr, &val);
+        break;
+    default:
+        pMPU9250->sensorData.aScaleFactor = 8192.0;
+        val = 0x08;
+        MPU_REG_WRITE(SPIx, &addr, &val);
+        break;
+    }
+}

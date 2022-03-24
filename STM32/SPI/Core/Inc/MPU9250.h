@@ -26,6 +26,9 @@
 #define CS_DESELECT     1
 #define SPI_TIMOUT_MS   1000
 
+#define GYRO_CONFIG  		0x1B
+#define ACCEL_CONFIG 		0x1C
+
 #define WHO_AM_I          0x75
 #define WHO_AM_I_9250_ANS 0x71
 
@@ -76,7 +79,8 @@ typedef struct MPU9250
 // Functions
 void MPU_CS(uint8_t state);
 void MPU_REG_READ(SPI_HandleTypeDef *SPIx, uint8_t addr, uint8_t *pRxData, uint16_t RxSize);
-void MPU_REG_WRITE(SPI_HandleTypeDef *SPIx, uint8_t *pReg);
-uint8_t MPU_begin(SPI_HandleTypeDef *SPIx, MPU9250_t *ParamStruct);
+void MPU_REG_WRITE(SPI_HandleTypeDef *SPIx, uint8_t *pAddr, uint8_t *pVal);
+uint8_t MPU_begin(SPI_HandleTypeDef *SPIx, MPU9250_t *mpuStruct);
+void setAccFullScaleRange(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250, uint8_t aScale);
 
 #endif /* INC_MPU9250_H_ */
