@@ -10,11 +10,11 @@
 /// @brief Check for connection, reset IMU, and set full range scale.
 /// @param 
 /// @param 
-uint8_t MPU_begin(SPI_HandleTypeDef *SPIx, MPU9250_t *ParamStruct)
+uint8_t MPU_begin(SPI_HandleTypeDef *SPIx, MPU9250_t *mpuStruct)
 {
     // Save values
-    uint8_t test1 = ParamStruct->aScale;
-    uint8_t test2 = ParamStruct->gScale;
+    uint8_t test1 = mpuStruct->settings.aFullScaleRange;
+    uint8_t test2 = mpuStruct->settings.gFullScaleRange;
     
     // Initialize variables
     uint8_t check;

@@ -15,48 +15,62 @@
 // CS -> CS (PB6)
 // GND -> GND
 
-
 // Libraries
 #include <stdint.h>
 #include <math.h>
 #include "SPI.h"
 
 // Defines
-#define READWRITE 		0x80
-#define CS_SELECT   	0
-#define CS_DESELECT 	1
-#define SPI_TIMOUT_MS	1000
+#define READWRITE       0x80
+#define CS_SELECT       0
+#define CS_DESELECT     1
+#define SPI_TIMOUT_MS   1000
 
-#define WHO_AM_I 	 	    		0x75
-#define WHO_AM_I_9250_ANS   0x71
+#define WHO_AM_I          0x75
+#define WHO_AM_I_9250_ANS 0x71
 
 // Full scale ranges
-enum gyroscopeFullScaleRange{GFS_250DPS, GFS_500DPS, GFS_1000DPS, GFS_2000DPS};
-enum accelerometerFullScaleRange{AFS_2G, AFS_4G, AFS_8G, AFS_16G};
+enum gyroscopeFullScaleRange
+{
+    GFS_250DPS,
+    GFS_500DPS,
+    GFS_1000DPS,
+    GFS_2000DPS
+};
 
-// Structures
+enum accelerometerFullScaleRange
+{
+    AFS_2G,
+    AFS_4G,
+    AFS_8G,
+    AFS_16G
+};
+
+// Master structure
 typedef struct MPU9250
 {
-	// Sensor data 
-	struct SensorData {
-		float aRes, gRes;
-		float ax, ay, az, gx, gy, gz;
-	} sensorData;
+    struct SensorData
+    {
+        float aScaleFactor, gScaleFactor;
+        float ax, ay, az, gx, gy, gz;
+    } sensorData;
 
-	struct GyroCal
-	{
-		float x, y, z;
-	} gyroCal;
+    struct GyroCal
+    {
+        float x, y, z;
+    } gyroCal;
 
-	struct Attitude
-	{
-		float tau, dt;
-		float r, p, y;
-	} attitude;
+    struct Attitude
+    {
+        float tau, dt;
+        float r, p, y;
+    } attitude;
 
-	// Variables
-	uint8_t CS_PORT, CS_PIN;
-    uint8_t aScale, gScale;
+    struct Settings
+    {
+        uint8_t CS_PORT, CS_PIN;
+        uint8_t aFullScaleRange, gFullScaleRange;
+    } settings;
 } MPU9250_t;
 
 // Functions

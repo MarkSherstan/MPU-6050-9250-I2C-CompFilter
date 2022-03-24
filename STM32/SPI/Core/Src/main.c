@@ -67,12 +67,12 @@ void SystemClock_Config(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-  MPU9250.CS_PORT = GPIOB;
-  MPU9250.CS_PIN = GPIO_PIN_6;
-  MPU9250.aScale = AFS_4G;
-  MPU9250.gScale = GFS_500DPS;
-  MPU9250.attitude.tau = 0.98;
+  MPU9250.settings.gFullScaleRange = GFS_500DPS;
+  MPU9250.settings.aFullScaleRange = AFS_4G;
+  MPU9250.settings.CS_PIN = GPIO_PIN_6;
+  MPU9250.settings.CS_PORT = GPIOB;
   MPU9250.attitude.dt = 0.004;
+  MPU9250.attitude.tau = 0.98;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
