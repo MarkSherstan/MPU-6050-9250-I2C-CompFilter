@@ -8,6 +8,7 @@
 #include "MPUXX50.h"
 
 /// @brief Set the IMU address, check for connection, reset IMU, and set full range scale.
+/// @param I2Cx Pointer to I2C structure config.
 /// @param addr Hex address based on AD0 pin - 0x68 low or 0x69 high.
 /// @param aScale Set accelerometer full scale range: 0 for ±2g, 1 for ±4g, 2 for ±8g, and 3 for ±16g.
 /// @param gScale Set gyroscope full scale range: 0 for ±250°/s, 1 for ±500°/s, 2 for ±1000°/s, and 3 for ±2000°/s.
@@ -45,6 +46,7 @@ uint8_t MPU_begin(I2C_HandleTypeDef *I2Cx, uint8_t addr, uint8_t aScale, uint8_t
 }
 
 /// @brief Set the accelerometer full scale range.
+/// @param I2Cx Pointer to I2C structure config.
 /// @param aScale Set 0 for ±2g, 1 for ±4g, 2 for ±8g, and 3 for ±16g.
 void setAccFullScaleRange(I2C_HandleTypeDef *I2Cx, uint8_t aScale)
 {
@@ -83,6 +85,7 @@ void setAccFullScaleRange(I2C_HandleTypeDef *I2Cx, uint8_t aScale)
 }
 
 /// @brief Set the gyroscope full scale range.
+/// @param I2Cx Pointer to I2C structure config.
 /// @param gScale Set 0 for ±250°/s, 1 for ±500°/s, 2 for ±1000°/s, and 3 for ±2000°/s.
 void setGyroFullScaleRange(I2C_HandleTypeDef *I2Cx, uint8_t gScale)
 {
@@ -121,6 +124,7 @@ void setGyroFullScaleRange(I2C_HandleTypeDef *I2Cx, uint8_t gScale)
 }
 
 /// @brief Read raw data from IMU
+/// @param I2Cx Pointer to I2C structure config.
 void readRawData(I2C_HandleTypeDef *I2Cx)
 {
     uint8_t buf[14];
@@ -141,6 +145,7 @@ void readRawData(I2C_HandleTypeDef *I2Cx)
 }
 
 /// @brief Find offsets for each axis of gyroscope.
+/// @param I2Cx Pointer to I2C structure config.
 /// @param numCalPoints Number of data points to average.
 void MPU_calibrateGyro(I2C_HandleTypeDef *I2Cx, uint16_t numCalPoints)
 {
@@ -166,6 +171,7 @@ void MPU_calibrateGyro(I2C_HandleTypeDef *I2Cx, uint16_t numCalPoints)
 }
 
 /// @brief Calculate the real world sensor values
+/// @param I2Cx Pointer to I2C structure config.
 void readProcessedData(I2C_HandleTypeDef *I2Cx)
 {
     // Get raw values from the IMU
@@ -188,7 +194,7 @@ void readProcessedData(I2C_HandleTypeDef *I2Cx)
 }
 
 /// @brief Calculate the attitude of the sensor in degrees using a complementary filter
-/// @param tau Time constant relating to the weighting of gyroscope vs accelerometer.
+/// @param I2Cx Pointer to I2C structure config.
 void MPU_calcAttitude(I2C_HandleTypeDef *I2Cx)
 {
     // Read processed data
