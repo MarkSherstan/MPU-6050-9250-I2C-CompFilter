@@ -178,6 +178,8 @@ void readRawData(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250)
 }
 
 /// @brief Find offsets for each axis of gyroscope.
+/// @param SPIx Pointer to SPI structure config
+/// @param pMPU9250 Pointer to master MPU9250 struct
 /// @param numCalPoints Number of data points to average.
 void MPU_calibrateGyro(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250, uint16_t numCalPoints)
 {
@@ -200,4 +202,45 @@ void MPU_calibrateGyro(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250, uint16_t nu
     pMPU9250->gyroCal.x = (float)x / (float)numCalPoints;
     pMPU9250->gyroCal.y = (float)y / (float)numCalPoints;
     pMPU9250->gyroCal.z = (float)z / (float)numCalPoints;
+}
+
+/// @brief Calculate the real world sensor values
+/// @param SPIx Pointer to SPI structure config
+/// @param pMPU9250 Pointer to master MPU9250 struct
+void readProcessedData(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250)
+{
+    // Get raw values from the IMU
+    readRawData(SPIx, pMPU9250);
+
+    // Convert accelerometer values to g's
+    pMPU9250->sensorData.ax /= pMPU9250->sensorData.aScaleFactor;
+    pMPU9250->sensorData.ay /= pMPU9250->sensorData.aScaleFactor;
+    pMPU9250->sensorData.az /= pMPU9250->sensorData.aScaleFactor;
+
+    // Compensate for gyro offset
+    pMPU9250->sensorData.gx -= pMPU9250->gyroCal.x;
+    pMPU9250->sensorData.gy -= pMPU9250->gyroCal.y;
+    pMPU9250->sensorData.gz -= pMPU9250->gyroCal.z;
+
+    // Convert gyro values to deg/s
+    pMPU9250->sensorData.gx /= pMPU9250->sensorData.gScaleFactor;
+    pMPU9250->sensorData.gy /= pMPU9250->sensorData.gScaleFactor;
+    pMPU9250->sensorData.gz /= pMPU9250->sensorData.gScaleFactor;
+}
+
+/// @brief Calculate the attitude of the sensor in degrees using a complementary filter
+/// @param SPIx Pointer to SPI structure config
+/// @param pMPU9250 Pointer to master MPU9250 struct
+void MPU_calcAttitude(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250)
+{
+    // Read processed data
+    readProcessedData(SPIx, pMPU9250);
+
+    // Complementary filter
+    float accelPitch = atan2(pMPU9250->sensorData.ay, pMPU9250->sensorData.az) * RAD2DEG;
+    float accelRoll = atan2(pMPU9250->sensorData.ax, pMPU9250->sensorData.az) * RAD2DEG;
+
+    pMPU9250->attitude.r = pMPU9250->attitude.tau * (pMPU9250->attitude.r - pMPU9250->sensorData.gy * pMPU9250->attitude.dt) + (1 - pMPU9250->attitude.tau) * accelRoll;
+    pMPU9250->attitude.p = pMPU9250->attitude.tau * (pMPU9250->attitude.p - pMPU9250->sensorData.gx * pMPU9250->attitude.dt) + (1 - pMPU9250->attitude.tau) * accelPitch;
+    pMPU9250->attitude.y += (pMPU9250->sensorData.gz * pMPU9250->attitude.dt);
 }

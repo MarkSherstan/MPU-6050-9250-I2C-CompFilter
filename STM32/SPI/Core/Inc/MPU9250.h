@@ -20,6 +20,9 @@
 #include <math.h>
 #include "SPI.h"
 
+// Constants
+#define RAD2DEG 57.2957795131
+
 // Defines
 #define READWRITE       0x80
 #define CS_SELECT       0
@@ -89,5 +92,7 @@ void setAccFullScaleRange(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250, uint8_t 
 void setGyroFullScaleRange(SPI_HandleTypeDef *SPIx,  MPU9250_t *pMPU9250, uint8_t gScale);
 void readRawData(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250);
 void MPU_calibrateGyro(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250, uint16_t numCalPoints);
+void MPU_calcAttitude(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250);
+void readProcessedData(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250);
 
 #endif /* INC_MPU9250_H_ */
