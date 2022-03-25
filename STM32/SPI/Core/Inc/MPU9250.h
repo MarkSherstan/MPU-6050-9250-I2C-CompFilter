@@ -31,6 +31,8 @@
 #define GYRO_CONFIG  		0x1B
 #define ACCEL_CONFIG 		0x1C
 
+#define ACCEL_XOUT_H        0x3B
+
 #define WHO_AM_I          0x75
 #define WHO_AM_I_9250_ANS 0x71
 
@@ -85,5 +87,7 @@ void MPU_REG_WRITE(SPI_HandleTypeDef *SPIx, uint8_t *pAddr, uint8_t *pVal);
 uint8_t MPU_begin(SPI_HandleTypeDef *SPIx, MPU9250_t *mpuStruct);
 void setAccFullScaleRange(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250, uint8_t aScale);
 void setGyroFullScaleRange(SPI_HandleTypeDef *SPIx,  MPU9250_t *pMPU9250, uint8_t gScale);
+void readRawData(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250);
+void MPU_calibrateGyro(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250, uint16_t numCalPoints);
 
 #endif /* INC_MPU9250_H_ */

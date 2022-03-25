@@ -97,7 +97,7 @@ int main(void)
   MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
 
-  
+  MPU_begin(&hspi1, &MPU9250);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -105,9 +105,9 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-	    HAL_Delay(1000);
-	    uint8_t dataOut;
-	    MPU_REG_READ(&hspi1, WHO_AM_I, &dataOut, 1);
+	    // HAL_Delay(1000);
+	    // uint8_t dataOut;
+	    // MPU_REG_READ(&hspi1, WHO_AM_I, &dataOut, 1);
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */

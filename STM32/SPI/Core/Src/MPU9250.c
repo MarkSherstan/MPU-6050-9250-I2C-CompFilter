@@ -75,9 +75,9 @@ void MPU_CS(uint8_t state)
 
 /// @brief Set the accelerometer full scale range
 /// @param SPIx Pointer to SPI structure config
-/// @param mpuStruct Pointer to master MPU9250 struct
+/// @param pMPU9250 Pointer to master MPU9250 struct
 /// @param aScale Set 0 for ±2g, 1 for ±4g, 2 for ±8g, and 3 for ±16g
-void setAccFullScaleRange(SPI_HandleTypeDef *SPIx,  MPU9250_t *pMPU9250, uint8_t aScale)
+void setAccFullScaleRange(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250, uint8_t aScale)
 {
     // Variable init
     uint8_t addr = ACCEL_CONFIG;
@@ -116,9 +116,9 @@ void setAccFullScaleRange(SPI_HandleTypeDef *SPIx,  MPU9250_t *pMPU9250, uint8_t
 
 /// @brief Set the gyroscope full scale range
 /// @param SPIx Pointer to SPI structure config
-/// @param mpuStruct Pointer to master MPU9250 struct
+/// @param pMPU9250 Pointer to master MPU9250 struct
 /// @param gScale Set 0 for ±250°/s, 1 for ±500°/s, 2 for ±1000°/s, and 3 for ±2000°/s
-void setGyroFullScaleRange(SPI_HandleTypeDef *SPIx,  MPU9250_t *pMPU9250, uint8_t gScale)
+void setGyroFullScaleRange(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250, uint8_t gScale)
 {
     // Variable init
     uint8_t addr = GYRO_CONFIG;
@@ -153,4 +153,51 @@ void setGyroFullScaleRange(SPI_HandleTypeDef *SPIx,  MPU9250_t *pMPU9250, uint8_
         MPU_REG_WRITE(SPIx, &addr, &val);
         break;
     }
+}
+
+/// @brief Read raw data from IMU
+/// @param SPIx Pointer to SPI structure config
+/// @param pMPU9250 Pointer to master MPU9250 struct
+void readRawData(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250)
+{
+    uint8_t buf[14];
+
+    // Subroutine for reading the raw data
+    MPU_REG_READ(SPIx, ACCEL_XOUT_H, &buf, 14);
+
+    // Bit shift the data
+    pMPU9250->sensorData.ax = buf[0] << 8 | buf[1];
+    pMPU9250->sensorData.ay = buf[2] << 8 | buf[3];
+    pMPU9250->sensorData.az = buf[4] << 8 | buf[5];
+
+    // temperature = buf[6] << 8 | buf[7];
+
+    pMPU9250->sensorData.gx = buf[8] << 8 | buf[9];
+    pMPU9250->sensorData.gy = buf[10] << 8 | buf[11];
+    pMPU9250->sensorData.gz = buf[12] << 8 | buf[13];
+}
+
+/// @brief Find offsets for each axis of gyroscope.
+/// @param numCalPoints Number of data points to average.
+void MPU_calibrateGyro(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250, uint16_t numCalPoints)
+{
+    // Init
+    int32_t x = 0;
+    int32_t y = 0;
+    int32_t z = 0;
+
+    // Save specified number of points
+    for (uint16_t ii = 0; ii < numCalPoints; ii++)
+    {
+        readRawData(SPIx, pMPU9250);
+        x += pMPU9250->sensorData.gx;
+        y += pMPU9250->sensorData.gy;
+        z += pMPU9250->sensorData.gz;
+        HAL_Delay(3);
+    }
+
+    // Average the saved data points to find the gyroscope offset
+    pMPU9250->gyroCal.x = (float)x / (float)numCalPoints;
+    pMPU9250->gyroCal.y = (float)y / (float)numCalPoints;
+    pMPU9250->gyroCal.z = (float)z / (float)numCalPoints;
 }
