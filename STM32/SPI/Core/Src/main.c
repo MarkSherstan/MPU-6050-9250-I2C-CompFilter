@@ -27,6 +27,7 @@
 #include "MPU9250.h"
 #include "string.h"
 #include "stdio.h"
+#include "math.h"
 
 /* USER CODE END Includes */
 
@@ -38,7 +39,7 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 #define CALIBRATION_POINTS 1500
-uint8_t serialBuf[25];
+uint8_t serialBuf[100];
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -110,11 +111,11 @@ int main(void)
   {
     /* USER CODE END WHILE */
     MPU_calcAttitude(&hspi1, &MPU9250);
-    float test = MPU9250.attitude.r;
-//    sprintf((char *)serialBuf, "%.1f,%.1f,%.1f\r\n", MPU9250.attitude.r, MPU9250.attitude.p, MPU9250.attitude.y);
-     sprintf((char *)serialBuf, "%.1f,%.1f,%.1f\r\n", test, 1.234, MPU9250.attitude.y);
-    
-//    sprintf((char *)serialBuf, "%u,%u,%u\r\n", 123, 1, 55);
+
+    int16_t roll = roundf(10 * MPU9250.attitude.r);
+    int16_t pitch = roundf(10 * MPU9250.attitude.p);
+    int16_t yaw = roundf(10 * MPU9250.attitude.y);
+    sprintf((char *)serialBuf, "%d.%d,%d.%d,%d.%d\r\n", roll/10, abs(roll%10), pitch/10, abs(pitch%10), yaw/10, abs(yaw%10));
     HAL_UART_Transmit(&huart2, serialBuf, strlen((char *)serialBuf), HAL_MAX_DELAY);
 
     HAL_Delay(4);
