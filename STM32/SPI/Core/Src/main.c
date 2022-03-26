@@ -25,6 +25,8 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "MPU9250.h"
+#include "string.h"
+#include "stdio.h"
 
 /* USER CODE END Includes */
 
@@ -35,6 +37,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define CALIBRATION_POINTS 1500
 uint8_t serialBuf[25];
 /* USER CODE END PD */
 
@@ -71,8 +74,8 @@ int main(void)
   MPU9250.settings.aFullScaleRange = AFS_4G;
   MPU9250.settings.CS_PIN = GPIO_PIN_6;
   MPU9250.settings.CS_PORT = GPIOB;
-  MPU9250.attitude.dt = 0.004;
   MPU9250.attitude.tau = 0.98;
+  MPU9250.attitude.dt = 0.004;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -98,6 +101,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
   MPU_begin(&hspi1, &MPU9250);
+  MPU_calibrateGyro(&hspi1, &MPU9250, CALIBRATION_POINTS);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -105,9 +109,15 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-	    // HAL_Delay(1000);
-	    // uint8_t dataOut;
-	    // MPU_REG_READ(&hspi1, WHO_AM_I, &dataOut, 1);
+    MPU_calcAttitude(&hspi1, &MPU9250);
+    float test = MPU9250.attitude.r;
+//    sprintf((char *)serialBuf, "%.1f,%.1f,%.1f\r\n", MPU9250.attitude.r, MPU9250.attitude.p, MPU9250.attitude.y);
+     sprintf((char *)serialBuf, "%.1f,%.1f,%.1f\r\n", test, 1.234, MPU9250.attitude.y);
+    
+//    sprintf((char *)serialBuf, "%u,%u,%u\r\n", 123, 1, 55);
+    HAL_UART_Transmit(&huart2, serialBuf, strlen((char *)serialBuf), HAL_MAX_DELAY);
+
+    HAL_Delay(4);
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
