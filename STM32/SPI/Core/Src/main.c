@@ -19,15 +19,18 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "spi.h"
+#include "tim.h"
 #include "usart.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "MPU9250.h"
+#include "stdlib.h"
 #include "string.h"
 #include "stdio.h"
 #include "math.h"
+
 
 /* USER CODE END Includes */
 
@@ -99,29 +102,34 @@ int main(void)
   MX_GPIO_Init();
   MX_USART2_UART_Init();
   MX_SPI1_Init();
+  MX_TIM11_Init();
   /* USER CODE BEGIN 2 */
 
   MPU_begin(&hspi1, &MPU9250);
+
+  // Calibrate the IMU
+  sprintf((char *)serialBuf, "CALIBRATING...\r\n");
+  HAL_UART_Transmit(&huart2, serialBuf, strlen((char *)serialBuf), HAL_MAX_DELAY);
   MPU_calibrateGyro(&hspi1, &MPU9250, CALIBRATION_POINTS);
+
+  // Start timer and put processor into an efficient low power mode
+  sprintf((char *)serialBuf, "START...\r\n");
+  HAL_UART_Transmit(&huart2, serialBuf, strlen((char *)serialBuf), HAL_MAX_DELAY);
+
+  HAL_TIM_Base_Start_IT(&htim11);
+  HAL_PWR_EnableSleepOnExit();
+  HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);
   /* USER CODE END 2 */
 
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
-  while (1)
-  {
-    /* USER CODE END WHILE */
-    MPU_calcAttitude(&hspi1, &MPU9250);
+  // /* Infinite loop */
+  // /* USER CODE BEGIN WHILE */
+  // while (1)
+  // {
+  //   /* USER CODE END WHILE */
 
-    int16_t roll = roundf(10 * MPU9250.attitude.r);
-    int16_t pitch = roundf(10 * MPU9250.attitude.p);
-    int16_t yaw = roundf(10 * MPU9250.attitude.y);
-    sprintf((char *)serialBuf, "%d.%d,%d.%d,%d.%d\r\n", roll/10, abs(roll%10), pitch/10, abs(pitch%10), yaw/10, abs(yaw%10));
-    HAL_UART_Transmit(&huart2, serialBuf, strlen((char *)serialBuf), HAL_MAX_DELAY);
-
-    HAL_Delay(4);
-    /* USER CODE BEGIN 3 */
-  }
-  /* USER CODE END 3 */
+  //   /* USER CODE BEGIN 3 */
+  // }
+  // /* USER CODE END 3 */
 }
 
 /**
@@ -169,7 +177,28 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+// Callback: timer has rolled over
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+  // Check if timer has triggered and update attitude
+  if (htim == &htim11)
+  {
+    HAL_ResumeTick();
 
+    MPU_calcAttitude(&hspi1, &MPU9250);
+    int16_t roll = roundf(10 * MPU9250.attitude.r);
+    uint8_t rollDecimal = abs(roll % 10);
+    int16_t pitch = roundf(10 * MPU9250.attitude.p);
+    uint8_t pitchDecimal = abs(pitch % 10);
+    int16_t yaw = roundf(10 * MPU9250.attitude.y);
+    uint8_t yawDecimal = abs(yaw % 10);
+
+    sprintf((char *)serialBuf, "%d.%d,%d.%d,%d.%d\r\n", roll/10, rollDecimal, pitch/10, pitchDecimal, yaw/10, yawDecimal);
+    HAL_UART_Transmit(&huart2, serialBuf, strlen((char *)serialBuf), HAL_MAX_DELAY);
+
+    HAL_SuspendTick();
+  }
+}
 /* USER CODE END 4 */
 
 /**
