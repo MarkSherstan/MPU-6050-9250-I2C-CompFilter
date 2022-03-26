@@ -121,15 +121,15 @@ int main(void)
   HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);
   /* USER CODE END 2 */
 
-  // /* Infinite loop */
-  // /* USER CODE BEGIN WHILE */
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
   // while (1)
   // {
-  //   /* USER CODE END WHILE */
+    /* USER CODE END WHILE */
 
-  //   /* USER CODE BEGIN 3 */
+    /* USER CODE BEGIN 3 */
   // }
-  // /* USER CODE END 3 */
+  /* USER CODE END 3 */
 }
 
 /**
