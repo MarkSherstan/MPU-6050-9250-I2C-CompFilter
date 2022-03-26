@@ -30,8 +30,8 @@ uint8_t MPU_begin(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250)
         MPU_REG_WRITE(SPIx, &addr, &val);
         
         // Set the full scale ranges
-        setAccFullScaleRange(SPIx, pMPU9250, pMPU9250->settings.aFullScaleRange);
-        setGyroFullScaleRange(SPIx, pMPU9250, pMPU9250->settings.gFullScaleRange);
+        MPU_setAccFullScaleRange(SPIx, pMPU9250, pMPU9250->settings.aFullScaleRange);
+        MPU_setGyroFullScaleRange(SPIx, pMPU9250, pMPU9250->settings.gFullScaleRange);
         return 1;
     }
     else 
@@ -77,7 +77,7 @@ void MPU_CS(uint8_t state)
 /// @param SPIx Pointer to SPI structure config
 /// @param pMPU9250 Pointer to master MPU9250 struct
 /// @param aScale Set 0 for ±2g, 1 for ±4g, 2 for ±8g, and 3 for ±16g
-void setAccFullScaleRange(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250, uint8_t aScale)
+void MPU_setAccFullScaleRange(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250, uint8_t aScale)
 {
     // Variable init
     uint8_t addr = ACCEL_CONFIG;
@@ -118,7 +118,7 @@ void setAccFullScaleRange(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250, uint8_t 
 /// @param SPIx Pointer to SPI structure config
 /// @param pMPU9250 Pointer to master MPU9250 struct
 /// @param gScale Set 0 for ±250°/s, 1 for ±500°/s, 2 for ±1000°/s, and 3 for ±2000°/s
-void setGyroFullScaleRange(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250, uint8_t gScale)
+void MPU_setGyroFullScaleRange(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250, uint8_t gScale)
 {
     // Variable init
     uint8_t addr = GYRO_CONFIG;
@@ -158,7 +158,7 @@ void setGyroFullScaleRange(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250, uint8_t
 /// @brief Read raw data from IMU
 /// @param SPIx Pointer to SPI structure config
 /// @param pMPU9250 Pointer to master MPU9250 struct
-void readRawData(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250)
+void MPU_readRawData(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250)
 {
     uint8_t buf[14];
 
@@ -191,7 +191,7 @@ void MPU_calibrateGyro(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250, uint16_t nu
     // Save specified number of points
     for (uint16_t ii = 0; ii < numCalPoints; ii++)
     {
-        readRawData(SPIx, pMPU9250);
+        MPU_readRawData(SPIx, pMPU9250);
         x += pMPU9250->rawData.gx;
         y += pMPU9250->rawData.gy;
         z += pMPU9250->rawData.gz;
@@ -207,10 +207,10 @@ void MPU_calibrateGyro(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250, uint16_t nu
 /// @brief Calculate the real world sensor values
 /// @param SPIx Pointer to SPI structure config
 /// @param pMPU9250 Pointer to master MPU9250 struct
-void readProcessedData(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250)
+void MPU_readProcessedData(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250)
 {
     // Get raw values from the IMU
-    readRawData(SPIx, pMPU9250);
+    MPU_readRawData(SPIx, pMPU9250);
 
     // Convert accelerometer values to g's
     pMPU9250->sensorData.ax = pMPU9250->rawData.ax / pMPU9250->sensorData.aScaleFactor;
@@ -234,7 +234,7 @@ void readProcessedData(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250)
 void MPU_calcAttitude(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250)
 {
     // Read processed data
-    readProcessedData(SPIx, pMPU9250);
+    MPU_readProcessedData(SPIx, pMPU9250);
 
     // Complementary filter
     float accelPitch = atan2(pMPU9250->sensorData.ay, pMPU9250->sensorData.az) * RAD2DEG;
