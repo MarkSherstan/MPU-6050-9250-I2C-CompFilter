@@ -166,15 +166,15 @@ void readRawData(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250)
     MPU_REG_READ(SPIx, ACCEL_XOUT_H, &buf, 14);
 
     // Bit shift the data
-    pMPU9250->sensorData.ax = buf[0] << 8 | buf[1];
-    pMPU9250->sensorData.ay = buf[2] << 8 | buf[3];
-    pMPU9250->sensorData.az = buf[4] << 8 | buf[5];
+    pMPU9250->rawData.ax = buf[0] << 8 | buf[1];
+    pMPU9250->rawData.ay = buf[2] << 8 | buf[3];
+    pMPU9250->rawData.az = buf[4] << 8 | buf[5];
 
     // temperature = buf[6] << 8 | buf[7];
 
-    pMPU9250->sensorData.gx = buf[8] << 8 | buf[9];
-    pMPU9250->sensorData.gy = buf[10] << 8 | buf[11];
-    pMPU9250->sensorData.gz = buf[12] << 8 | buf[13];
+    pMPU9250->rawData.gx = buf[8] << 8 | buf[9];
+    pMPU9250->rawData.gy = buf[10] << 8 | buf[11];
+    pMPU9250->rawData.gz = buf[12] << 8 | buf[13];
 }
 
 /// @brief Find offsets for each axis of gyroscope.
@@ -192,9 +192,9 @@ void MPU_calibrateGyro(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250, uint16_t nu
     for (uint16_t ii = 0; ii < numCalPoints; ii++)
     {
         readRawData(SPIx, pMPU9250);
-        x += pMPU9250->sensorData.gx;
-        y += pMPU9250->sensorData.gy;
-        z += pMPU9250->sensorData.gz;
+        x += pMPU9250->rawData.gx;
+        y += pMPU9250->rawData.gy;
+        z += pMPU9250->rawData.gz;
         HAL_Delay(3);
     }
 
@@ -213,14 +213,14 @@ void readProcessedData(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250)
     readRawData(SPIx, pMPU9250);
 
     // Convert accelerometer values to g's
-    pMPU9250->sensorData.ax /= pMPU9250->sensorData.aScaleFactor;
-    pMPU9250->sensorData.ay /= pMPU9250->sensorData.aScaleFactor;
-    pMPU9250->sensorData.az /= pMPU9250->sensorData.aScaleFactor;
+    pMPU9250->sensorData.ax = pMPU9250->rawData.ax / pMPU9250->sensorData.aScaleFactor;
+    pMPU9250->sensorData.ay = pMPU9250->rawData.ay / pMPU9250->sensorData.aScaleFactor;
+    pMPU9250->sensorData.az = pMPU9250->rawData.az / pMPU9250->sensorData.aScaleFactor;
 
     // Compensate for gyro offset
-    pMPU9250->sensorData.gx -= pMPU9250->gyroCal.x;
-    pMPU9250->sensorData.gy -= pMPU9250->gyroCal.y;
-    pMPU9250->sensorData.gz -= pMPU9250->gyroCal.z;
+    pMPU9250->sensorData.gx = pMPU9250->rawData.gx - pMPU9250->gyroCal.x;
+    pMPU9250->sensorData.gy = pMPU9250->rawData.gy - pMPU9250->gyroCal.y;
+    pMPU9250->sensorData.gz = pMPU9250->rawData.gz - pMPU9250->gyroCal.z;
 
     // Convert gyro values to deg/s
     pMPU9250->sensorData.gx /= pMPU9250->sensorData.gScaleFactor;

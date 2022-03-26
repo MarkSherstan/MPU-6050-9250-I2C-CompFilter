@@ -59,6 +59,11 @@ enum accelerometerFullScaleRange
 // Master structure
 typedef struct MPU9250
 {
+    struct RawData
+    {
+        int16_t ax, ay, az, gx, gy, gz;
+    } rawData;
+
     struct SensorData
     {
         float aScaleFactor, gScaleFactor;
