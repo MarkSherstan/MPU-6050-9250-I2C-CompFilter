@@ -41,6 +41,9 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define TRUE 1
+#define FALSE 0
+
 #define CALIBRATION_POINTS 1500
 uint8_t serialBuf[100];
 /* USER CODE END PD */
@@ -105,7 +108,13 @@ int main(void)
   MX_TIM11_Init();
   /* USER CODE BEGIN 2 */
 
-  MPU_begin(&hspi1, &MPU9250);
+  // Check if IMU configured properly and block if it didn't
+  if (MPU_begin(&hspi1, &MPU9250) != TRUE)
+  {
+    sprintf((char *)serialBuf, "ERROR!\r\n");
+    HAL_UART_Transmit(&huart2, serialBuf, strlen((char *)serialBuf), HAL_MAX_DELAY);
+    while (1){}
+  }
 
   // Calibrate the IMU
   sprintf((char *)serialBuf, "CALIBRATING...\r\n");
@@ -113,9 +122,6 @@ int main(void)
   MPU_calibrateGyro(&hspi1, &MPU9250, CALIBRATION_POINTS);
 
   // Start timer and put processor into an efficient low power mode
-  sprintf((char *)serialBuf, "START...\r\n");
-  HAL_UART_Transmit(&huart2, serialBuf, strlen((char *)serialBuf), HAL_MAX_DELAY);
-
   HAL_TIM_Base_Start_IT(&htim11);
   HAL_PWR_EnableSleepOnExit();
   HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);
