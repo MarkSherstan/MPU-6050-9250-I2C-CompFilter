@@ -31,7 +31,6 @@
 #include "stdio.h"
 #include "math.h"
 
-
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -41,11 +40,8 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define TRUE 1
+#define TRUE  1
 #define FALSE 0
-
-#define CALIBRATION_POINTS 1500
-uint8_t serialBuf[100];
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -56,6 +52,7 @@ uint8_t serialBuf[100];
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+uint8_t serialBuf[100];
 MPU9250_t MPU9250;
 /* USER CODE END PV */
 
@@ -119,7 +116,7 @@ int main(void)
   // Calibrate the IMU
   sprintf((char *)serialBuf, "CALIBRATING...\r\n");
   HAL_UART_Transmit(&huart2, serialBuf, strlen((char *)serialBuf), HAL_MAX_DELAY);
-  MPU_calibrateGyro(&hspi1, &MPU9250, CALIBRATION_POINTS);
+  MPU_calibrateGyro(&hspi1, &MPU9250, 1500);
 
   // Start timer and put processor into an efficient low power mode
   HAL_TIM_Base_Start_IT(&htim11);

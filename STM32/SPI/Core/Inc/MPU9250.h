@@ -83,8 +83,9 @@ typedef struct MPU9250
 
     struct Settings
     {
-        uint8_t CS_PORT, CS_PIN;
-        uint8_t aFullScaleRange, gFullScaleRange;
+    	uint8_t aFullScaleRange, gFullScaleRange;
+    	GPIO_TypeDef *CS_PORT;
+        uint8_t CS_PIN;
     } settings;
 } MPU9250_t;
 
