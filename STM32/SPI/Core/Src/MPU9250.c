@@ -166,7 +166,7 @@ void MPU_readRawData(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250)
     uint8_t buf[14];
 
     // Subroutine for reading the raw data
-    MPU_REG_READ(SPIx, pMPU9250, ACCEL_XOUT_H, &buf, 14);
+    MPU_REG_READ(SPIx, pMPU9250, ACCEL_XOUT_H, &buf[0], 14);
 
     // Bit shift the data
     pMPU9250->rawData.ax = buf[0] << 8 | buf[1];

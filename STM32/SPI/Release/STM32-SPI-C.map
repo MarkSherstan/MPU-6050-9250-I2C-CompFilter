@@ -88,7 +88,7 @@ __lock___sinit_recursive_mutex
                     0x1               /Applications/STM32CubeIDE.app/Contents/Eclipse/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.macos64_2.0.0.202105311346/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-lock.o)
 __lock___malloc_recursive_mutex
                     0x1               /Applications/STM32CubeIDE.app/Contents/Eclipse/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.macos64_2.0.0.202105311346/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-lock.o)
-MPU9250             0x54              ./Core/Src/main.o
+MPU9250             0x58              ./Core/Src/main.o
 htim11              0x48              ./Core/Src/tim.o
 hspi1               0x58              ./Core/Src/spi.o
 huart2              0x44              ./Core/Src/usart.o
@@ -1296,25 +1296,25 @@ LOAD /Applications/STM32CubeIDE.app/Contents/Eclipse/plugins/com.st.stm32cube.id
  .text.MPU_REG_READ
                 0x0000000008000f1a       0x40 ./Core/Src/MPU9250.o
                 0x0000000008000f1a                MPU_REG_READ
- .text.setAccFullScaleRange
+ .text.MPU_setAccFullScaleRange
                 0x0000000008000f5a       0x50 ./Core/Src/MPU9250.o
-                0x0000000008000f5a                setAccFullScaleRange
+                0x0000000008000f5a                MPU_setAccFullScaleRange
  *fill*         0x0000000008000faa        0x2 
- .text.setGyroFullScaleRange
+ .text.MPU_setGyroFullScaleRange
                 0x0000000008000fac       0x58 ./Core/Src/MPU9250.o
-                0x0000000008000fac                setGyroFullScaleRange
+                0x0000000008000fac                MPU_setGyroFullScaleRange
  .text.MPU_begin
                 0x0000000008001004       0x6e ./Core/Src/MPU9250.o
                 0x0000000008001004                MPU_begin
- .text.readRawData
+ .text.MPU_readRawData
                 0x0000000008001072       0x66 ./Core/Src/MPU9250.o
-                0x0000000008001072                readRawData
+                0x0000000008001072                MPU_readRawData
  .text.MPU_calibrateGyro
                 0x00000000080010d8       0x76 ./Core/Src/MPU9250.o
                 0x00000000080010d8                MPU_calibrateGyro
- .text.readProcessedData
+ .text.MPU_readProcessedData
                 0x000000000800114e       0xa2 ./Core/Src/MPU9250.o
-                0x000000000800114e                readProcessedData
+                0x000000000800114e                MPU_readProcessedData
  .text.MPU_calcAttitude
                 0x00000000080011f0       0xe0 ./Core/Src/MPU9250.o
                 0x00000000080011f0                MPU_calcAttitude
@@ -1767,7 +1767,7 @@ LOAD /Applications/STM32CubeIDE.app/Contents/Eclipse/plugins/com.st.stm32cube.id
  .igot.plt      0x0000000020000070        0x0 /Applications/STM32CubeIDE.app/Contents/Eclipse/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.macos64_2.0.0.202105311346/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/thumb/v7e-m+fp/hard/crtbegin.o
                 0x0000000020000070                . = ALIGN (0x4)
 
-.bss            0x0000000020000070      0x1d8 load address 0x0000000008003c68
+.bss            0x0000000020000070      0x1dc load address 0x0000000008003c68
                 0x0000000020000070                _sbss = .
                 0x0000000020000070                __bss_start__ = _sbss
  *(.bss)
@@ -1782,44 +1782,45 @@ LOAD /Applications/STM32CubeIDE.app/Contents/Eclipse/plugins/com.st.stm32cube.id
                 0x0000000020000094        0x4 /Applications/STM32CubeIDE.app/Contents/Eclipse/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.macos64_2.0.0.202105311346/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-nano-mallocr.o)
                 0x0000000020000094                __malloc_sbrk_start
  *(COMMON)
- COMMON         0x0000000020000098       0xb8 ./Core/Src/main.o
+ COMMON         0x0000000020000098       0xbc ./Core/Src/main.o
                 0x0000000020000098                serialBuf
                 0x00000000200000fc                MPU9250
- COMMON         0x0000000020000150       0x58 ./Core/Src/spi.o
-                0x0000000020000150                hspi1
- COMMON         0x00000000200001a8       0x48 ./Core/Src/tim.o
-                0x00000000200001a8                htim11
- COMMON         0x00000000200001f0       0x44 ./Core/Src/usart.o
-                0x00000000200001f0                huart2
- COMMON         0x0000000020000234        0x4 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.o
-                0x0000000020000234                uwTick
- COMMON         0x0000000020000238        0x4 /Applications/STM32CubeIDE.app/Contents/Eclipse/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.macos64_2.0.0.202105311346/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-reent.o)
-                0x0000000020000238                errno
- COMMON         0x000000002000023c        0x9 /Applications/STM32CubeIDE.app/Contents/Eclipse/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.macos64_2.0.0.202105311346/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-lock.o)
-                0x000000002000023c                __lock___atexit_recursive_mutex
-                0x000000002000023d                __lock___arc4random_mutex
-                0x000000002000023e                __lock___env_recursive_mutex
-                0x000000002000023f                __lock___sinit_recursive_mutex
-                0x0000000020000240                __lock___malloc_recursive_mutex
-                0x0000000020000241                __lock___at_quick_exit_mutex
-                0x0000000020000242                __lock___dd_hash_mutex
-                0x0000000020000243                __lock___tz_mutex
-                0x0000000020000244                __lock___sfp_recursive_mutex
-                0x0000000020000248                . = ALIGN (0x4)
- *fill*         0x0000000020000245        0x3 
-                0x0000000020000248                _ebss = .
-                0x0000000020000248                __bss_end__ = _ebss
+ COMMON         0x0000000020000154       0x58 ./Core/Src/spi.o
+                0x0000000020000154                hspi1
+ COMMON         0x00000000200001ac       0x48 ./Core/Src/tim.o
+                0x00000000200001ac                htim11
+ COMMON         0x00000000200001f4       0x44 ./Core/Src/usart.o
+                0x00000000200001f4                huart2
+ COMMON         0x0000000020000238        0x4 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.o
+                0x0000000020000238                uwTick
+ COMMON         0x000000002000023c        0x4 /Applications/STM32CubeIDE.app/Contents/Eclipse/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.macos64_2.0.0.202105311346/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-reent.o)
+                0x000000002000023c                errno
+ COMMON         0x0000000020000240        0x9 /Applications/STM32CubeIDE.app/Contents/Eclipse/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.macos64_2.0.0.202105311346/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-lock.o)
+                0x0000000020000240                __lock___atexit_recursive_mutex
+                0x0000000020000241                __lock___arc4random_mutex
+                0x0000000020000242                __lock___env_recursive_mutex
+                0x0000000020000243                __lock___sinit_recursive_mutex
+                0x0000000020000244                __lock___malloc_recursive_mutex
+                0x0000000020000245                __lock___at_quick_exit_mutex
+                0x0000000020000246                __lock___dd_hash_mutex
+                0x0000000020000247                __lock___tz_mutex
+                0x0000000020000248                __lock___sfp_recursive_mutex
+                0x000000002000024c                . = ALIGN (0x4)
+ *fill*         0x0000000020000249        0x3 
+                0x000000002000024c                _ebss = .
+                0x000000002000024c                __bss_end__ = _ebss
 
 ._user_heap_stack
-                0x0000000020000248      0x600 load address 0x0000000008003c68
-                0x0000000020000248                . = ALIGN (0x8)
+                0x000000002000024c      0x604 load address 0x0000000008003c68
+                0x0000000020000250                . = ALIGN (0x8)
+ *fill*         0x000000002000024c        0x4 
                 [!provide]                        PROVIDE (end = .)
-                0x0000000020000248                PROVIDE (_end = .)
-                0x0000000020000448                . = (. + _Min_Heap_Size)
- *fill*         0x0000000020000248      0x200 
-                0x0000000020000848                . = (. + _Min_Stack_Size)
- *fill*         0x0000000020000448      0x400 
-                0x0000000020000848                . = ALIGN (0x8)
+                0x0000000020000250                PROVIDE (_end = .)
+                0x0000000020000450                . = (. + _Min_Heap_Size)
+ *fill*         0x0000000020000250      0x200 
+                0x0000000020000850                . = (. + _Min_Stack_Size)
+ *fill*         0x0000000020000450      0x400 
+                0x0000000020000850                . = ALIGN (0x8)
 
 /DISCARD/
  libc.a(*)
