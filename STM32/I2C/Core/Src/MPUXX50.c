@@ -12,8 +12,8 @@
 /// @param addr Hex address based on AD0 pin - 0x68 low or 0x69 high.
 /// @param aScale Set accelerometer full scale range: 0 for ±2g, 1 for ±4g, 2 for ±8g, and 3 for ±16g.
 /// @param gScale Set gyroscope full scale range: 0 for ±250°/s, 1 for ±500°/s, 2 for ±1000°/s, and 3 for ±2000°/s.
-/// @param tau Set tau value for the complementary filter (typically 0.98)
-/// @param dt Set sampling rate in seconds determined by the timer interrupt 
+/// @param tau Set tau value for the complementary filter (typically 0.98).
+/// @param dt Set sampling rate in seconds determined by the timer interrupt.
 uint8_t MPU_begin(I2C_HandleTypeDef *I2Cx, uint8_t addr, uint8_t aScale, uint8_t gScale, float tau, float dt)
 {
     // Save values
@@ -40,7 +40,9 @@ uint8_t MPU_begin(I2C_HandleTypeDef *I2Cx, uint8_t addr, uint8_t aScale, uint8_t
         setGyroFullScaleRange(I2Cx, gScale);
 
         return 1;
-    } else {
+    }
+    else
+    {
         return 0;
     }
 }
@@ -123,7 +125,7 @@ void setGyroFullScaleRange(I2C_HandleTypeDef *I2Cx, uint8_t gScale)
     }
 }
 
-/// @brief Read raw data from IMU
+/// @brief Read raw data from IMU.
 /// @param I2Cx Pointer to I2C structure config.
 void readRawData(I2C_HandleTypeDef *I2Cx)
 {
@@ -154,6 +156,12 @@ void MPU_calibrateGyro(I2C_HandleTypeDef *I2Cx, uint16_t numCalPoints)
     int32_t y = 0;
     int32_t z = 0;
 
+    // Zero guard
+    if (numCalPoints == 0)
+    {
+        numCalPoints = 1;
+    }
+
     // Save specified number of points
     for (uint16_t ii = 0; ii < numCalPoints; ii++)
     {
@@ -170,7 +178,7 @@ void MPU_calibrateGyro(I2C_HandleTypeDef *I2Cx, uint16_t numCalPoints)
     gyroCal.z = (float)z / (float)numCalPoints;
 }
 
-/// @brief Calculate the real world sensor values
+/// @brief Calculate the real world sensor values.
 /// @param I2Cx Pointer to I2C structure config.
 void readProcessedData(I2C_HandleTypeDef *I2Cx)
 {
@@ -193,7 +201,7 @@ void readProcessedData(I2C_HandleTypeDef *I2Cx)
     sensorProcessed.gz /= gRes;
 }
 
-/// @brief Calculate the attitude of the sensor in degrees using a complementary filter
+/// @brief Calculate the attitude of the sensor in degrees using a complementary filter.
 /// @param I2Cx Pointer to I2C structure config.
 void MPU_calcAttitude(I2C_HandleTypeDef *I2Cx)
 {
