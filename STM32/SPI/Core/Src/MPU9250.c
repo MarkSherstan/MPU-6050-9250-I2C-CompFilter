@@ -11,7 +11,7 @@
 /// @param SPIx Pointer to SPI structure config
 /// @param pMPU9250 Pointer to master MPU9250 struct
 uint8_t MPU_begin(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250)
-{   
+{
     // Initialize variables
     uint8_t check, addr, val;
 
@@ -28,13 +28,13 @@ uint8_t MPU_begin(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250)
         addr = USER_CTRL;
         val = 0x10;
         MPU_REG_WRITE(SPIx, pMPU9250, &addr, &val);
-        
+
         // Set the full scale ranges
         MPU_setAccFullScaleRange(SPIx, pMPU9250, pMPU9250->settings.aFullScaleRange);
         MPU_setGyroFullScaleRange(SPIx, pMPU9250, pMPU9250->settings.gFullScaleRange);
         return 1;
     }
-    else 
+    else
     {
         return 0;
     }
@@ -47,10 +47,10 @@ uint8_t MPU_begin(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250)
 /// @param pVal Pointer of value to write to given address
 void MPU_REG_WRITE(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250, uint8_t *pAddr, uint8_t *pVal)
 {
-	MPU_CS(pMPU9250, CS_SELECT);
+    MPU_CS(pMPU9250, CS_SELECT);
     HAL_SPI_Transmit(SPIx, pAddr, 1, SPI_TIMOUT_MS);
     HAL_SPI_Transmit(SPIx, pVal, 1, SPI_TIMOUT_MS);
-	MPU_CS(pMPU9250, CS_DESELECT);
+    MPU_CS(pMPU9250, CS_DESELECT);
 }
 
 /// @brief Read a specific registry address
@@ -61,11 +61,11 @@ void MPU_REG_WRITE(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250, uint8_t *pAddr,
 /// @param RxSize Size of data buffer
 void MPU_REG_READ(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250, uint8_t addr, uint8_t *pRxData, uint16_t RxSize)
 {
-	MPU_CS(pMPU9250, CS_SELECT);
-	uint8_t writeAddr = addr | READWRITE;
-	HAL_SPI_Transmit(SPIx, &writeAddr, 1, SPI_TIMOUT_MS);
-	HAL_SPI_Receive(SPIx, pRxData, RxSize, SPI_TIMOUT_MS);
-	MPU_CS(pMPU9250, CS_DESELECT);
+    MPU_CS(pMPU9250, CS_SELECT);
+    uint8_t writeAddr = addr | READWRITE;
+    HAL_SPI_Transmit(SPIx, &writeAddr, 1, SPI_TIMOUT_MS);
+    HAL_SPI_Receive(SPIx, pRxData, RxSize, SPI_TIMOUT_MS);
+    MPU_CS(pMPU9250, CS_DESELECT);
 }
 
 /// @brief Set CS state to either start or end transmissions
@@ -73,7 +73,7 @@ void MPU_REG_READ(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250, uint8_t addr, ui
 /// @param state Set low to select, high to deselect
 void MPU_CS(MPU9250_t *pMPU9250, uint8_t state)
 {
-	HAL_GPIO_WritePin(pMPU9250->settings.CS_PORT, pMPU9250->settings.CS_PIN, state); 
+    HAL_GPIO_WritePin(pMPU9250->settings.CS_PORT, pMPU9250->settings.CS_PIN, state);
 }
 
 /// @brief Set the accelerometer full scale range
@@ -180,16 +180,22 @@ void MPU_readRawData(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250)
     pMPU9250->rawData.gz = buf[12] << 8 | buf[13];
 }
 
-/// @brief Find offsets for each axis of gyroscope.
+/// @brief Find offsets for each axis of gyroscope
 /// @param SPIx Pointer to SPI structure config
 /// @param pMPU9250 Pointer to master MPU9250 struct
-/// @param numCalPoints Number of data points to average.
+/// @param numCalPoints Number of data points to average
 void MPU_calibrateGyro(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250, uint16_t numCalPoints)
 {
     // Init
     int32_t x = 0;
     int32_t y = 0;
     int32_t z = 0;
+
+    // Zero guard
+    if (numCalPoints == 0)
+    {
+        numCalPoints = 1;
+    }
 
     // Save specified number of points
     for (uint16_t ii = 0; ii < numCalPoints; ii++)
