@@ -124,14 +124,20 @@ In your default browser enter `localhost:3000` and the visualizer should be runn
 **Ensure to hold the IMU device still until an object appears on the screen. This is the program performing a calibration for gyroscope offset.**
 
 ### STM32
-The following was tested with a NUCLEO-F401RE dev board. Using a similar configuration and copying the `MPUXX50.c` and `MPUXX50.h` files into their respective `\Src` and `\Inc` directories, and adjusting `huart#`, `hi2c#`, and `TIM#` values the base code should work for any STM32 based device.
-
+The following was tested with a [NUCLEO-F401RE](https://www.st.com/en/evaluation-tools/nucleo-f401re.html) dev board ([pinout](https://os.mbed.com/platforms/ST-Nucleo-F401RE/)). Using a similar configuration and copying the `MPUXX50.c` and `MPUXX50.h` files into their respective `\Src` and `\Inc` directories, and adjusting the `huart#`, `hi2c#`, and `hspix` values the base code should work for any STM32 based device. Addional set up for `TIM#` and `GPIO` pins may be required.
 * Download [STM32CubeIDE](https://www.st.com/en/development-tools/stm32cubeide.html) and create a new project based on hardware.
-* Configure the pins (Example uses `USART2`, `I2C1`, and `TIM11`). The serial port runs with default settings at a baud rate of 115200, the I2C port runs in standard mode at 100 kHz, the timer is set to interrupt at 250 Hz (adjust prescaler and counter based on hardware and clock speeds). Configure a GPIO port with an indicator LED if desired. 
 * Select: Project Manager -> Code Generator -> Check `Generate peripheral initialization as a pair of '.c/.h' files per peripheral`.
-* Have the IDE generate the hardware specific code.
+
+For **I2C**
+* Configure the pins (Example uses `USART2`, `I2C1`, and `TIM11`). The serial port runs with default settings at a baud rate of 115200, the I2C port runs in standard mode at 100 kHz, the timer is set to interrupt at 250 Hz (adjust prescaler and counter based on hardware and clock speeds). Configure a GPIO port with an indicator LED if desired. 
 * Use `MPU_begin(...)` to configure the IMU settings and ensure that there is a connection. The IMU should be calibrated with `MPU_calibrateGyro(...)`, and to retrieve attitude use `MPU_calcAttitude(...)`. See `main.c` for the full example implementation with additional notes.
 * Code could use a little tidy (e.g. remove global variables, make it simpler to initialize, etc...)
+
+For **SPI**
+* MPU6050 does not support SPI, a MPU9250 must be used (confirm hardware set up before use; some breakout boards require adjusting of solder jumpers to be used in SPI mode as there is overlap with I2C hardare e.g. AD0)
+* Configure the pins (Example uses `USART2`, `SPI1`, `PB6` and `TIM11`). The serial port runs with default settings at a baud rate of 115200, the SPI port runs with a 128 prescaler to keep the rate below 1 MHz, the timer is set to interrupt at 250 Hz (adjust prescaler and counter based on hardware and clock speeds), and PB6 is set as a digital Chip Select pin with a high output level and high max output speed.
+* Use `MPU_begin(...)` to configure the IMU settings and ensure that there is a connection. The IMU should be calibrated with `MPU_calibrateGyro(...)`, and to retrieve attitude use `MPU_calcAttitude(...)`. See `main.c` for the full example implementation with additional notes.
+* Code is very similar to the I2C example; however, it makes more use of pointers and is cleaner. 
 
 ### C++ Library
 A generic C++ library was written that can be used on a variety of hardware. Refer to the Arduino or Raspberry Pi example in the `CPP_library` directory to get an idea of how to use the library.
