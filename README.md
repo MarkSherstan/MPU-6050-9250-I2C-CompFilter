@@ -1,5 +1,5 @@
 # MPU-6050 and MPU-9250 I2C Complementary Filter
-Testing different methods to interface with a MPU-6050 or MPU-9250 via I2C. All methods feature the extraction of the raw sensor values as well as the implementation of a complementary filter for the fusion of the gyroscope and accelerometer to yield an angle(s) in 3 dimensional space.
+Testing different methods to interface with a MPU-6050 or MPU-9250 via I2C and SPI. All methods feature the extraction of the raw sensor values as well as the implementation of a complementary filter for the fusion of the gyroscope and accelerometer to yield an angle(s) in 3 dimensional space.
 
 ## Registry Maps and Sensitivity Values
 Values retrieved below come from the MPU-6050 and MPU-9250 registry maps and product specifications documents located in the `\Resources` folder. Configure the gyroscope on `0x1B` and the accelerometer on `0x1C` as per data sheets with the following values (the MPU-6050 and MPU-9250 are interchangeable and all registries are the same):
@@ -128,12 +128,12 @@ The following was tested with a [NUCLEO-F401RE](https://www.st.com/en/evaluation
 * Download [STM32CubeIDE](https://www.st.com/en/development-tools/stm32cubeide.html) and create a new project based on hardware.
 * Select: Project Manager -> Code Generator -> Check `Generate peripheral initialization as a pair of '.c/.h' files per peripheral`.
 
-For **I2C**
+For **I2C:**
 * Configure the pins (Example uses `USART2`, `I2C1`, and `TIM11`). The serial port runs with default settings at a baud rate of 115200, the I2C port runs in standard mode at 100 kHz, the timer is set to interrupt at 250 Hz (adjust prescaler and counter based on hardware and clock speeds). Configure a GPIO port with an indicator LED if desired. 
 * Use `MPU_begin(...)` to configure the IMU settings and ensure that there is a connection. The IMU should be calibrated with `MPU_calibrateGyro(...)`, and to retrieve attitude use `MPU_calcAttitude(...)`. See `main.c` for the full example implementation with additional notes.
 * Code could use a little tidy (e.g. remove global variables, make it simpler to initialize, etc...)
 
-For **SPI**
+For **SPI:**
 * MPU6050 does not support SPI, a MPU9250 must be used (confirm hardware set up before use; some breakout boards require adjusting of solder jumpers to be used in SPI mode as there is overlap with I2C hardare e.g. AD0)
 * Configure the pins (Example uses `USART2`, `SPI1`, `PB6` and `TIM11`). The serial port runs with default settings at a baud rate of 115200, the SPI port runs with a 128 prescaler to keep the rate below 1 MHz, the timer is set to interrupt at 250 Hz (adjust prescaler and counter based on hardware and clock speeds), and PB6 is set as a digital Chip Select pin with a high output level and high max output speed.
 * Use `MPU_begin(...)` to configure the IMU settings and ensure that there is a connection. The IMU should be calibrated with `MPU_calibrateGyro(...)`, and to retrieve attitude use `MPU_calcAttitude(...)`. See `main.c` for the full example implementation with additional notes.
