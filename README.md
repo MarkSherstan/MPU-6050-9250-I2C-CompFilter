@@ -1,15 +1,15 @@
-# MPU-6050 and MPU-9250 I2C Complementary Filter
-Testing different methods to interface with a MPU-6050 or MPU-9250 via I2C and SPI. All methods feature the extraction of the raw sensor values as well as the implementation of a complementary filter for the fusion of the gyroscope and accelerometer to yield an angle(s) in 3 dimensional space.
+# MPU-6050 and MPU-9250 I2C or SPI Complementary Filter
+Testing different methods to interface with a MPU-6050 or MPU-9250 via I2C or SPI. All methods feature the extraction of the raw sensor values as well as the implementation of a complementary filter for the fusion of the gyroscope and accelerometer to yield an angle(s) in 3 dimensional space.
 
 ## Registry Maps and Sensitivity Values
 Values retrieved below come from the MPU-6050 and MPU-9250 registry maps and product specifications documents located in the `\Resources` folder. Configure the gyroscope on `0x1B` and the accelerometer on `0x1C` as per data sheets with the following values (the MPU-6050 and MPU-9250 are interchangeable and all registries are the same):
 
 | Accelerometer | Sensitivity   | Gyroscope     | Sensitivity   | Hexadecimal   |  Binary       |
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
-| +/- 2g	      | 16384	        | +/- 250 deg/s | 131           | 0x00	        | 00000000      |
-| +/- 4g	      | 8192 	        | +/- 500 deg/s | 65.5          | 0x08	        | 00001000      |
-| +/- 8g        | 4096	        | +/- 1000 deg/s| 32.8          | 0x10	        | 00010000      |
-| +/- 16g	      | 2048	        | +/- 2000 deg/s| 16.4          | 0x18	        | 00011000      |
+| +/- 2g	      | 16384	       | +/- 250 deg/s | 131           | 0x00	     | 00000000      |
+| +/- 4g	      | 8192 	       | +/- 500 deg/s | 65.5          | 0x08	     | 00001000      |
+| +/- 8g        | 4096	       | +/- 1000 deg/s| 32.8          | 0x10          | 00010000      |
+| +/- 16g	      | 2048	       | +/- 2000 deg/s| 16.4          | 0x18	     | 00011000      |
 
 The slave address is b110100X which is 7 bits long. The LSB bit of the 7 bit address is determined by the logic level on pin AD0. This allows two sensors to be connected to the same I2C bus. When used in this configuration, the address of one of the devices should be b1101000 (pin AD0 is logic low) and the address of the other should be b1101001 (pin AD0 is logic high). Communication will typically take place over the `0x68` register.
 
@@ -124,7 +124,11 @@ In your default browser enter `localhost:3000` and the visualizer should be runn
 **Ensure to hold the IMU device still until an object appears on the screen. This is the program performing a calibration for gyroscope offset.**
 
 ### STM32
-See full instructions and example code at [https://github.com/MarkSherstan/STM32-MPU6050-MPU9250-I2C-SPI](https://github.com/MarkSherstan/STM32-MPU6050-MPU9250-I2C-SPI).
+See full instructions and example code at [https://github.com/MarkSherstan/STM32-MPU6050-MPU9250-I2C-SPI](https://github.com/MarkSherstan/STM32-MPU6050-MPU9250-I2C-SPI). Support for:
+- I2C using CPP
+- I2C using C
+- SPI using CPP (MPU-9250 only)
+- SPI using C (MPU-9250 only)
 
 ### C++ Library
 A generic C++ library was written that can be used on a variety of hardware. Refer to the Arduino or Raspberry Pi example in the `CPP_library` directory to get an idea of how to use the library.
@@ -154,4 +158,4 @@ Upon setting up the class with the I2C address of the sensor and defining the re
 * Kalman filter (custom lib)
 * C Library
 * General clean up
-* Move STM32 examples to their own repo (just put the libs)
+* Use updated hardware
