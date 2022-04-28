@@ -36,8 +36,8 @@ uint8_t MPU_begin(I2C_HandleTypeDef *I2Cx, uint8_t addr, uint8_t aScale, uint8_t
         HAL_I2C_Mem_Write(I2Cx, _addr, PWR_MGMT_1, 1, &select, 1, I2C_TIMOUT_MS);
 
         // Set the full scale ranges
-        setAccFullScaleRange(I2Cx, aScale);
-        setGyroFullScaleRange(I2Cx, gScale);
+        MPU_writeAccFullScaleRange(I2Cx, aScale);
+        MPU_writeGyroFullScaleRange(I2Cx, gScale);
 
         return 1;
     }
@@ -50,7 +50,7 @@ uint8_t MPU_begin(I2C_HandleTypeDef *I2Cx, uint8_t addr, uint8_t aScale, uint8_t
 /// @brief Set the accelerometer full scale range.
 /// @param I2Cx Pointer to I2C structure config.
 /// @param aScale Set 0 for ±2g, 1 for ±4g, 2 for ±8g, and 3 for ±16g.
-void setAccFullScaleRange(I2C_HandleTypeDef *I2Cx, uint8_t aScale)
+void MPU_writeAccFullScaleRange(I2C_HandleTypeDef *I2Cx, uint8_t aScale)
 {
     // Variable init
     uint8_t select;
@@ -58,28 +58,28 @@ void setAccFullScaleRange(I2C_HandleTypeDef *I2Cx, uint8_t aScale)
     // Set the value
     switch (aScale)
     {
-    case AFS_2G:
-        aRes = 16384.0;
+    case AFSR_2G:
+        aScaleFactor = 16384.0;
         select = 0x00;
         HAL_I2C_Mem_Write(I2Cx, _addr, ACCEL_CONFIG, 1, &select, 1, I2C_TIMOUT_MS);
         break;
-    case AFS_4G:
-        aRes = 8192.0;
+    case AFSR_4G:
+        aScaleFactor = 8192.0;
         select = 0x08;
         HAL_I2C_Mem_Write(I2Cx, _addr, ACCEL_CONFIG, 1, &select, 1, I2C_TIMOUT_MS);
         break;
-    case AFS_8G:
-        aRes = 4096.0;
+    case AFSR_8G:
+        aScaleFactor = 4096.0;
         select = 0x10;
         HAL_I2C_Mem_Write(I2Cx, _addr, ACCEL_CONFIG, 1, &select, 1, I2C_TIMOUT_MS);
         break;
-    case AFS_16G:
-        aRes = 2048.0;
+    case AFSR_16G:
+        aScaleFactor = 2048.0;
         select = 0x18;
         HAL_I2C_Mem_Write(I2Cx, _addr, ACCEL_CONFIG, 1, &select, 1, I2C_TIMOUT_MS);
         break;
     default:
-        aRes = 8192.0;
+        aScaleFactor = 8192.0;
         select = 0x08;
         HAL_I2C_Mem_Write(I2Cx, _addr, ACCEL_CONFIG, 1, &select, 1, I2C_TIMOUT_MS);
         break;
@@ -89,7 +89,7 @@ void setAccFullScaleRange(I2C_HandleTypeDef *I2Cx, uint8_t aScale)
 /// @brief Set the gyroscope full scale range.
 /// @param I2Cx Pointer to I2C structure config.
 /// @param gScale Set 0 for ±250°/s, 1 for ±500°/s, 2 for ±1000°/s, and 3 for ±2000°/s.
-void setGyroFullScaleRange(I2C_HandleTypeDef *I2Cx, uint8_t gScale)
+void MPU_writeGyroFullScaleRange(I2C_HandleTypeDef *I2Cx, uint8_t gScale)
 {
     // Variable init
     uint8_t select;
@@ -97,28 +97,28 @@ void setGyroFullScaleRange(I2C_HandleTypeDef *I2Cx, uint8_t gScale)
     // Set the value
     switch (gScale)
     {
-    case GFS_250DPS:
-        gRes = 131.0;
+    case GFSR_250DPS:
+        gScaleFactor = 131.0;
         select = 0x00;
         HAL_I2C_Mem_Write(I2Cx, _addr, GYRO_CONFIG, 1, &select, 1, I2C_TIMOUT_MS);
         break;
-    case GFS_500DPS:
-        gRes = 65.5;
+    case GFSR_500DPS:
+        gScaleFactor = 65.5;
         select = 0x08;
         HAL_I2C_Mem_Write(I2Cx, _addr, GYRO_CONFIG, 1, &select, 1, I2C_TIMOUT_MS);
         break;
-    case GFS_1000DPS:
-        gRes = 32.8;
+    case GFSR_1000DPS:
+        gScaleFactor = 32.8;
         select = 0x10;
         HAL_I2C_Mem_Write(I2Cx, _addr, GYRO_CONFIG, 1, &select, 1, I2C_TIMOUT_MS);
         break;
-    case GFS_2000DPS:
-        gRes = 16.4;
+    case GFSR_2000DPS:
+        gScaleFactor = 16.4;
         select = 0x18;
         HAL_I2C_Mem_Write(I2Cx, _addr, GYRO_CONFIG, 1, &select, 1, I2C_TIMOUT_MS);
         break;
     default:
-        gRes = 65.5;
+        gScaleFactor = 65.5;
         select = 0x08;
         HAL_I2C_Mem_Write(I2Cx, _addr, GYRO_CONFIG, 1, &select, 1, I2C_TIMOUT_MS);
         break;
@@ -127,23 +127,22 @@ void setGyroFullScaleRange(I2C_HandleTypeDef *I2Cx, uint8_t gScale)
 
 /// @brief Read raw data from IMU.
 /// @param I2Cx Pointer to I2C structure config.
-void readRawData(I2C_HandleTypeDef *I2Cx)
+void MPU_readRawData(I2C_HandleTypeDef *I2Cx)
 {
+    // Init buffer
     uint8_t buf[14];
 
     // Subroutine for reading the raw data
     HAL_I2C_Mem_Read(I2Cx, _addr, ACCEL_XOUT_H, 1, buf, 14, I2C_TIMOUT_MS);
 
     // Bit shift the data
-    sensorRaw.ax = buf[0] << 8 | buf[1];
-    sensorRaw.ay = buf[2] << 8 | buf[3];
-    sensorRaw.az = buf[4] << 8 | buf[5];
-
+    rawData.ax = buf[0] << 8 | buf[1];
+    rawData.ay = buf[2] << 8 | buf[3];
+    rawData.az = buf[4] << 8 | buf[5];
     // temperature = buf[6] << 8 | buf[7];
-
-    sensorRaw.gx = buf[8] << 8 | buf[9];
-    sensorRaw.gy = buf[10] << 8 | buf[11];
-    sensorRaw.gz = buf[12] << 8 | buf[13];
+    rawData.gx = buf[8] << 8 | buf[9];
+    rawData.gy = buf[10] << 8 | buf[11];
+    rawData.gz = buf[12] << 8 | buf[13];
 }
 
 /// @brief Find offsets for each axis of gyroscope.
@@ -165,10 +164,10 @@ void MPU_calibrateGyro(I2C_HandleTypeDef *I2Cx, uint16_t numCalPoints)
     // Save specified number of points
     for (uint16_t ii = 0; ii < numCalPoints; ii++)
     {
-        readRawData(I2Cx);
-        x += sensorRaw.gx;
-        y += sensorRaw.gy;
-        z += sensorRaw.gz;
+        MPU_readRawData(I2Cx);
+        x += rawData.gx;
+        y += rawData.gy;
+        z += rawData.gz;
         HAL_Delay(3);
     }
 
@@ -180,25 +179,25 @@ void MPU_calibrateGyro(I2C_HandleTypeDef *I2Cx, uint16_t numCalPoints)
 
 /// @brief Calculate the real world sensor values.
 /// @param I2Cx Pointer to I2C structure config.
-void readProcessedData(I2C_HandleTypeDef *I2Cx)
+void MPU_readProcessedData(I2C_HandleTypeDef *I2Cx)
 {
     // Get raw values from the IMU
-    readRawData(I2Cx);
+    MPU_readRawData(I2Cx);
 
     // Convert accelerometer values to g's
-    sensorProcessed.ax = sensorRaw.ax / aRes;
-    sensorProcessed.ay = sensorRaw.ay / aRes;
-    sensorProcessed.az = sensorRaw.az / aRes;
+    sensorData.ax = rawData.ax / aScaleFactor;
+    sensorData.ay = rawData.ay / aScaleFactor;
+    sensorData.az = rawData.az / aScaleFactor;
 
     // Compensate for gyro offset
-    sensorProcessed.gx = sensorRaw.gx - gyroCal.x;
-    sensorProcessed.gy = sensorRaw.gy - gyroCal.y;
-    sensorProcessed.gz = sensorRaw.gz - gyroCal.z;
+    sensorData.gx = rawData.gx - gyroCal.x;
+    sensorData.gy = rawData.gy - gyroCal.y;
+    sensorData.gz = rawData.gz - gyroCal.z;
 
     // Convert gyro values to deg/s
-    sensorProcessed.gx /= gRes;
-    sensorProcessed.gy /= gRes;
-    sensorProcessed.gz /= gRes;
+    sensorData.gx /= gScaleFactor;
+    sensorData.gy /= gScaleFactor;
+    sensorData.gz /= gScaleFactor;
 }
 
 /// @brief Calculate the attitude of the sensor in degrees using a complementary filter.
@@ -206,13 +205,13 @@ void readProcessedData(I2C_HandleTypeDef *I2Cx)
 void MPU_calcAttitude(I2C_HandleTypeDef *I2Cx)
 {
     // Read processed data
-    readProcessedData(I2Cx);
+    MPU_readProcessedData(I2Cx);
 
     // Complementary filter
-    float accelPitch = atan2(sensorProcessed.ay, sensorProcessed.az) * RAD2DEG;
-    float accelRoll = atan2(sensorProcessed.ax, sensorProcessed.az) * RAD2DEG;
+    float accelPitch = atan2(sensorData.ay, sensorData.az) * RAD2DEG;
+    float accelRoll = atan2(sensorData.ax, sensorData.az) * RAD2DEG;
 
-    attitude.r = _tau * (attitude.r - sensorProcessed.gy * _dt) + (1 - _tau) * accelRoll;
-    attitude.p = _tau * (attitude.p + sensorProcessed.gx * _dt) + (1 - _tau) * accelPitch;
-    attitude.y += sensorProcessed.gz * _dt;
+    attitude.r = _tau * (attitude.r - sensorData.gy * _dt) + (1 - _tau) * accelRoll;
+    attitude.p = _tau * (attitude.p + sensorData.gx * _dt) + (1 - _tau) * accelPitch;
+    attitude.y += sensorData.gz * _dt;
 }

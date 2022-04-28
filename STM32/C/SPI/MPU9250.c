@@ -30,8 +30,8 @@ uint8_t MPU_begin(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250)
         MPU_REG_WRITE(SPIx, pMPU9250, &addr, &val);
 
         // Set the full scale ranges
-        MPU_setAccFullScaleRange(SPIx, pMPU9250, pMPU9250->settings.aFullScaleRange);
-        MPU_setGyroFullScaleRange(SPIx, pMPU9250, pMPU9250->settings.gFullScaleRange);
+        MPU_writeAccFullScaleRange(SPIx, pMPU9250, pMPU9250->settings.aFullScaleRange);
+        MPU_writeGyroFullScaleRange(SPIx, pMPU9250, pMPU9250->settings.gFullScaleRange);
         return 1;
     }
     else
@@ -80,7 +80,7 @@ void MPU_CS(MPU9250_t *pMPU9250, uint8_t state)
 /// @param SPIx Pointer to SPI structure config
 /// @param pMPU9250 Pointer to master MPU9250 struct
 /// @param aScale Set 0 for ±2g, 1 for ±4g, 2 for ±8g, and 3 for ±16g
-void MPU_setAccFullScaleRange(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250, uint8_t aScale)
+void MPU_writeAccFullScaleRange(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250, uint8_t aScale)
 {
     // Variable init
     uint8_t addr = ACCEL_CONFIG;
@@ -89,22 +89,22 @@ void MPU_setAccFullScaleRange(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250, uint
     // Set the value
     switch (aScale)
     {
-    case AFS_2G:
+    case AFSR_2G:
         pMPU9250->sensorData.aScaleFactor = 16384.0;
         val = 0x00;
         MPU_REG_WRITE(SPIx, pMPU9250, &addr, &val);
         break;
-    case AFS_4G:
+    case AFSR_4G:
         pMPU9250->sensorData.aScaleFactor = 8192.0;
         val = 0x08;
         MPU_REG_WRITE(SPIx, pMPU9250, &addr, &val);
         break;
-    case AFS_8G:
+    case AFSR_8G:
         pMPU9250->sensorData.aScaleFactor = 4096.0;
         val = 0x10;
         MPU_REG_WRITE(SPIx, pMPU9250, &addr, &val);
         break;
-    case AFS_16G:
+    case AFSR_16G:
         pMPU9250->sensorData.aScaleFactor = 2048.0;
         val = 0x18;
         MPU_REG_WRITE(SPIx, pMPU9250, &addr, &val);
@@ -121,7 +121,7 @@ void MPU_setAccFullScaleRange(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250, uint
 /// @param SPIx Pointer to SPI structure config
 /// @param pMPU9250 Pointer to master MPU9250 struct
 /// @param gScale Set 0 for ±250°/s, 1 for ±500°/s, 2 for ±1000°/s, and 3 for ±2000°/s
-void MPU_setGyroFullScaleRange(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250, uint8_t gScale)
+void MPU_writeGyroFullScaleRange(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250, uint8_t gScale)
 {
     // Variable init
     uint8_t addr = GYRO_CONFIG;
@@ -130,22 +130,22 @@ void MPU_setGyroFullScaleRange(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250, uin
     // Set the value
     switch (gScale)
     {
-    case GFS_250DPS:
+    case GFSR_250DPS:
         pMPU9250->sensorData.gScaleFactor = 131.0;
         val = 0x00;
         MPU_REG_WRITE(SPIx, pMPU9250, &addr, &val);
         break;
-    case GFS_500DPS:
+    case GFSR_500DPS:
         pMPU9250->sensorData.gScaleFactor = 65.5;
         val = 0x08;
         MPU_REG_WRITE(SPIx, pMPU9250, &addr, &val);
         break;
-    case GFS_1000DPS:
+    case GFSR_1000DPS:
         pMPU9250->sensorData.gScaleFactor = 32.8;
         val = 0x10;
         MPU_REG_WRITE(SPIx, pMPU9250, &addr, &val);
         break;
-    case GFS_2000DPS:
+    case GFSR_2000DPS:
         pMPU9250->sensorData.gScaleFactor = 16.4;
         val = 0x18;
         MPU_REG_WRITE(SPIx, pMPU9250, &addr, &val);
@@ -163,6 +163,7 @@ void MPU_setGyroFullScaleRange(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250, uin
 /// @param pMPU9250 Pointer to master MPU9250 struct
 void MPU_readRawData(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250)
 {
+    // Init buffer
     uint8_t buf[14];
 
     // Subroutine for reading the raw data
@@ -172,9 +173,7 @@ void MPU_readRawData(SPI_HandleTypeDef *SPIx, MPU9250_t *pMPU9250)
     pMPU9250->rawData.ax = buf[0] << 8 | buf[1];
     pMPU9250->rawData.ay = buf[2] << 8 | buf[3];
     pMPU9250->rawData.az = buf[4] << 8 | buf[5];
-
     // temperature = buf[6] << 8 | buf[7];
-
     pMPU9250->rawData.gx = buf[8] << 8 | buf[9];
     pMPU9250->rawData.gy = buf[10] << 8 | buf[11];
     pMPU9250->rawData.gz = buf[12] << 8 | buf[13];
